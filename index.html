@@ -62,8 +62,10 @@
                 safeDish: "✅ Safe based on your registered allergen profile.",
                 filters: "Filters",
                 cafeteria: "Cafeteria",
-                dayOfWeek: "Day of Week",
-                mealType: "Meal Type",
+                dateAndMeal: "Date & Meal",
+                rating: "Rating",
+                cafeteriaLabel: "Cafeteria",
+                filtersLabel: "Filters",
                 allergens: "Allergens",
                 ingredients: "Ingredients",
                 description: "Description",
@@ -77,7 +79,8 @@
                 close: "Close",
                 rateThis: "Rate this dish:",
                 noDishes: "No menu published for today yet.",
-                selectYourAllergens: "Select Your Allergens"
+                selectYourAllergens: "Select Your Allergens",
+                allergyCaution: "Caution: This dish contains allergen(s) listed in your profile"
             },
             ru: {
                 brand: "🐯 KU MEAL GUIDE",
@@ -105,8 +108,10 @@
                 safeDish: "✅ Безопасно по вашему профилю аллергенов.",
                 filters: "Фильтры",
                 cafeteria: "Столовая",
-                dayOfWeek: "День недели",
-                mealType: "Прием пищи",
+                dateAndMeal: "Дата и прием пищи",
+                rating: "Рейтинг",
+                cafeteriaLabel: "Столовая",
+                filtersLabel: "Фильтры",
                 allergens: "Аллергены",
                 ingredients: "Ингредиенты",
                 description: "Описание",
@@ -120,7 +125,8 @@
                 close: "Закрыть",
                 rateThis: "Оценить блюдо:",
                 noDishes: "На сегодня меню еще не опубликовано.",
-                selectYourAllergens: "Выберите ваши аллергены"
+                selectYourAllergens: "Выберите ваши аллергены",
+                allergyCaution: "Внимание: Это блюдо содержит аллергены из вашего профиля"
             },
             zh: {
                 brand: "🐯 KU MEAL GUIDE",
@@ -148,8 +154,10 @@
                 safeDish: "✅ 根据您的过敏原档案确认安全。",
                 filters: "筛选",
                 cafeteria: "食堂",
-                dayOfWeek: "星期",
-                mealType: "餐次",
+                dateAndMeal: "日期与餐次",
+                rating: "评分",
+                cafeteriaLabel: "食堂",
+                filtersLabel: "筛选",
                 allergens: "过敏原",
                 ingredients: "配料",
                 description: "描述",
@@ -163,32 +171,36 @@
                 close: "关闭",
                 rateThis: "评价此菜品：",
                 noDishes: "今天暂未发布菜单。",
-                selectYourAllergens: "选择您的过敏原"
+                selectYourAllergens: "选择您的过敏原",
+                allergyCaution: "注意：这道菜包含您资料中列出的过敏原"
             }
         };
 
         const ALLERGEN_TRANSLATIONS = {
-            'Eggs': { ru: 'Яйца', zh: '鸡蛋' },
-            'Milk': { ru: 'Молоко', zh: '牛奶' },
-            'Peanuts': { ru: 'Арахис', zh: '花生' },
-            'Tree Nuts': { ru: 'Орехи', zh: '坚果' },
-            'Soy': { ru: 'Соя', zh: '大豆' },
-            'Wheat / Gluten': { ru: 'Пшеница / Глютен', zh: '小麦 / 面筋' },
-            'Fish': { ru: 'Рыба', zh: '鱼类' },
-            'Shellfish': { ru: 'Моллюски / Ракообразные', zh: '甲壳类海鲜' },
-            'Pork': { ru: 'Свинина', zh: '猪肉' },
-            'Beef': { ru: 'Говядина', zh: '牛肉' },
-            'Chicken': { ru: 'Курица', zh: '鸡肉' },
-            'Sesame': { ru: 'Кунжут', zh: '芝麻' }
+            'eggs': { ru: 'Яйца', zh: '鸡蛋' },
+            'milk': { ru: 'Молоко', zh: '牛奶' },
+            'peanuts': { ru: 'Арахис', zh: '花生' },
+            'tree nuts': { ru: 'Орехи', zh: '坚果' },
+            'soy': { ru: 'Соя', zh: '大豆' },
+            'soybean': { ru: 'Соя', zh: '大豆' },
+            'wheat / gluten': { ru: 'Пшеница / Глютен', zh: '小麦 / 面筋' },
+            'wheat': { ru: 'Пшеница', zh: '小麦' },
+            'fish': { ru: 'Рыба', zh: '鱼类' },
+            'shellfish': { ru: 'Моллюски / Ракообразные', zh: '甲壳类海鲜' },
+            'pork': { ru: 'Свинина', zh: '猪肉' },
+            'beef': { ru: 'Говядина', zh: '牛肉' },
+            'chicken': { ru: 'Курица', zh: '鸡肉' },
+            'sesame': { ru: 'Кунжут', zh: '芝麻' }
         };
 
         const translateAllergen = (item, targetLang) => {
-            if (targetLang === 'en') return item;
-            const found = ALLERGEN_TRANSLATIONS[item];
-            return found ? (found[targetLang] || item) : item;
+            if (!item) return '';
+            const clean = item.trim().toLowerCase();
+            if (targetLang === 'en') return item.trim();
+            const found = ALLERGEN_TRANSLATIONS[clean];
+            return found ? (found[targetLang] || item.trim()) : item.trim();
         };
 
-        // Хук и функция для перевода текстов через публичный API переводчика
         const useAutoTranslate = (text, targetLang) => {
             const [translatedText, setTranslatedText] = useState(text);
 
@@ -205,7 +217,6 @@
                         const res = await fetch(url);
                         const data = await res.json();
                         if (isMounted && data && data.responseData && data.responseData.translatedText) {
-                            // Проверяем, что API не вернул ошибку лимита
                             if (!data.responseData.translatedText.includes('MYMEMORY WARNING')) {
                                 setTranslatedText(data.responseData.translatedText);
                             }
@@ -222,7 +233,6 @@
             return translatedText;
         };
 
-        // Компонент для вывода автоматически переведенного текста на лету
         function TranslatedText({ text, lang }) {
             const translated = useAutoTranslate(text, lang);
             return <>{translated}</>;
@@ -270,11 +280,25 @@
 
         const DAYS_OF_WEEK = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
 
+        const getSafeDateString = (dateInput) => {
+            if (!dateInput) return new Date().toISOString().split('T')[0];
+            const clean = String(dateInput).replace(/\./g, '-').trim();
+            const parts = clean.split('-');
+            if (parts.length === 3) {
+                const y = parts[0];
+                const m = parts[1].padStart(2, '0');
+                const d = parts[2].padStart(2, '0');
+                return `${y}-${m}-${d}`;
+            }
+            return clean;
+        };
+
         const getDayName = (dateStr) => {
-            if (!dateStr) return '';
-            const [y, m, d] = dateStr.split('-').map(Number);
+            const safe = getSafeDateString(dateStr);
+            const [y, m, d] = safe.split('-').map(Number);
+            if (!y || !m || !d) return '';
             const dateObj = new Date(y, m - 1, d);
-            return dateObj.toLocaleDateString('en-US', { weekday: 'long' });
+            return isNaN(dateObj.getTime()) ? '' : dateObj.toLocaleDateString('en-US', { weekday: 'long' });
         };
 
         const getCurrWeekDates = () => {
@@ -595,7 +619,7 @@
                     if (parts.length >= 6) {
                         newDishes.push({
                             id: 'dish_' + Date.now() + '_' + Math.random().toString(36).substring(2, 7),
-                            date: parts[0],
+                            date: getSafeDateString(parts[0]),
                             cafeteriaId: parts[1],
                             mealType: parts[2],
                             koName: parts[3],
@@ -727,7 +751,6 @@
                     </header>
 
                     <main className="flex-grow max-w-6xl w-full mx-auto px-4 py-6">
-                        {/* HOME VIEW */}
                         {view === 'home' && (
                             <div className="space-y-6">
                                 <div className="bg-white p-6 rounded-lg shadow border border-beige text-center">
@@ -746,7 +769,7 @@
                                     </div>
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                         {INITIAL_CAFETERIAS.map(caf => {
-                                            const cafDishes = dishes.filter(d => d.cafeteriaId === caf.id && d.date === todayStr);
+                                            const cafDishes = dishes.filter(d => d.cafeteriaId === caf.id && getSafeDateString(d.date) === todayStr);
                                             return (
                                                 <div key={caf.id} className="bg-white p-4 rounded-lg shadow border border-beige">
                                                     <h3 className="font-bold text-burgundy">{caf.name}</h3>
@@ -782,7 +805,6 @@
                             </div>
                         )}
 
-                        {/* CAFETERIAS VIEW */}
                         {view === 'cafeterias' && (
                             <div className="space-y-4">
                                 <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
@@ -858,7 +880,7 @@
                                                 const dayDishes = dishes
                                                     .filter(d => d.cafeteriaId === selectedCafeteriaObj.id && getDayName(d.date) === dayName)
                                                     .filter(d => matchesDishFilters(d, { includeDay: false }))
-                                                    .sort((a, b) => new Date(a.date) - new Date(b.date));
+                                                    .sort((a, b) => new Date(getSafeDateString(a.date)) - new Date(getSafeDateString(b.date)));
 
                                                 return (
                                                     <div key={dayName} className="bg-white p-4 rounded-lg shadow border border-beige">
@@ -879,7 +901,7 @@
                                                                                 <div className="font-semibold">
                                                                                     {dish.koName} (<TranslatedText text={dish.enName} lang={lang} />)
                                                                                     <span className="text-xs bg-beige px-1.5 py-0.5 rounded ml-1.5 text-burgundy font-bold">{dish.mealType}</span>
-                                                                                    <span className="text-xs text-gray-400 ml-2">{dish.date}</span>
+                                                                                    <span className="text-xs text-gray-400 ml-2">{getSafeDateString(dish.date)}</span>
                                                                                     {stats.count > 0 && <span className="ml-2 text-amber-600 font-bold">★ {stats.avg} ({stats.count})</span>}
                                                                                 </div>
                                                                                 {isAllergic && (
@@ -909,7 +931,6 @@
                             </div>
                         )}
 
-                        {/* TODAY'S MENU VIEW */}
                         {view === 'todays-menu' && (
                             <div className="space-y-4">
                                 <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
@@ -963,7 +984,7 @@
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                     {INITIAL_CAFETERIAS.map(caf => {
                                         const cafDishes = dishes
-                                            .filter(d => d.cafeteriaId === caf.id && d.date === selectedQuickDate)
+                                            .filter(d => d.cafeteriaId === caf.id && getSafeDateString(d.date) === selectedQuickDate)
                                             .filter(d => matchesDishFilters(d, { includeDay: false }));
                                         return (
                                             <div key={caf.id} className="bg-white p-4 rounded-lg shadow border border-beige">
@@ -995,7 +1016,7 @@
                                                                         </div>
                                                                     </div>
                                                                     {dish.allergens && dish.allergens.length > 0 && (
-                                                                        <p className="text-xs text-gray-500 mt-1">Allergens: {dish.allergens.map(a => translateAllergen(a.trim(), lang)).join(', ')}</p>
+                                                                        <p className="text-xs text-gray-500 mt-1">{t.allergens}: {dish.allergens.map(a => translateAllergen(a, lang)).join(', ')}</p>
                                                                     )}
                                                                     {isAllergic && (
                                                                         <div className="text-xs text-red-600 font-bold mt-1">{t.warningAllergy}</div>
@@ -1012,7 +1033,6 @@
                             </div>
                         )}
 
-                        {/* WEEKLY MENU VIEW */}
                         {view === 'weekly-menu' && (
                             <div className="space-y-4">
                                 <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-3">
@@ -1068,7 +1088,7 @@
                                         const filteredDishes = dishes
                                             .filter(d => weeklyCafFilter === 'all' || d.cafeteriaId === weeklyCafFilter)
                                             .filter(d => matchesDishFilters(d, { includeDay: true }))
-                                            .sort((a, b) => new Date(a.date) - new Date(b.date));
+                                            .sort((a, b) => new Date(getSafeDateString(a.date)) - new Date(getSafeDateString(b.date)));
 
                                         if (filteredDishes.length === 0) {
                                             return <p className="text-sm text-gray-400 italic">No menu items match the selected filters.</p>;
@@ -1088,10 +1108,10 @@
                                                                 {stats.count > 0 && <span className="ml-2 text-amber-600 font-bold text-xs">★ {stats.avg} ({stats.count})</span>}
                                                             </div>
                                                             <div className="text-xs text-gray-500">
-                                                                {caf ? caf.name : ''} | 📅 {dish.date} ({dayLabel}) — <span className="font-semibold text-burgundy">{dish.mealType}</span>
+                                                                {caf ? caf.name : ''} | 📅 {getSafeDateString(dish.date)} ({dayLabel}) — <span className="font-semibold text-burgundy">{dish.mealType}</span>
                                                             </div>
                                                             {dish.allergens && dish.allergens.length > 0 && (
-                                                                <div className="text-xs text-gray-500 mt-0.5">Allergens: {dish.allergens.map(a => translateAllergen(a.trim(), lang)).join(', ')}</div>
+                                                                <div className="text-xs text-gray-500 mt-0.5">{t.allergens}: {dish.allergens.map(a => translateAllergen(a, lang)).join(', ')}</div>
                                                             )}
                                                         </div>
                                                         <div className="flex items-center gap-3 self-end sm:self-center">
@@ -1318,7 +1338,6 @@
                         )}
                     </main>
 
-                    {/* МОДАЛЬНОЕ ОКНО ДЕТАЛЕЙ БЛЮДА С АВТОПЕРЕВОДОМ */}
                     {selectedDishModal && (
                         <div 
                             className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50"
@@ -1345,21 +1364,21 @@
 
                                 <div className="space-y-2 text-sm">
                                     <div className="flex justify-between">
-                                        <span className="text-gray-500">{t.cafeteria}:</span>
+                                        <span className="text-gray-500">{t.cafeteriaLabel}:</span>
                                         <span className="font-semibold">
                                             {INITIAL_CAFETERIAS.find(c => c.id === selectedDishModal.cafeteriaId)?.name || selectedDishModal.cafeteriaId}
                                         </span>
                                     </div>
                                     <div className="flex justify-between">
-                                        <span className="text-gray-500">Date & Meal:</span>
-                                        <span className="font-semibold">{selectedDishModal.date} ({getDayName(selectedDishModal.date)}) — {selectedDishModal.mealType}</span>
+                                        <span className="text-gray-500">{t.dateAndMeal}:</span>
+                                        <span className="font-semibold">{getSafeDateString(selectedDishModal.date)} ({getDayName(selectedDishModal.date)}) — {selectedDishModal.mealType}</span>
                                     </div>
                                     <div className="flex justify-between">
                                         <span className="text-gray-500">{t.price}:</span>
                                         <span className="font-bold text-burgundy">{selectedDishModal.price} {t.price}</span>
                                     </div>
                                     <div className="flex justify-between items-center bg-amber-50 p-2 rounded">
-                                        <span className="text-amber-800 font-semibold text-xs">Rating:</span>
+                                        <span className="text-amber-800 font-semibold text-xs">{t.rating}:</span>
                                         <span className="font-bold text-amber-700 text-sm">
                                             ★ {getDishRatingStats(selectedDishModal.id).avg} ({getDishRatingStats(selectedDishModal.id).count})
                                         </span>
@@ -1383,7 +1402,7 @@
                                         <span className="font-bold text-darkbrown block text-xs uppercase tracking-wide">{t.allergens}</span>
                                         <p className="text-gray-700 mt-0.5">
                                             {selectedDishModal.allergens && selectedDishModal.allergens.length > 0 
-                                                ? selectedDishModal.allergens.map(a => translateAllergen(a.trim(), lang)).join(', ') 
+                                                ? selectedDishModal.allergens.map(a => translateAllergen(a, lang)).join(', ') 
                                                 : 'None listed'}
                                         </p>
                                     </div>
@@ -1412,7 +1431,7 @@
 
                                 {checkAllergy(selectedDishModal.allergens) ? (
                                     <div className="bg-red-100 border border-red-400 text-red-800 p-3 rounded text-xs font-semibold">
-                                        ⚠️ Caution: This dish contains allergen(s) listed in your profile ({getMatchingUserAllergens(selectedDishModal.allergens).map(a => translateAllergen(a, lang)).join(', ')}).
+                                        ⚠️ {t.allergyCaution} ({getMatchingUserAllergens(selectedDishModal.allergens).map(a => translateAllergen(a, lang)).join(', ')}).
                                     </div>
                                 ) : user && user.role !== 'admin' ? (
                                     <div className="bg-green-50 border border-green-300 text-green-800 p-2.5 rounded text-xs font-medium">
