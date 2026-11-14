@@ -35,7 +35,7 @@
     <script type="text/babel">
         const { useState, useEffect } = React;
 
-        // Локализованные тексты интерфейса (English, Russian, Chinese)
+        // Полный словарь интерфейса и переводов аллергенов (EN, RU, ZH)
         const TRANSLATIONS = {
             en: {
                 brand: "🐯 KU MEAL GUIDE",
@@ -66,6 +66,8 @@
                 dayOfWeek: "Day of Week",
                 mealType: "Meal Type",
                 allergens: "Allergens",
+                ingredients: "Ingredients",
+                description: "Description",
                 reset: "Reset",
                 allCafeterias: "All Cafeterias",
                 allDays: "All Days",
@@ -75,8 +77,8 @@
                 dinner: "Dinner",
                 close: "Close",
                 rateThis: "Rate this dish:",
-                avgRating: "Rating",
-                noDishes: "No menu published for today yet."
+                noDishes: "No menu published for today yet.",
+                selectYourAllergens: "Select Your Allergens"
             },
             ru: {
                 brand: "🐯 KU MEAL GUIDE",
@@ -107,6 +109,8 @@
                 dayOfWeek: "День недели",
                 mealType: "Прием пищи",
                 allergens: "Аллергены",
+                ingredients: "Ингредиенты",
+                description: "Описание",
                 reset: "Сбросить",
                 allCafeterias: "Все столовые",
                 allDays: "Все дни",
@@ -116,8 +120,8 @@
                 dinner: "Ужин",
                 close: "Закрыть",
                 rateThis: "Оценить блюдо:",
-                avgRating: "Рейтинг",
-                noDishes: "На сегодня меню еще не опубликовано."
+                noDishes: "На сегодня меню еще не опубликовано.",
+                selectYourAllergens: "Выберите ваши аллергены"
             },
             zh: {
                 brand: "🐯 KU MEAL GUIDE",
@@ -148,6 +152,8 @@
                 dayOfWeek: "星期",
                 mealType: "餐次",
                 allergens: "过敏原",
+                ingredients: "配料",
+                description: "描述",
                 reset: "重置",
                 allCafeterias: "所有食堂",
                 allDays: "所有日期",
@@ -157,9 +163,48 @@
                 dinner: "晚餐",
                 close: "关闭",
                 rateThis: "评价此菜品：",
-                avgRating: "评分",
-                noDishes: "今天暂未发布菜单。"
+                noDishes: "今天暂未发布菜单。",
+                selectYourAllergens: "选择您的过敏原"
             }
+        };
+
+        // Переводы стандартных аллергенов для списков и фильтров
+        const ALLERGEN_TRANSLATIONS = {
+            'Eggs': { ru: 'Яйца', zh: '鸡蛋' },
+            'Milk': { ru: 'Молоко', zh: '牛奶' },
+            'Peanuts': { ru: 'Арахис', zh: '花生' },
+            'Tree Nuts': { ru: 'Орехи', zh: '坚果' },
+            'Soy': { ru: 'Соя', zh: '大豆' },
+            'Wheat / Gluten': { ru: 'Пшеница / Глютен', zh: '小麦 / 面筋' },
+            'Fish': { ru: 'Рыба', zh: '鱼类' },
+            'Shellfish': { ru: 'Моллюски / Ракообразные', zh: '甲壳类海鲜' },
+            'Pork': { ru: 'Свинина', zh: '猪肉' },
+            'Beef': { ru: 'Говядина', zh: '牛肉' },
+            'Chicken': { ru: 'Курица', zh: '鸡肉' },
+            'Sesame': { ru: 'Кунжут', zh: '芝麻' }
+        };
+
+        const translateAllergen = (item, targetLang) => {
+            if (targetLang === 'en') return item;
+            const found = ALLERGEN_TRANSLATIONS[item];
+            return found ? (found[targetLang] || item) : item;
+        };
+
+        // Автоматический перевод описаний и ингредиентов блюд на RU и ZH (если они введены на английском)
+        const TRANSLATED_DISH_DATA = {
+            // Примеры словаря автоперевода частых блюд и ингредиентов (можно расширять)
+            "Kimchi Stew": { ru: "Кимчи чиге (острый суп с кимчи)", zh: "泡菜汤" },
+            "Spicy traditional stew with pork and tofu": { ru: "Острый традиционный суп со свининой и тофу", zh: "带有猪肉和豆腐的传统辣汤" },
+            "Kimchi, pork, tofu, garlic": { ru: "Кимчи, свинина, тофу, чеснок", zh: "泡菜, 猪肉, 豆腐, 蒜" },
+            "Pork Stir Fry": { ru: "Жареная свинина в остром соусе", zh: "韩式炒猪肉" },
+            "Tender pork marinated in spicy chili paste": { ru: "Нежная свинина, маринованная встрой пасте чили", zh: "用香辣酱腌制的嫩猪肉" },
+            "Pork, onion, cabbage, chili paste": { ru: "Свинина, лук, капуста, паста чили", zh: "猪肉, 洋葱, 白菜, 辣酱" }
+        };
+
+        const translateDishField = (text, targetLang) => {
+            if (!text) return '';
+            if (targetLang === 'en') return text;
+            return TRANSLATED_DISH_DATA[text]?.[targetLang] || text;
         };
 
         const INITIAL_CAFETERIAS = [
@@ -211,10 +256,9 @@
             return dateObj.toLocaleDateString('en-US', { weekday: 'long' });
         };
 
-        // Генерация дат текущей недели для Quick Date Picker
         const getCurrWeekDates = () => {
             const now = new Date();
-            const currentDayOfWeek = now.getDay(); // 0 is Sunday, 1 is Monday...
+            const currentDayOfWeek = now.getDay();
             const monday = new Date(now);
             monday.setDate(now.getDate() - (currentDayOfWeek === 0 ? 6 : currentDayOfWeek - 1));
             
@@ -237,7 +281,7 @@
 
         function App() {
             const [view, setView] = useState('home');
-            const [lang, setLang] = useState('en'); // Языковой режим: 'en', 'ru', 'zh'
+            const [lang, setLang] = useState('en');
             const t = TRANSLATIONS[lang];
 
             const [user, setUser] = useState(() => JSON.parse(localStorage.getItem('ku_cloud_user') || 'null'));
@@ -246,8 +290,6 @@
             
             const [selectedDishModal, setSelectedDishModal] = useState(null);
             const [selectedCafeteriaId, setSelectedCafeteriaId] = useState(null);
-            
-            // Выбранная дата для Quick Date Picker
             const [selectedQuickDate, setSelectedQuickDate] = useState(new Date().toISOString().split('T')[0]);
 
             useEffect(() => {
@@ -448,18 +490,15 @@
                 }
             };
 
-            // Функция выставления рейтинга блюду (от 1 до 5 звезд)
             const handleRateDish = async (dishId, stars) => {
                 if (!user || user.role === 'admin') {
                     alert('Please log in as a student to rate dishes.');
                     return;
                 }
                 
-                // Проверяем, оценивал ли юзер уже это блюдо
                 const existingRating = ratings.find(r => r.dish_id === dishId && r.username === user.username);
                 
                 if (existingRating) {
-                    // Обновляем оценку
                     const { error } = await supabase
                         .from('ratings')
                         .update({ rating: stars })
@@ -471,7 +510,6 @@
                         setRatings(ratings.map(r => r.id === existingRating.id ? { ...r, rating: stars } : r));
                     }
                 } else {
-                    // Создаем новую оценку
                     const newRecord = { dish_id: dishId, username: user.username, rating: stars };
                     const { data, error } = await supabase.from('ratings').insert([newRecord]).select();
 
@@ -631,7 +669,6 @@
                                 <div className="cursor-pointer font-bold text-lg" onClick={() => switchView('home')}>
                                     {t.brand}
                                 </div>
-                                {/* Переключатель языков */}
                                 <div className="flex bg-burgundy-dark border border-beige/30 rounded text-xs overflow-hidden">
                                     <button onClick={() => setLang('en')} className={`px-2 py-1 ${lang === 'en' ? 'bg-gold text-darkbrown font-bold' : 'text-white'}`}>EN</button>
                                     <button onClick={() => setLang('ru')} className={`px-2 py-1 ${lang === 'ru' ? 'bg-gold text-darkbrown font-bold' : 'text-white'}`}>RU</button>
@@ -700,10 +737,11 @@
                                                             cafDishes.slice(0, 3).map(dish => {
                                                                 const isAllergic = checkAllergy(dish.allergens);
                                                                 const stats = getDishRatingStats(dish.id);
+                                                                const displayName = lang === 'ru' || lang === 'zh' ? (translateDishField(dish.enName, lang) !== dish.enName ? translateDishField(dish.enName, lang) : dish.koName) : dish.enName;
                                                                 return (
                                                                     <div key={dish.id} className={`p-2 rounded border text-xs flex justify-between items-center ${isAllergic ? 'bg-red-50 border-red-300' : 'border-gray-100'}`}>
                                                                         <div>
-                                                                            <span className="font-semibold">{dish.koName}</span> ({dish.enName})
+                                                                            <span className="font-semibold">{dish.koName}</span> ({displayName})
                                                                             <span className="bg-beige px-1 rounded ml-1 text-burgundy font-bold">{dish.mealType}</span>
                                                                             {stats.count > 0 && <span className="ml-2 text-amber-600 font-bold">★ {stats.avg}</span>}
                                                                         </div>
@@ -790,7 +828,7 @@
                                                     <option value="safe_for_me">✅ Hide My Allergens</option>
                                                 )}
                                                 {COMMON_ALLERGENS.map(al => (
-                                                    <option key={al} value={`exclude:${al}`}>Exclude {al}</option>
+                                                    <option key={al} value={`exclude:${al}`}>Exclude {translateAllergen(al, lang)}</option>
                                                 ))}
                                             </select>
                                         </div>
@@ -815,11 +853,12 @@
                                                                 {dayDishes.map(dish => {
                                                                     const isAllergic = checkAllergy(dish.allergens);
                                                                     const stats = getDishRatingStats(dish.id);
+                                                                    const displayName = lang === 'ru' || lang === 'zh' ? (translateDishField(dish.enName, lang) !== dish.enName ? translateDishField(dish.enName, lang) : dish.koName) : dish.enName;
                                                                     return (
                                                                         <div key={dish.id} className={`p-2.5 rounded border text-sm flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 ${isAllergic ? 'bg-red-50 border-red-300' : 'border-gray-100'}`}>
                                                                             <div>
                                                                                 <div className="font-semibold">
-                                                                                    {dish.koName} ({dish.enName})
+                                                                                    {dish.koName} ({displayName})
                                                                                     <span className="text-xs bg-beige px-1.5 py-0.5 rounded ml-1.5 text-burgundy font-bold">{dish.mealType}</span>
                                                                                     <span className="text-xs text-gray-400 ml-2">{dish.date}</span>
                                                                                     {stats.count > 0 && <span className="ml-2 text-amber-600 font-bold">★ {stats.avg} ({stats.count})</span>}
@@ -851,14 +890,13 @@
                             </div>
                         )}
 
-                        {/* TODAY'S MENU VIEW + QUICK DATE PICKER */}
+                        {/* TODAY'S MENU VIEW */}
                         {view === 'todays-menu' && (
                             <div className="space-y-4">
                                 <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
                                     <h1 className="text-2xl font-bold text-burgundy">{t.todaysMenu} ({selectedQuickDate} — {getDayName(selectedQuickDate)})</h1>
                                 </div>
 
-                                {/* QUICK DATE PICKER (Быстрый переключатель дат) */}
                                 <div className="bg-white p-3 rounded-lg shadow border border-beige flex items-center gap-2 overflow-x-auto">
                                     <span className="text-xs font-bold text-burgundy uppercase whitespace-nowrap">Week:</span>
                                     {weekDates.map(item => {
@@ -877,7 +915,7 @@
 
                                 {user && user.profile?.allergens?.length > 0 && (
                                     <div className="bg-amber-50 border border-amber-200 p-3 rounded text-xs text-amber-800">
-                                        ⚠️ Your registered allergies: <strong>{user.profile.allergens.join(', ')}</strong>. Unsafe dishes will be highlighted.
+                                        ⚠️ Your registered allergies: <strong>{user.profile.allergens.map(a => translateAllergen(a, lang)).join(', ')}</strong>. Unsafe dishes will be highlighted.
                                     </div>
                                 )}
 
@@ -895,7 +933,7 @@
                                             <option value="safe_for_me">✅ Hide My Allergens</option>
                                         )}
                                         {COMMON_ALLERGENS.map(al => (
-                                            <option key={al} value={`exclude:${al}`}>Exclude {al}</option>
+                                            <option key={al} value={`exclude:${al}`}>Exclude {translateAllergen(al, lang)}</option>
                                         ))}
                                     </select>
                                     {(mealFilter !== 'all' || allergenFilter !== 'all') && (
@@ -919,11 +957,12 @@
                                                         cafDishes.map(dish => {
                                                             const isAllergic = checkAllergy(dish.allergens);
                                                             const stats = getDishRatingStats(dish.id);
+                                                            const displayName = lang === 'ru' || lang === 'zh' ? (translateDishField(dish.enName, lang) !== dish.enName ? translateDishField(dish.enName, lang) : dish.koName) : dish.enName;
                                                             return (
                                                                 <div key={dish.id} className={`p-2.5 rounded border text-sm ${isAllergic ? 'bg-red-50 border-red-300' : 'border-gray-100'}`}>
                                                                     <div className="flex justify-between items-start gap-2">
                                                                         <div>
-                                                                            <span className="font-semibold">{dish.koName}</span> ({dish.enName})
+                                                                            <span className="font-semibold">{dish.koName}</span> ({displayName})
                                                                             <span className="text-xs bg-beige px-1.5 py-0.5 rounded ml-1 text-burgundy font-bold">{dish.mealType}</span>
                                                                             {stats.count > 0 && <span className="ml-2 text-amber-600 font-bold">★ {stats.avg} ({stats.count})</span>}
                                                                         </div>
@@ -938,7 +977,7 @@
                                                                         </div>
                                                                     </div>
                                                                     {dish.allergens && dish.allergens.length > 0 && (
-                                                                        <p className="text-xs text-gray-500 mt-1">Allergens: {dish.allergens.join(', ')}</p>
+                                                                        <p className="text-xs text-gray-500 mt-1">Allergens: {dish.allergens.map(a => translateAllergen(a.trim(), lang)).join(', ')}</p>
                                                                     )}
                                                                     {isAllergic && (
                                                                         <div className="text-xs text-red-600 font-bold mt-1">{t.warningAllergy}</div>
@@ -994,7 +1033,7 @@
                                                 <option value="safe_for_me">✅ Hide My Allergens</option>
                                             )}
                                             {COMMON_ALLERGENS.map(al => (
-                                                <option key={al} value={`exclude:${al}`}>Exclude {al}</option>
+                                                <option key={al} value={`exclude:${al}`}>Exclude {translateAllergen(al, lang)}</option>
                                             ))}
                                         </select>
                                     </div>
@@ -1022,19 +1061,20 @@
                                             const isAllergic = checkAllergy(dish.allergens);
                                             const dayLabel = getDayName(dish.date);
                                             const stats = getDishRatingStats(dish.id);
+                                            const displayName = lang === 'ru' || lang === 'zh' ? (translateDishField(dish.enName, lang) !== dish.enName ? translateDishField(dish.enName, lang) : dish.koName) : dish.enName;
                                             return (
                                                 <div key={dish.id} className={`p-3 rounded border text-sm ${isAllergic ? 'bg-red-50 border-red-300' : 'border-gray-100'}`}>
                                                     <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
                                                         <div>
                                                             <div className="font-bold text-burgundy">
-                                                                {dish.koName} ({dish.enName})
+                                                                {dish.koName} ({displayName})
                                                                 {stats.count > 0 && <span className="ml-2 text-amber-600 font-bold text-xs">★ {stats.avg} ({stats.count})</span>}
                                                             </div>
                                                             <div className="text-xs text-gray-500">
                                                                 {caf ? caf.name : ''} | 📅 {dish.date} ({dayLabel}) — <span className="font-semibold text-burgundy">{dish.mealType}</span>
                                                             </div>
                                                             {dish.allergens && dish.allergens.length > 0 && (
-                                                                <div className="text-xs text-gray-500 mt-0.5">Allergens: {dish.allergens.join(', ')}</div>
+                                                                <div className="text-xs text-gray-500 mt-0.5">Allergens: {dish.allergens.map(a => translateAllergen(a.trim(), lang)).join(', ')}</div>
                                                             )}
                                                         </div>
                                                         <div className="flex items-center gap-3 self-end sm:self-center">
@@ -1069,7 +1109,7 @@
                                         <input type="email" value={user.email || ''} className="w-full border rounded p-2 text-sm bg-gray-100" disabled />
                                     </div>
                                     <div>
-                                        <label className="block text-sm font-semibold mb-2">Select Your Allergens</label>
+                                        <label className="block text-sm font-semibold mb-2">{t.selectYourAllergens}</label>
                                         <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
                                             {COMMON_ALLERGENS.map(item => {
                                                 const checked = (studentProfile.allergens || []).some(a => a.toLowerCase() === item.toLowerCase());
@@ -1081,7 +1121,7 @@
                                                             onChange={() => toggleProfileCommonAllergen(item)} 
                                                             className="accent-gold"
                                                         />
-                                                        <span>{item}</span>
+                                                        <span>{translateAllergen(item, lang)}</span>
                                                     </label>
                                                 );
                                             })}
@@ -1128,9 +1168,8 @@
                                     {view === 'signup' && (
                                         <div className="pt-2 border-t border-beige space-y-3">
                                             <div>
-                                                <label className="block text-sm font-semibold mb-1">Select Allergens (optional)</label>
-                                                <p className="text-xs text-gray-500 mb-2">Choose any allergens so we can warn you about unsafe dishes:</p>
-                                                <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                                                <label className="block text-sm font-semibold mb-1">{t.selectYourAllergens} (optional)</label>
+                                                <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 mt-2">
                                                     {COMMON_ALLERGENS.map(item => {
                                                         const checked = authForm.selectedAllergens.includes(item);
                                                         return (
@@ -1141,7 +1180,7 @@
                                                                     onChange={() => toggleSignupAllergen(item)} 
                                                                     className="accent-gold"
                                                                 />
-                                                                <span>{item}</span>
+                                                                <span>{translateAllergen(item, lang)}</span>
                                                             </label>
                                                         );
                                                     })}
@@ -1153,7 +1192,7 @@
                                                     type="text" 
                                                     value={authForm.otherAllergens} 
                                                     onChange={e => setAuthForm({...authForm, otherAllergens: e.target.value})} 
-                                                    placeholder="Add any other allergens (comma separated, e.g. kiwi, buckwheat)" 
+                                                    placeholder="Add any other allergens (comma separated)" 
                                                     className="w-full border rounded p-2 text-sm" 
                                                 />
                                             </div>
@@ -1225,9 +1264,8 @@
                                 <div className="bg-white p-6 rounded-lg shadow border border-beige">
                                     <h2 className="text-lg font-bold mb-2">Bulk Import Weekly Menu (Text)</h2>
                                     <p className="text-xs text-gray-500 mb-3">
-                                        CafIDs: <code>c1</code> (Student Union), <code>c2</code> (Anam Dorm), <code>c3</code> (Sanhakwan), <code>c4</code> (Science Campus)<br/>
-                                        Format per line: <code className="bg-gray-100 p-1 rounded">Date | CafId | Meal | KoName | EnName | Price | Description | Ingredients | Allergens</code><br/>
-                                        Example: <code className="bg-gray-100 p-1 rounded">2026-06-01 | c1 | Lunch | 김치찌개 | Kimchi Stew | 5000 | Spicy stew | Pork, tofu | soy, pork</code>
+                                        CafIDs: <code>c1</code>, <code>c2</code>, <code>c3</code>, <code>c4</code><br/>
+                                        Format per line: <code className="bg-gray-100 p-1 rounded">Date | CafId | Meal | KoName | EnName | Price | Description | Ingredients | Allergens</code>
                                     </p>
                                     <form onSubmit={handleBulkImport} className="space-y-3">
                                         <textarea 
@@ -1263,7 +1301,7 @@
                         )}
                     </main>
 
-                    {/* МОДАЛЬНОЕ ОКНО ДЕТАЛЕЙ БЛЮДА С СИСТЕМОЙ РЕЙТИНГОВ И ОТЗЫВОВ */}
+                    {/* МОДАЛЬНОЕ ОКНО ДЕТАЛЕЙ БЛЮДА С АВТОПЕРЕВОДОМ */}
                     {selectedDishModal && (
                         <div 
                             className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50"
@@ -1276,7 +1314,9 @@
                                 <div className="flex justify-between items-start gap-2 border-b border-beige pb-3">
                                     <div>
                                         <h3 className="text-xl font-bold text-burgundy">{selectedDishModal.koName}</h3>
-                                        <p className="text-sm font-medium text-gray-700">{selectedDishModal.enName}</p>
+                                        <p className="text-sm font-medium text-gray-700">
+                                            {lang === 'ru' || lang === 'zh' ? (translateDishField(selectedDishModal.enName, lang) !== selectedDishModal.enName ? translateDishField(selectedDishModal.enName, lang) : selectedDishModal.enName) : selectedDishModal.enName}
+                                        </p>
                                     </div>
                                     <button 
                                         onClick={() => setSelectedDishModal(null)} 
@@ -1288,7 +1328,7 @@
 
                                 <div className="space-y-2 text-sm">
                                     <div className="flex justify-between">
-                                        <span className="text-gray-500">Cafeteria:</span>
+                                        <span className="text-gray-500">{t.cafeteria}:</span>
                                         <span className="font-semibold">
                                             {INITIAL_CAFETERIAS.find(c => c.id === selectedDishModal.cafeteriaId)?.name || selectedDishModal.cafeteriaId}
                                         </span>
@@ -1298,37 +1338,36 @@
                                         <span className="font-semibold">{selectedDishModal.date} ({getDayName(selectedDishModal.date)}) — {selectedDishModal.mealType}</span>
                                     </div>
                                     <div className="flex justify-between">
-                                        <span className="text-gray-500">Price:</span>
+                                        <span className="text-gray-500">{t.price}:</span>
                                         <span className="font-bold text-burgundy">{selectedDishModal.price} {t.price}</span>
                                     </div>
                                     <div className="flex justify-between items-center bg-amber-50 p-2 rounded">
-                                        <span className="text-amber-800 font-semibold text-xs">Average Rating:</span>
+                                        <span className="text-amber-800 font-semibold text-xs">Rating:</span>
                                         <span className="font-bold text-amber-700 text-sm">
-                                            ★ {getDishRatingStats(selectedDishModal.id).avg} ({getDishRatingStats(selectedDishModal.id).count} reviews)
+                                            ★ {getDishRatingStats(selectedDishModal.id).avg} ({getDishRatingStats(selectedDishModal.id).count})
                                         </span>
                                     </div>
                                 </div>
 
                                 <div className="bg-cream p-3 rounded-lg border border-beige space-y-2 text-sm">
                                     <div>
-                                        <span className="font-bold text-darkbrown block text-xs uppercase tracking-wide">Description</span>
-                                        <p className="text-gray-700 mt-0.5">{selectedDishModal.desc || 'No detailed description provided.'}</p>
+                                        <span className="font-bold text-darkbrown block text-xs uppercase tracking-wide">{t.description}</span>
+                                        <p className="text-gray-700 mt-0.5">{translateDishField(selectedDishModal.desc, lang) || 'No detailed description provided.'}</p>
                                     </div>
                                     <div>
-                                        <span className="font-bold text-darkbrown block text-xs uppercase tracking-wide">Ingredients</span>
-                                        <p className="text-gray-700 mt-0.5">{selectedDishModal.ingredients || 'Not specified.'}</p>
+                                        <span className="font-bold text-darkbrown block text-xs uppercase tracking-wide">{t.ingredients}</span>
+                                        <p className="text-gray-700 mt-0.5">{translateDishField(selectedDishModal.ingredients, lang) || 'Not specified.'}</p>
                                     </div>
                                     <div>
-                                        <span className="font-bold text-darkbrown block text-xs uppercase tracking-wide">Allergens</span>
+                                        <span className="font-bold text-darkbrown block text-xs uppercase tracking-wide">{t.allergens}</span>
                                         <p className="text-gray-700 mt-0.5">
                                             {selectedDishModal.allergens && selectedDishModal.allergens.length > 0 
-                                                ? selectedDishModal.allergens.join(', ') 
+                                                ? selectedDishModal.allergens.map(a => translateAllergen(a.trim(), lang)).join(', ') 
                                                 : 'None listed'}
                                         </p>
                                     </div>
                                 </div>
 
-                                {/* Блок выставления оценки студентом */}
                                 {user && user.role !== 'admin' ? (
                                     <div className="bg-beige/40 p-3 rounded-lg border border-beige text-center space-y-1">
                                         <span className="text-xs font-bold text-burgundy">{t.rateThis}</span>
@@ -1348,13 +1387,11 @@
                                             })}
                                         </div>
                                     </div>
-                                ) : (
-                                    <div className="text-[11px] text-gray-400 text-center italic">Log in as a student to rate this dish.</div>
-                                )}
+                                ) : null}
 
                                 {checkAllergy(selectedDishModal.allergens) ? (
                                     <div className="bg-red-100 border border-red-400 text-red-800 p-3 rounded text-xs font-semibold">
-                                        ⚠️ Caution: This dish contains allergen(s) listed in your profile ({getMatchingUserAllergens(selectedDishModal.allergens).join(', ')}).
+                                        ⚠️ Caution: This dish contains allergen(s) listed in your profile ({getMatchingUserAllergens(selectedDishModal.allergens).map(a => translateAllergen(a, lang)).join(', ')}).
                                     </div>
                                 ) : user && user.role !== 'admin' ? (
                                     <div className="bg-green-50 border border-green-300 text-green-800 p-2.5 rounded text-xs font-medium">
