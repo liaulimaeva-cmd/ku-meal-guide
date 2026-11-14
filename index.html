@@ -85,7 +85,10 @@
                 clickToViewMenu: "Click to view menu by days of week →",
                 weekLabel: "Week:",
                 itemsLabel: "items",
-                dishCountLabel: "dish(es)"
+                dishCountLabel: "dish(es)",
+                excludeText: "Exclude",
+                allAllergensShowAll: "All Allergens (Show All)",
+                hideMyAllergens: "✅ Hide My Allergens"
             },
             ru: {
                 brand: "🐯 KU MEAL GUIDE",
@@ -136,7 +139,10 @@
                 clickToViewMenu: "Нажмите, чтобы посмотреть меню по дням недели →",
                 weekLabel: "Неделя:",
                 itemsLabel: "блюд",
-                dishCountLabel: "блюдо(в)"
+                dishCountLabel: "блюдо(в)",
+                excludeText: "Исключить",
+                allAllergensShowAll: "Все аллергены (показать все)",
+                hideMyAllergens: "✅ Скрыть мои аллергены"
             },
             zh: {
                 brand: "🐯 KU MEAL GUIDE",
@@ -187,7 +193,10 @@
                 clickToViewMenu: "点击查看按星期划分的菜单 →",
                 weekLabel: "星期:",
                 itemsLabel: "项",
-                dishCountLabel: "道菜"
+                dishCountLabel: "道菜",
+                excludeText: "排除",
+                allAllergensShowAll: "所有过敏原（显示全部）",
+                hideMyAllergens: "✅ 隐藏我的过敏原"
             }
         };
 
@@ -231,7 +240,6 @@
             return found ? (found[targetLang] || item.trim()) : item.trim();
         };
 
-        // Полная локализация столовых, их расположения и часов работы
         const CAFETERIAS_DATA = {
             c1: {
                 koName: '학생회관 학생식당',
@@ -286,7 +294,9 @@
                 let isMounted = true;
                 const fetchTranslation = async () => {
                     try {
-                        const url = `https://api.mymemory.translated.net/get?q=${encodeURIComponent(text)}&langpair=en|${targetLang}`;
+                        // Исправленный код языка для китайского (zh-CN) и русского (ru)
+                        const apiLang = targetLang === 'zh' ? 'zh-CN' : targetLang;
+                        const url = `https://api.mymemory.translated.net/get?q=${encodeURIComponent(text)}&langpair=en|${apiLang}`;
                         const res = await fetch(url);
                         const data = await res.json();
                         if (isMounted && data && data.responseData && data.responseData.translatedText) {
@@ -824,7 +834,7 @@
                                                                 return (
                                                                     <div key={dish.id} className={`p-2 rounded border text-xs flex justify-between items-center ${isAllergic ? 'bg-red-50 border-red-300' : 'border-gray-100'}`}>
                                                                         <div>
-                                                                            <span className="font-semibold">{dish.koName}</span> (<TranslatedText lang="{lang}" text="{dish.enName}"/>)
+                                                                            <span className="font-semibold">{dish.koName}</span> (<TranslatedText text={dish.enName} lang={lang} />)
                                                                             <span className="bg-beige px-1 rounded ml-1 text-burgundy font-bold">{mealLocalized}</span>
                                                                             {stats.count > 0 && <span className="ml-2 text-amber-600 font-bold">★ {stats.avg}</span>}
                                                                         </div>
@@ -905,12 +915,12 @@
                                                 <option value="Dinner">{t.dinner}</option>
                                             </select>
                                             <select value={allergenFilter} onChange={e => setAllergenFilter(e.target.value)} className="border rounded p-1.5 text-xs bg-white">
-                                                <option value="all">All Allergens (Show All)</option>
+                                                <option value="all">{t.allAllergensShowAll}</option>
                                                 {user && user.profile?.allergens?.length > 0 && (
-                                                    <option value="safe_for_me">✅ Hide My Allergens</option>
+                                                    <option value="safe_for_me">{t.hideMyAllergens}</option>
                                                 )}
                                                 {COMMON_ALLERGENS.map(al => (
-                                                    <option key={al} value={`exclude:${al}`}>Exclude {translateAllergen(al, lang)}</option>
+                                                    <option key={al} value={`exclude:${al}`}>{t.excludeText} {translateAllergen(al, lang)}</option>
                                                 ))}
                                             </select>
                                         </div>
@@ -942,7 +952,7 @@
                                                                         <div key={dish.id} className={`p-2.5 rounded border text-sm flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 ${isAllergic ? 'bg-red-50 border-red-300' : 'border-gray-100'}`}>
                                                                             <div>
                                                                                 <div className="font-semibold">
-                                                                                    {dish.koName} (<TranslatedText lang="{lang}" text="{dish.enName}"/>)
+                                                                                    {dish.koName} (<TranslatedText text={dish.enName} lang={lang} />)
                                                                                     <span className="text-xs bg-beige px-1.5 py-0.5 rounded ml-1.5 text-burgundy font-bold">{mealLocalized}</span>
                                                                                     <span className="text-xs text-gray-400 ml-2">{getSafeDateString(dish.date)}</span>
                                                                                     {stats.count > 0 && <span className="ml-2 text-amber-600 font-bold">★ {stats.avg} ({stats.count})</span>}
@@ -1011,12 +1021,12 @@
                                         <option value="Dinner">{t.dinner}</option>
                                     </select>
                                     <select value={allergenFilter} onChange={e => setAllergenFilter(e.target.value)} className="border rounded p-1.5 text-xs bg-white">
-                                        <option value="all">All Allergens (Show All)</option>
+                                        <option value="all">{t.allAllergensShowAll}</option>
                                         {user && user.profile?.allergens?.length > 0 && (
-                                            <option value="safe_for_me">✅ Hide My Allergens</option>
+                                            <option value="safe_for_me">{t.hideMyAllergens}</option>
                                         )}
                                         {COMMON_ALLERGENS.map(al => (
-                                            <option key={al} value={`exclude:${al}`}>Exclude {translateAllergen(al, lang)}</option>
+                                            <option key={al} value={`exclude:${al}`}>{t.excludeText} {translateAllergen(al, lang)}</option>
                                         ))}
                                     </select>
                                     {(mealFilter !== 'all' || allergenFilter !== 'all') && (
@@ -1045,7 +1055,7 @@
                                                                 <div key={dish.id} className={`p-2.5 rounded border text-sm ${isAllergic ? 'bg-red-50 border-red-300' : 'border-gray-100'}`}>
                                                                     <div className="flex justify-between items-start gap-2">
                                                                         <div>
-                                                                            <span className="font-semibold">{dish.koName}</span> (<TranslatedText lang="{lang}" text="{dish.enName}"/>)
+                                                                            <span className="font-semibold">{dish.koName}</span> (<TranslatedText text={dish.enName} lang={lang} />)
                                                                             <span className="text-xs bg-beige px-1.5 py-0.5 rounded ml-1 text-burgundy font-bold">{mealLocalized}</span>
                                                                             {stats.count > 0 && <span className="ml-2 text-amber-600 font-bold">★ {stats.avg} ({stats.count})</span>}
                                                                         </div>
@@ -1110,12 +1120,12 @@
                                     <div>
                                         <label className="block text-[11px] font-bold text-gray-500 uppercase mb-1">{t.allergens}</label>
                                         <select value={allergenFilter} onChange={e => setAllergenFilter(e.target.value)} className="w-full border rounded p-2 text-xs bg-white">
-                                            <option value="all">All Allergens (Show All)</option>
+                                            <option value="all">{t.allAllergensShowAll}</option>
                                             {user && user.profile?.allergens?.length > 0 && (
-                                                <option value="safe_for_me">✅ Hide My Allergens</option>
+                                                <option value="safe_for_me">{t.hideMyAllergens}</option>
                                             )}
                                             {COMMON_ALLERGENS.map(al => (
-                                                <option key={al} value={`exclude:${al}`}>Exclude {translateAllergen(al, lang)}</option>
+                                                <option key={al} value={`exclude:${al}`}>{t.excludeText} {translateAllergen(al, lang)}</option>
                                             ))}
                                         </select>
                                     </div>
@@ -1149,7 +1159,7 @@
                                                     <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
                                                         <div>
                                                             <div className="font-bold text-burgundy">
-                                                                {dish.koName} (<TranslatedText lang="{lang}" text="{dish.enName}"/>)
+                                                                {dish.koName} (<TranslatedText text={dish.enName} lang={lang} />)
                                                                 {stats.count > 0 && <span className="ml-2 text-amber-600 font-bold text-xs">★ {stats.avg} ({stats.count})</span>}
                                                             </div>
                                                             <div className="text-xs text-gray-500">
@@ -1396,7 +1406,7 @@
                                     <div>
                                         <h3 className="text-xl font-bold text-burgundy">{selectedDishModal.koName}</h3>
                                         <p className="text-sm font-medium text-gray-700">
-                                            <TranslatedText lang="{lang}" text="{selectedDishModal.enName}"/>
+                                            <TranslatedText text={selectedDishModal.enName} lang={lang} />
                                         </p>
                                     </div>
                                     <button 
@@ -1434,13 +1444,13 @@
                                     <div>
                                         <span className="font-bold text-darkbrown block text-xs uppercase tracking-wide">{t.description}</span>
                                         <p className="text-gray-700 mt-0.5">
-                                            {selectedDishModal.desc ? <TranslatedText lang="{lang}" text="{selectedDishModal.desc}"/> : 'No detailed description provided.'}
+                                            {selectedDishModal.desc ? <TranslatedText text={selectedDishModal.desc} lang={lang} /> : 'No detailed description provided.'}
                                         </p>
                                     </div>
                                     <div>
                                         <span className="font-bold text-darkbrown block text-xs uppercase tracking-wide">{t.ingredients}</span>
                                         <p className="text-gray-700 mt-0.5">
-                                            {selectedDishModal.ingredients ? <TranslatedText lang="{lang}" text="{selectedDishModal.ingredients}"/> : 'Not specified.'}
+                                            {selectedDishModal.ingredients ? <TranslatedText text={selectedDishModal.ingredients} lang={lang} /> : 'Not specified.'}
                                         </p>
                                     </div>
                                     <div>
@@ -1497,7 +1507,7 @@
             );
         }
 
-        ReactDOM.render(<App/>, document.getElementById('root'));
+        ReactDOM.render(<App />, document.getElementById('root'));
     </script>
 </body>
 </html>
