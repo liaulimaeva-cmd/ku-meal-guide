@@ -35,7 +35,6 @@
     <script type="text/babel">
         const { useState, useEffect } = React;
 
-        // Полный словарь интерфейса и переводов аллергенов (EN, RU, ZH)
         const TRANSLATIONS = {
             en: {
                 brand: "🐯 KU MEAL GUIDE",
@@ -168,7 +167,6 @@
             }
         };
 
-        // Переводы стандартных аллергенов для списков и фильтров
         const ALLERGEN_TRANSLATIONS = {
             'Eggs': { ru: 'Яйца', zh: '鸡蛋' },
             'Milk': { ru: 'Молоко', zh: '牛奶' },
@@ -190,22 +188,45 @@
             return found ? (found[targetLang] || item) : item;
         };
 
-        // Автоматический перевод описаний и ингредиентов блюд на RU и ZH (если они введены на английском)
-        const TRANSLATED_DISH_DATA = {
-            // Примеры словаря автоперевода частых блюд и ингредиентов (можно расширять)
-            "Kimchi Stew": { ru: "Кимчи чиге (острый суп с кимчи)", zh: "泡菜汤" },
-            "Spicy traditional stew with pork and tofu": { ru: "Острый традиционный суп со свининой и тофу", zh: "带有猪肉和豆腐的传统辣汤" },
-            "Kimchi, pork, tofu, garlic": { ru: "Кимчи, свинина, тофу, чеснок", zh: "泡菜, 猪肉, 豆腐, 蒜" },
-            "Pork Stir Fry": { ru: "Жареная свинина в остром соусе", zh: "韩式炒猪肉" },
-            "Tender pork marinated in spicy chili paste": { ru: "Нежная свинина, маринованная встрой пасте чили", zh: "用香辣酱腌制的嫩猪肉" },
-            "Pork, onion, cabbage, chili paste": { ru: "Свинина, лук, капуста, паста чили", zh: "猪肉, 洋葱, 白菜, 辣酱" }
+        // Хук и функция для перевода текстов через публичный API переводчика
+        const useAutoTranslate = (text, targetLang) => {
+            const [translatedText, setTranslatedText] = useState(text);
+
+            useEffect(() => {
+                if (!text || targetLang === 'en') {
+                    setTranslatedText(text);
+                    return;
+                }
+
+                let isMounted = true;
+                const fetchTranslation = async () => {
+                    try {
+                        const url = `https://api.mymemory.translated.net/get?q=${encodeURIComponent(text)}&langpair=en|${targetLang}`;
+                        const res = await fetch(url);
+                        const data = await res.json();
+                        if (isMounted && data && data.responseData && data.responseData.translatedText) {
+                            // Проверяем, что API не вернул ошибку лимита
+                            if (!data.responseData.translatedText.includes('MYMEMORY WARNING')) {
+                                setTranslatedText(data.responseData.translatedText);
+                            }
+                        }
+                    } catch (e) {
+                        console.error('Translation error:', e);
+                    }
+                };
+
+                fetchTranslation();
+                return () => { isMounted = false; };
+            }, [text, targetLang]);
+
+            return translatedText;
         };
 
-        const translateDishField = (text, targetLang) => {
-            if (!text) return '';
-            if (targetLang === 'en') return text;
-            return TRANSLATED_DISH_DATA[text]?.[targetLang] || text;
-        };
+        // Компонент для вывода автоматически переведенного текста на лету
+        function TranslatedText({ text, lang }) {
+            const translated = useAutoTranslate(text, lang);
+            return <>{translated}</>;
+        }
 
         const INITIAL_CAFETERIAS = [
             { 
@@ -222,14 +243,14 @@
                 koName: '안암학사 식당', 
                 location: 'Anam Dormitory Administration Building 2F', 
                 hours: 'Cheonwon Breakfast: 08:00 - 09:30 | Easy Meal: 08:00 - 19:00 | Lunch: 11:30 - 14:00 | Dinner: 17:00 - 19:00',
-                phone: '070-4120-3229'
+                phone: 'Dormitory Cafeteria'
             },
             { 
                 id: 'c3', 
                 name: 'Sanhakwan Dining Hall', 
                 koName: '산학관 식당', 
                 location: 'Sanhakwan 1F, Science & Technology Campus', 
-                hours: 'Lunch: 11:20 - 13:50 | Dinner: 17:30 - 18:50 (Last Order 18:30)',
+                hours: 'Lunch: 11:20 - 13:50 | Dinner: 17:30 - 18:50 (Last Order 18:30) | Saturday: Lunch only (11:20 - 13:30)',
                 phone: '02-921-5770'
             },
             { 
@@ -737,11 +758,10 @@
                                                             cafDishes.slice(0, 3).map(dish => {
                                                                 const isAllergic = checkAllergy(dish.allergens);
                                                                 const stats = getDishRatingStats(dish.id);
-                                                                const displayName = lang === 'ru' || lang === 'zh' ? (translateDishField(dish.enName, lang) !== dish.enName ? translateDishField(dish.enName, lang) : dish.koName) : dish.enName;
                                                                 return (
                                                                     <div key={dish.id} className={`p-2 rounded border text-xs flex justify-between items-center ${isAllergic ? 'bg-red-50 border-red-300' : 'border-gray-100'}`}>
                                                                         <div>
-                                                                            <span className="font-semibold">{dish.koName}</span> ({displayName})
+                                                                            <span className="font-semibold">{dish.koName}</span> (<TranslatedText text={dish.enName} lang={lang} />)
                                                                             <span className="bg-beige px-1 rounded ml-1 text-burgundy font-bold">{dish.mealType}</span>
                                                                             {stats.count > 0 && <span className="ml-2 text-amber-600 font-bold">★ {stats.avg}</span>}
                                                                         </div>
@@ -853,12 +873,11 @@
                                                                 {dayDishes.map(dish => {
                                                                     const isAllergic = checkAllergy(dish.allergens);
                                                                     const stats = getDishRatingStats(dish.id);
-                                                                    const displayName = lang === 'ru' || lang === 'zh' ? (translateDishField(dish.enName, lang) !== dish.enName ? translateDishField(dish.enName, lang) : dish.koName) : dish.enName;
                                                                     return (
                                                                         <div key={dish.id} className={`p-2.5 rounded border text-sm flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 ${isAllergic ? 'bg-red-50 border-red-300' : 'border-gray-100'}`}>
                                                                             <div>
                                                                                 <div className="font-semibold">
-                                                                                    {dish.koName} ({displayName})
+                                                                                    {dish.koName} (<TranslatedText text={dish.enName} lang={lang} />)
                                                                                     <span className="text-xs bg-beige px-1.5 py-0.5 rounded ml-1.5 text-burgundy font-bold">{dish.mealType}</span>
                                                                                     <span className="text-xs text-gray-400 ml-2">{dish.date}</span>
                                                                                     {stats.count > 0 && <span className="ml-2 text-amber-600 font-bold">★ {stats.avg} ({stats.count})</span>}
@@ -957,12 +976,11 @@
                                                         cafDishes.map(dish => {
                                                             const isAllergic = checkAllergy(dish.allergens);
                                                             const stats = getDishRatingStats(dish.id);
-                                                            const displayName = lang === 'ru' || lang === 'zh' ? (translateDishField(dish.enName, lang) !== dish.enName ? translateDishField(dish.enName, lang) : dish.koName) : dish.enName;
                                                             return (
                                                                 <div key={dish.id} className={`p-2.5 rounded border text-sm ${isAllergic ? 'bg-red-50 border-red-300' : 'border-gray-100'}`}>
                                                                     <div className="flex justify-between items-start gap-2">
                                                                         <div>
-                                                                            <span className="font-semibold">{dish.koName}</span> ({displayName})
+                                                                            <span className="font-semibold">{dish.koName}</span> (<TranslatedText text={dish.enName} lang={lang} />)
                                                                             <span className="text-xs bg-beige px-1.5 py-0.5 rounded ml-1 text-burgundy font-bold">{dish.mealType}</span>
                                                                             {stats.count > 0 && <span className="ml-2 text-amber-600 font-bold">★ {stats.avg} ({stats.count})</span>}
                                                                         </div>
@@ -1061,13 +1079,12 @@
                                             const isAllergic = checkAllergy(dish.allergens);
                                             const dayLabel = getDayName(dish.date);
                                             const stats = getDishRatingStats(dish.id);
-                                            const displayName = lang === 'ru' || lang === 'zh' ? (translateDishField(dish.enName, lang) !== dish.enName ? translateDishField(dish.enName, lang) : dish.koName) : dish.enName;
                                             return (
                                                 <div key={dish.id} className={`p-3 rounded border text-sm ${isAllergic ? 'bg-red-50 border-red-300' : 'border-gray-100'}`}>
                                                     <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
                                                         <div>
                                                             <div className="font-bold text-burgundy">
-                                                                {dish.koName} ({displayName})
+                                                                {dish.koName} (<TranslatedText text={dish.enName} lang={lang} />)
                                                                 {stats.count > 0 && <span className="ml-2 text-amber-600 font-bold text-xs">★ {stats.avg} ({stats.count})</span>}
                                                             </div>
                                                             <div className="text-xs text-gray-500">
@@ -1315,7 +1332,7 @@
                                     <div>
                                         <h3 className="text-xl font-bold text-burgundy">{selectedDishModal.koName}</h3>
                                         <p className="text-sm font-medium text-gray-700">
-                                            {lang === 'ru' || lang === 'zh' ? (translateDishField(selectedDishModal.enName, lang) !== selectedDishModal.enName ? translateDishField(selectedDishModal.enName, lang) : selectedDishModal.enName) : selectedDishModal.enName}
+                                            <TranslatedText text={selectedDishModal.enName} lang={lang} />
                                         </p>
                                     </div>
                                     <button 
@@ -1352,11 +1369,15 @@
                                 <div className="bg-cream p-3 rounded-lg border border-beige space-y-2 text-sm">
                                     <div>
                                         <span className="font-bold text-darkbrown block text-xs uppercase tracking-wide">{t.description}</span>
-                                        <p className="text-gray-700 mt-0.5">{translateDishField(selectedDishModal.desc, lang) || 'No detailed description provided.'}</p>
+                                        <p className="text-gray-700 mt-0.5">
+                                            {selectedDishModal.desc ? <TranslatedText text={selectedDishModal.desc} lang={lang} /> : 'No detailed description provided.'}
+                                        </p>
                                     </div>
                                     <div>
                                         <span className="font-bold text-darkbrown block text-xs uppercase tracking-wide">{t.ingredients}</span>
-                                        <p className="text-gray-700 mt-0.5">{translateDishField(selectedDishModal.ingredients, lang) || 'Not specified.'}</p>
+                                        <p className="text-gray-700 mt-0.5">
+                                            {selectedDishModal.ingredients ? <TranslatedText text={selectedDishModal.ingredients} lang={lang} /> : 'Not specified.'}
+                                        </p>
                                     </div>
                                     <div>
                                         <span className="font-bold text-darkbrown block text-xs uppercase tracking-wide">{t.allergens}</span>
