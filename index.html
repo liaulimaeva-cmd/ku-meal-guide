@@ -57,7 +57,7 @@
                 name: 'Sanhakwan Dining Hall', 
                 koName: '산학관 식당', 
                 location: 'Sanhakwan 1F, Science & Technology Campus', 
-                hours: 'Lunch: 11:20 - 13:50 | Dinner: 17:30 - 18:50 (Last Order 18:30) | Saturday: Lunch only (11:20 - 13:30)',
+                hours: 'Lunch: 11:20 - 13:50 | Dinner: 17:30 - 18:50 (Last Order 18:30)',
                 phone: '02-921-5770'
             },
             { 
@@ -70,6 +70,20 @@
             }
         ];
 
+        const COMMON_ALLERGENS = [
+            'Eggs', 'Milk', 'Peanuts', 'Tree Nuts', 'Soy', 'Wheat / Gluten', 
+            'Fish', 'Shellfish', 'Pork', 'Beef', 'Chicken', 'Sesame'
+        ];
+
+        const DAYS_OF_WEEK = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+
+        const getDayName = (dateStr) => {
+            if (!dateStr) return '';
+            const [y, m, d] = dateStr.split('-').map(Number);
+            const dateObj = new Date(y, m - 1, d);
+            return dateObj.toLocaleDateString('en-US', { weekday: 'long' });
+        };
+
         const SUPABASE_URL = 'https://fzdseiswlhckroaliizn.supabase.co';
         const SUPABASE_ANON_KEY = 'sb_publishable_1ShB7yCEJTtL3uWYzNZElQ_XSN-EPVO';
         const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
@@ -79,6 +93,11 @@
             const [user, setUser] = useState(() => JSON.parse(localStorage.getItem('ku_cloud_user') || 'null'));
             const [dishes, setDishes] = useState([]);
             
+            // Модальное окно деталей блюда
+            const [selectedDishModal, setSelectedDishModal] = useState(null);
+            // Выбранная столовая во вкладке Cafeterias
+            const [selectedCafeteriaId, setSelectedCafeteriaId] = useState(null);
+
             useEffect(() => {
                 fetchDishes();
             }, []);
@@ -92,11 +111,22 @@
                 }
             };
 
-            const [authForm, setAuthForm] = useState({ username: '', password: '', email: '' });
+            const [authForm, setAuthForm] = useState({ 
+                username: '', 
+                password: '', 
+                email: '', 
+                selectedAllergens: [], 
+                otherAllergens: '' 
+            });
             const [authError, setAuthError] = useState('');
-            const [weeklyCafFilter, setWeeklyCafFilter] = useState('all');
 
-            // Полная форма администратора с описанием, ингредиентами и аллергенами
+            // Фильтры меню
+            const [weeklyCafFilter, setWeeklyCafFilter] = useState('all');
+            const [dayFilter, setDayFilter] = useState('all');
+            const [mealFilter, setMealFilter] = useState('all');
+            const [allergenFilter, setAllergenFilter] = useState('all'); // 'all' | 'safe_for_me' | конкретный аллерген
+
+            // Полная форма администратора
             const [adminForm, setAdminForm] = useState({
                 cafeteriaId: 'c1',
                 date: new Date().toISOString().split('T')[0],
@@ -114,17 +144,36 @@
 
             // Профиль студента для аллергий
             const [studentProfile, setStudentProfile] = useState(() => {
-                return user?.profile || { allergies: [], spicePreference: 'Medium' };
+                return user?.profile || { allergens: [], spicePreference: 'Medium' };
             });
+            const [profileOtherAllergen, setProfileOtherAllergen] = useState('');
 
             useEffect(() => { 
                 localStorage.setItem('ku_cloud_user', JSON.stringify(user)); 
-                if (user?.profile) setStudentProfile(user.profile);
+                if (user?.profile) {
+                    setStudentProfile(user.profile);
+                    const custom = (user.profile.allergens || []).filter(
+                        a => !COMMON_ALLERGENS.some(ca => ca.toLowerCase() === a.toLowerCase())
+                    );
+                    setProfileOtherAllergen(custom.join(', '));
+                }
             }, [user]);
 
             const switchView = (v) => { 
                 setAuthError(''); 
                 setView(v); 
+            };
+
+            const toggleSignupAllergen = (item) => {
+                setAuthForm(prev => {
+                    const exists = prev.selectedAllergens.includes(item);
+                    return {
+                        ...prev,
+                        selectedAllergens: exists 
+                            ? prev.selectedAllergens.filter(a => a !== item)
+                            : [...prev.selectedAllergens, item]
+                    };
+                });
             };
 
             const handleLogin = async (e) => {
@@ -155,14 +204,19 @@
                     return;
                 }
 
-                setUser({ username: foundUser.username, email: foundUser.email, role: 'user', profile: foundUser.profile || { allergies: [] } });
+                setUser({ 
+                    username: foundUser.username, 
+                    email: foundUser.email, 
+                    role: 'user', 
+                    profile: foundUser.profile || { allergens: [] } 
+                });
                 switchView('home');
             };
 
             const handleSignup = async (e) => {
                 e.preventDefault();
                 if (!authForm.username || !authForm.email || !authForm.password) {
-                    setAuthError('Fill in all fields.');
+                    setAuthError('Fill in all required fields.');
                     return;
                 }
 
@@ -176,7 +230,12 @@
                     return;
                 }
 
-                const newProfile = { allergies: [], spicePreference: 'Medium' };
+                const customList = authForm.otherAllergens
+                    ? authForm.otherAllergens.split(',').map(s => s.trim()).filter(Boolean)
+                    : [];
+                const combinedAllergens = Array.from(new Set([...authForm.selectedAllergens, ...customList]));
+
+                const newProfile = { allergens: combinedAllergens, spicePreference: 'Medium' };
                 const newUserRecord = {
                     username: authForm.username,
                     email: authForm.email,
@@ -191,23 +250,46 @@
                 }
 
                 setUser({ username: authForm.username, email: authForm.email, role: 'user', profile: newProfile });
+                setAuthForm({ username: '', password: '', email: '', selectedAllergens: [], otherAllergens: '' });
                 alert('Account successfully created and saved to cloud!');
                 switchView('home');
             };
 
+            const toggleProfileCommonAllergen = (item) => {
+                setStudentProfile(prev => {
+                    const current = prev.allergens || [];
+                    const exists = current.some(a => a.toLowerCase() === item.toLowerCase());
+                    return {
+                        ...prev,
+                        allergens: exists
+                            ? current.filter(a => a.toLowerCase() !== item.toLowerCase())
+                            : [...current, item]
+                    };
+                });
+            };
+
             const handleUpdateProfile = async (e) => {
                 e.preventDefault();
-                const updatedUser = { ...user, profile: studentProfile };
+                const baseCommon = (studentProfile.allergens || []).filter(
+                    a => COMMON_ALLERGENS.some(ca => ca.toLowerCase() === a.toLowerCase())
+                );
+                const customList = profileOtherAllergen
+                    ? profileOtherAllergen.split(',').map(s => s.trim()).filter(Boolean)
+                    : [];
+                const mergedAllergens = Array.from(new Set([...baseCommon, ...customList]));
+
+                const updatedProfile = { ...studentProfile, allergens: mergedAllergens };
+                const updatedUser = { ...user, profile: updatedProfile };
                 
-                // Обновляем в Supabase
                 const { error } = await supabase
                     .from('users')
-                    .update({ profile: studentProfile })
+                    .update({ profile: updatedProfile })
                     .eq('username', user.username);
 
                 if (error) {
                     alert('Error updating profile: ' + error.message);
                 } else {
+                    setStudentProfile(updatedProfile);
                     setUser(updatedUser);
                     alert('Profile and allergies updated successfully!');
                 }
@@ -300,16 +382,50 @@
 
             const todayStr = new Date().toISOString().split('T')[0];
 
-            // Проверка на аллергены для студента
-            const checkAllergy = (dishAllergens) => {
-                if (!user || !user.profile || !user.profile.allergens) return false;
-                if (!dishAllergens || !Array.isArray(dishAllergens)) return false;
-                return dishAllergens.some(a => user.profile.allergens.map(al => al.toLowerCase()).includes(a.trim().toLowerCase()));
+            // Проверка совпадения аллергенов блюда с аллергенами студента
+            const getMatchingUserAllergens = (dishAllergens) => {
+                if (!user || !user.profile || !user.profile.allergens || !Array.isArray(dishAllergens)) return [];
+                const userAllergensLower = user.profile.allergens.map(al => al.trim().toLowerCase());
+                return dishAllergens.filter(a => {
+                    const dishAl = a.trim().toLowerCase();
+                    return userAllergensLower.some(uAl => uAl.includes(dishAl) || dishAl.includes(uAl));
+                });
             };
+
+            const checkAllergy = (dishAllergens) => getMatchingUserAllergens(dishAllergens).length > 0;
+
+            // Общая функция фильтрации блюд по дню недели, приему пищи и аллергенам
+            const matchesDishFilters = (dish, { includeDay = true } = {}) => {
+                if (includeDay && dayFilter !== 'all') {
+                    if (getDayName(dish.date) !== dayFilter) return false;
+                }
+                if (mealFilter !== 'all') {
+                    if ((dish.mealType || '').toLowerCase() !== mealFilter.toLowerCase()) return false;
+                }
+                if (allergenFilter !== 'all') {
+                    const dishAllergens = Array.isArray(dish.allergens) ? dish.allergens.map(a => a.toLowerCase()) : [];
+                    if (allergenFilter === 'safe_for_me') {
+                        if (checkAllergy(dish.allergens)) return false;
+                    } else if (allergenFilter.startsWith('exclude:')) {
+                        const target = allergenFilter.replace('exclude:', '').toLowerCase();
+                        if (dishAllergens.some(a => a.includes(target) || target.includes(a))) return false;
+                    }
+                }
+                return true;
+            };
+
+            const resetFilters = () => {
+                setWeeklyCafFilter('all');
+                setDayFilter('all');
+                setMealFilter('all');
+                setAllergenFilter('all');
+            };
+
+            const selectedCafeteriaObj = INITIAL_CAFETERIAS.find(c => c.id === selectedCafeteriaId);
 
             return (
                 <div className="flex flex-col min-h-screen">
-                    <header className="bg-burgundy text-white shadow-md sticky top-0 z-50">
+                    <header className="bg-burgundy text-white shadow-md sticky top-0 z-40">
                         <div className="max-w-6xl mx-auto px-4 py-3 flex flex-col md:flex-row justify-between items-center gap-3">
                             <div className="cursor-pointer font-bold text-lg" onClick={() => switchView('home')}>
                                 🐯 KU MEAL GUIDE
@@ -317,7 +433,7 @@
                             
                             <nav className="flex flex-wrap items-center justify-center gap-2 text-sm font-medium">
                                 <button onClick={() => switchView('home')} className={`px-3 py-1 rounded transition ${view === 'home' ? 'bg-gold text-darkbrown font-bold' : 'hover:bg-burgundy-dark'}`}>Home</button>
-                                <button onClick={() => switchView('cafeterias')} className={`px-3 py-1 rounded transition ${view === 'cafeterias' ? 'bg-gold text-darkbrown font-bold' : 'hover:bg-burgundy-dark'}`}>Cafeterias</button>
+                                <button onClick={() => { setSelectedCafeteriaId(null); switchView('cafeterias'); }} className={`px-3 py-1 rounded transition ${view === 'cafeterias' ? 'bg-gold text-darkbrown font-bold' : 'hover:bg-burgundy-dark'}`}>Cafeterias</button>
                                 <button onClick={() => switchView('todays-menu')} className={`px-3 py-1 rounded transition ${view === 'todays-menu' ? 'bg-gold text-darkbrown font-bold' : 'hover:bg-burgundy-dark'}`}>Today’s Menu</button>
                                 <button onClick={() => switchView('weekly-menu')} className={`px-3 py-1 rounded transition ${view === 'weekly-menu' ? 'bg-gold text-darkbrown font-bold' : 'hover:bg-burgundy-dark'}`}>Weekly Menu</button>
                             </nav>
@@ -352,62 +468,207 @@
                                     <p className="text-gray-600 mb-4">Your ultimate guide to campus dining halls, daily menus, and weekly schedules.</p>
                                     <div className="flex justify-center gap-3 flex-wrap">
                                         <button onClick={() => switchView('todays-menu')} className="bg-burgundy text-white px-4 py-2 rounded text-sm font-semibold">View Today’s Menu</button>
-                                        <button onClick={() => switchView('cafeterias')} className="bg-gold text-darkbrown px-4 py-2 rounded text-sm font-semibold">View Cafeterias & Hours</button>
+                                        <button onClick={() => { setSelectedCafeteriaId(null); switchView('cafeterias'); }} className="bg-gold text-darkbrown px-4 py-2 rounded text-sm font-semibold">View Cafeterias & Hours</button>
+                                        <button onClick={() => switchView('weekly-menu')} className="border border-burgundy text-burgundy px-4 py-2 rounded text-sm font-semibold hover:bg-cream">Weekly Menu</button>
                                     </div>
                                 </div>
                             </div>
                         )}
 
+                        {/* CAFETERIAS VIEW + МЕНЮ ПО ДНЯМ НЕДЕЛИ ПРИ НАЖАТИИ */}
                         {view === 'cafeterias' && (
                             <div className="space-y-4">
-                                <h1 className="text-2xl font-bold text-burgundy">Campus Cafeterias & Operating Hours</h1>
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                    {INITIAL_CAFETERIAS.map(caf => (
-                                        <div key={caf.id} className="bg-white p-5 rounded-lg shadow border border-beige space-y-2">
-                                            <h2 className="font-bold text-lg text-burgundy">{caf.name} <span className="text-xs text-gray-500">({caf.koName})</span></h2>
-                                            <p className="text-sm text-gray-700">📍 <strong>Location:</strong> {caf.location}</p>
-                                            <p className="text-sm text-gray-700">🕒 <strong>Hours:</strong> {caf.hours}</p>
-                                            <p className="text-sm text-gray-700">📞 <strong>Phone:</strong> {caf.phone}</p>
-                                        </div>
-                                    ))}
+                                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
+                                    <h1 className="text-2xl font-bold text-burgundy">Campus Cafeterias & Operating Hours</h1>
+                                    {selectedCafeteriaObj && (
+                                        <button 
+                                            onClick={() => setSelectedCafeteriaId(null)} 
+                                            className="text-xs bg-beige hover:bg-gold text-darkbrown font-semibold px-3 py-1.5 rounded transition"
+                                        >
+                                            ← Back to All Cafeterias
+                                        </button>
+                                    )}
                                 </div>
+
+                                {!selectedCafeteriaObj ? (
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        {INITIAL_CAFETERIAS.map(caf => {
+                                            const cafDishCount = dishes.filter(d => d.cafeteriaId === caf.id).length;
+                                            return (
+                                                <div 
+                                                    key={caf.id} 
+                                                    onClick={() => setSelectedCafeteriaId(caf.id)}
+                                                    className="bg-white p-5 rounded-lg shadow border border-beige hover:border-burgundy hover:shadow-md transition cursor-pointer space-y-2 flex flex-col justify-between"
+                                                >
+                                                    <div className="space-y-2">
+                                                        <div className="flex justify-between items-start gap-2">
+                                                            <h2 className="font-bold text-lg text-burgundy">{caf.name} <span className="text-xs text-gray-500">({caf.koName})</span></h2>
+                                                            <span className="text-xs bg-cream border border-beige text-burgundy font-semibold px-2 py-0.5 rounded whitespace-nowrap">
+                                                                {cafDishCount} items
+                                                            </span>
+                                                        </div>
+                                                        <p className="text-sm text-gray-700">📍 <strong>Location:</strong> {caf.location}</p>
+                                                        <p className="text-sm text-gray-700">🕒 <strong>Hours:</strong> {caf.hours}</p>
+                                                        <p className="text-sm text-gray-700">📞 <strong>Phone:</strong> {caf.phone}</p>
+                                                    </div>
+                                                    <div className="pt-2 border-t border-cream flex justify-end">
+                                                        <span className="text-xs font-bold text-burgundy">Click to view menu by days of week →</span>
+                                                    </div>
+                                                </div>
+                                            );
+                                        })}
+                                    </div>
+                                ) : (
+                                    <div className="space-y-4">
+                                        <div className="bg-white p-5 rounded-lg shadow border border-burgundy space-y-1">
+                                            <h2 className="font-bold text-xl text-burgundy">{selectedCafeteriaObj.name} <span className="text-sm text-gray-500">({selectedCafeteriaObj.koName})</span></h2>
+                                            <p className="text-sm text-gray-700">📍 {selectedCafeteriaObj.location}</p>
+                                            <p className="text-sm text-gray-700">🕒 {selectedCafeteriaObj.hours}</p>
+                                            <p className="text-sm text-gray-700">📞 {selectedCafeteriaObj.phone}</p>
+                                        </div>
+
+                                        {/* Фильтр по приему пищи и аллергенам внутри столовой */}
+                                        <div className="bg-white p-3 rounded-lg shadow border border-beige flex flex-wrap items-center gap-3">
+                                            <span className="text-xs font-bold text-burgundy uppercase">Filter:</span>
+                                            <select value={mealFilter} onChange={e => setMealFilter(e.target.value)} className="border rounded p-1.5 text-xs bg-white">
+                                                <option value="all">All Meals</option>
+                                                <option value="Breakfast">Breakfast</option>
+                                                <option value="Lunch">Lunch</option>
+                                                <option value="Dinner">Dinner</option>
+                                            </select>
+                                            <select value={allergenFilter} onChange={e => setAllergenFilter(e.target.value)} className="border rounded p-1.5 text-xs bg-white">
+                                                <option value="all">All Allergens (Show All)</option>
+                                                {user && user.profile?.allergens?.length > 0 && (
+                                                    <option value="safe_for_me">✅ Hide My Allergens</option>
+                                                )}
+                                                {COMMON_ALLERGENS.map(al => (
+                                                    <option key={al} value={`exclude:${al}`}>Exclude {al}</option>
+                                                ))}
+                                            </select>
+                                        </div>
+
+                                        {/* Меню выбранной столовой, сгруппированное по дням недели */}
+                                        <div className="space-y-4">
+                                            {DAYS_OF_WEEK.map(dayName => {
+                                                const dayDishes = dishes
+                                                    .filter(d => d.cafeteriaId === selectedCafeteriaObj.id && getDayName(d.date) === dayName)
+                                                    .filter(d => matchesDishFilters(d, { includeDay: false }))
+                                                    .sort((a, b) => new Date(a.date) - new Date(b.date));
+
+                                                return (
+                                                    <div key={dayName} className="bg-white p-4 rounded-lg shadow border border-beige">
+                                                        <h3 className="font-bold text-burgundy border-b border-beige pb-1.5 mb-3 flex justify-between items-center">
+                                                            <span>📅 {dayName}</span>
+                                                            <span className="text-xs font-normal text-gray-500">{dayDishes.length} dish(es)</span>
+                                                        </h3>
+                                                        {dayDishes.length === 0 ? (
+                                                            <p className="text-xs text-gray-400 italic">No dishes scheduled for {dayName}.</p>
+                                                        ) : (
+                                                            <div className="space-y-2">
+                                                                {dayDishes.map(dish => {
+                                                                    const isAllergic = checkAllergy(dish.allergens);
+                                                                    return (
+                                                                        <div key={dish.id} className={`p-2.5 rounded border text-sm flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 ${isAllergic ? 'bg-red-50 border-red-300' : 'border-gray-100'}`}>
+                                                                            <div>
+                                                                                <div className="font-semibold">
+                                                                                    {dish.koName} ({dish.enName})
+                                                                                    <span className="text-xs bg-beige px-1.5 py-0.5 rounded ml-1.5 text-burgundy font-bold">{dish.mealType}</span>
+                                                                                    <span className="text-xs text-gray-400 ml-2">{dish.date}</span>
+                                                                                </div>
+                                                                                {isAllergic && (
+                                                                                    <div className="text-xs text-red-600 font-bold mt-0.5">⚠️ Warning: Contains your allergen!</div>
+                                                                                )}
+                                                                            </div>
+                                                                            <div className="flex items-center gap-3 self-end sm:self-center">
+                                                                                <span className="text-burgundy font-bold">{dish.price} KRW</span>
+                                                                                <button 
+                                                                                    onClick={() => setSelectedDishModal(dish)} 
+                                                                                    className="bg-cream hover:bg-gold border border-beige text-darkbrown px-2.5 py-1 rounded text-xs font-semibold transition"
+                                                                                >
+                                                                                    Details
+                                                                                </button>
+                                                                            </div>
+                                                                        </div>
+                                                                    );
+                                                                })}
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                );
+                                            })}
+                                        </div>
+                                    </div>
+                                )}
                             </div>
                         )}
 
+                        {/* TODAY'S MENU VIEW */}
                         {view === 'todays-menu' && (
                             <div className="space-y-4">
-                                <h1 className="text-2xl font-bold text-burgundy">Today’s Menu ({todayStr})</h1>
+                                <h1 className="text-2xl font-bold text-burgundy">Today’s Menu ({todayStr} — {getDayName(todayStr)})</h1>
                                 {user && user.profile?.allergens?.length > 0 && (
                                     <div className="bg-amber-50 border border-amber-200 p-3 rounded text-xs text-amber-800">
                                         ⚠️ Your registered allergies: <strong>{user.profile.allergens.join(', ')}</strong>. Unsafe dishes will be highlighted.
                                     </div>
                                 )}
+
+                                {/* Панель фильтров по приемам пищи и аллергенам */}
+                                <div className="bg-white p-3 rounded-lg shadow border border-beige flex flex-wrap items-center gap-3">
+                                    <span className="text-xs font-bold text-burgundy uppercase">Filters:</span>
+                                    <select value={mealFilter} onChange={e => setMealFilter(e.target.value)} className="border rounded p-1.5 text-xs bg-white">
+                                        <option value="all">All Meals</option>
+                                        <option value="Breakfast">Breakfast</option>
+                                        <option value="Lunch">Lunch</option>
+                                        <option value="Dinner">Dinner</option>
+                                    </select>
+                                    <select value={allergenFilter} onChange={e => setAllergenFilter(e.target.value)} className="border rounded p-1.5 text-xs bg-white">
+                                        <option value="all">All Allergens (Show All)</option>
+                                        {user && user.profile?.allergens?.length > 0 && (
+                                            <option value="safe_for_me">✅ Hide My Allergens</option>
+                                        )}
+                                        {COMMON_ALLERGENS.map(al => (
+                                            <option key={al} value={`exclude:${al}`}>Exclude {al}</option>
+                                        ))}
+                                    </select>
+                                    {(mealFilter !== 'all' || allergenFilter !== 'all') && (
+                                        <button onClick={resetFilters} className="text-xs text-burgundy underline">Reset</button>
+                                    )}
+                                </div>
+
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                     {INITIAL_CAFETERIAS.map(caf => {
-                                        const cafDishes = dishes.filter(d => d.cafeteriaId === caf.id && d.date === todayStr);
+                                        const cafDishes = dishes
+                                            .filter(d => d.cafeteriaId === caf.id && d.date === todayStr)
+                                            .filter(d => matchesDishFilters(d, { includeDay: false }));
                                         return (
                                             <div key={caf.id} className="bg-white p-4 rounded-lg shadow border border-beige">
                                                 <h2 className="font-bold text-burgundy">{caf.name}</h2>
                                                 <p className="text-xs text-gray-500 mb-2">{caf.hours}</p>
                                                 <div className="space-y-3 mt-2">
                                                     {cafDishes.length === 0 ? (
-                                                        <p className="text-sm text-gray-400 italic">No menu published for today yet.</p>
+                                                        <p className="text-sm text-gray-400 italic">No matching menu items for today.</p>
                                                     ) : (
                                                         cafDishes.map(dish => {
                                                             const isAllergic = checkAllergy(dish.allergens);
                                                             return (
-                                                                <div key={dish.id} className={`p-2 rounded border text-sm ${isAllergic ? 'bg-red-50 border-red-300' : 'border-gray-100'}`}>
-                                                                    <div className="flex justify-between items-center">
+                                                                <div key={dish.id} className={`p-2.5 rounded border text-sm ${isAllergic ? 'bg-red-50 border-red-300' : 'border-gray-100'}`}>
+                                                                    <div className="flex justify-between items-start gap-2">
                                                                         <div>
                                                                             <span className="font-semibold">{dish.koName}</span> ({dish.enName})
                                                                             <span className="text-xs bg-beige px-1.5 py-0.5 rounded ml-1 text-burgundy font-bold">{dish.mealType}</span>
                                                                         </div>
-                                                                        <div className="text-burgundy font-bold">{dish.price} KRW</div>
+                                                                        <div className="flex items-center gap-2 shrink-0">
+                                                                            <span className="text-burgundy font-bold">{dish.price} KRW</span>
+                                                                            <button 
+                                                                                onClick={() => setSelectedDishModal(dish)} 
+                                                                                className="bg-cream hover:bg-gold border border-beige text-darkbrown px-2 py-0.5 rounded text-xs font-semibold transition"
+                                                                            >
+                                                                                Details
+                                                                            </button>
+                                                                        </div>
                                                                     </div>
-                                                                    {dish.desc && <p className="text-xs text-gray-600 mt-1">{dish.desc}</p>}
-                                                                    {dish.ingredients && <p className="text-xs text-gray-500 mt-0.5">Ingredients: {dish.ingredients}</p>}
                                                                     {dish.allergens && dish.allergens.length > 0 && (
-                                                                        <p className="text-xs text-gray-500 mt-0.5">Allergens: {dish.allergens.join(', ')}</p>
+                                                                        <p className="text-xs text-gray-500 mt-1">Allergens: {dish.allergens.join(', ')}</p>
                                                                     )}
                                                                     {isAllergic && (
                                                                         <div className="text-xs text-red-600 font-bold mt-1">⚠️ Warning: Contains your allergen!</div>
@@ -424,49 +685,107 @@
                             </div>
                         )}
 
+                        {/* WEEKLY MENU VIEW С ФИЛЬТРАМИ ПО КАФЕТЕРИЯМ, ДНЯМ НЕДЕЛИ, ПРИЕМАМ ПИЩИ И АЛЛЕРГЕНАМ */}
                         {view === 'weekly-menu' && (
                             <div className="space-y-4">
-                                <div className="flex flex-col md:flex-row justify-between items-center gap-3">
+                                <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-3">
                                     <h1 className="text-2xl font-bold text-burgundy">Weekly Menu Schedule</h1>
-                                    <select value={weeklyCafFilter} onChange={e => setWeeklyCafFilter(e.target.value)} className="border rounded p-2 text-sm bg-white">
-                                        <option value="all">All Cafeterias</option>
-                                        {INITIAL_CAFETERIAS.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
-                                    </select>
                                 </div>
 
+                                {/* Панель всех фильтров */}
+                                <div className="bg-white p-4 rounded-lg shadow border border-beige grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3">
+                                    <div>
+                                        <label className="block text-[11px] font-bold text-gray-500 uppercase mb-1">Cafeteria</label>
+                                        <select value={weeklyCafFilter} onChange={e => setWeeklyCafFilter(e.target.value)} className="w-full border rounded p-2 text-xs bg-white">
+                                            <option value="all">All Cafeterias</option>
+                                            {INITIAL_CAFETERIAS.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label className="block text-[11px] font-bold text-gray-500 uppercase mb-1">Day of Week</label>
+                                        <select value={dayFilter} onChange={e => setDayFilter(e.target.value)} className="w-full border rounded p-2 text-xs bg-white">
+                                            <option value="all">All Days</option>
+                                            {DAYS_OF_WEEK.map(day => <option key={day} value={day}>{day}</option>)}
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label className="block text-[11px] font-bold text-gray-500 uppercase mb-1">Meal Type</label>
+                                        <select value={mealFilter} onChange={e => setMealFilter(e.target.value)} className="w-full border rounded p-2 text-xs bg-white">
+                                            <option value="all">All Meals</option>
+                                            <option value="Breakfast">Breakfast</option>
+                                            <option value="Lunch">Lunch</option>
+                                            <option value="Dinner">Dinner</option>
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label className="block text-[11px] font-bold text-gray-500 uppercase mb-1">Allergens</label>
+                                        <select value={allergenFilter} onChange={e => setAllergenFilter(e.target.value)} className="w-full border rounded p-2 text-xs bg-white">
+                                            <option value="all">All Allergens (Show All)</option>
+                                            {user && user.profile?.allergens?.length > 0 && (
+                                                <option value="safe_for_me">✅ Hide My Allergens</option>
+                                            )}
+                                            {COMMON_ALLERGENS.map(al => (
+                                                <option key={al} value={`exclude:${al}`}>Exclude {al}</option>
+                                            ))}
+                                        </select>
+                                    </div>
+                                </div>
+
+                                {(weeklyCafFilter !== 'all' || dayFilter !== 'all' || mealFilter !== 'all' || allergenFilter !== 'all') && (
+                                    <div className="flex justify-end">
+                                        <button onClick={resetFilters} className="text-xs text-burgundy font-semibold underline">Reset All Filters</button>
+                                    </div>
+                                )}
+
                                 <div className="bg-white p-4 rounded-lg shadow border border-beige space-y-3">
-                                    {dishes.length === 0 ? (
-                                        <p className="text-sm text-gray-400 italic">No menu items available in the cloud yet.</p>
-                                    ) : (
-                                        dishes
+                                    {(() => {
+                                        const filteredDishes = dishes
                                             .filter(d => weeklyCafFilter === 'all' || d.cafeteriaId === weeklyCafFilter)
-                                            .sort((a, b) => new Date(a.date) - new Date(b.date))
-                                            .map(dish => {
-                                                const caf = INITIAL_CAFETERIAS.find(c => c.id === dish.cafeteriaId);
-                                                const isAllergic = checkAllergy(dish.allergens);
-                                                return (
-                                                    <div key={dish.id} className={`p-2 rounded border text-sm ${isAllergic ? 'bg-red-50 border-red-300' : 'border-gray-100'}`}>
-                                                        <div className="flex justify-between items-start md:items-center">
-                                                            <div>
-                                                                <div className="font-bold text-burgundy">{dish.koName} ({dish.enName})</div>
-                                                                <div className="text-xs text-gray-500">{caf ? caf.name : ''} | 📅 {dish.date} (<span className="font-semibold text-burgundy">{dish.mealType}</span>)</div>
-                                                                {dish.ingredients && <div className="text-xs text-gray-500 mt-1">Ingredients: {dish.ingredients}</div>}
-                                                                {dish.allergens && dish.allergens.length > 0 && <div className="text-xs text-gray-500">Allergens: {dish.allergens.join(', ')}</div>}
+                                            .filter(d => matchesDishFilters(d, { includeDay: true }))
+                                            .sort((a, b) => new Date(a.date) - new Date(b.date));
+
+                                        if (filteredDishes.length === 0) {
+                                            return <p className="text-sm text-gray-400 italic">No menu items match the selected filters.</p>;
+                                        }
+
+                                        return filteredDishes.map(dish => {
+                                            const caf = INITIAL_CAFETERIAS.find(c => c.id === dish.cafeteriaId);
+                                            const isAllergic = checkAllergy(dish.allergens);
+                                            const dayLabel = getDayName(dish.date);
+                                            return (
+                                                <div key={dish.id} className={`p-3 rounded border text-sm ${isAllergic ? 'bg-red-50 border-red-300' : 'border-gray-100'}`}>
+                                                    <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
+                                                        <div>
+                                                            <div className="font-bold text-burgundy">{dish.koName} ({dish.enName})</div>
+                                                            <div className="text-xs text-gray-500">
+                                                                {caf ? caf.name : ''} | 📅 {dish.date} ({dayLabel}) — <span className="font-semibold text-burgundy">{dish.mealType}</span>
                                                             </div>
-                                                            <div className="font-bold text-burgundy">{dish.price} KRW</div>
+                                                            {dish.allergens && dish.allergens.length > 0 && (
+                                                                <div className="text-xs text-gray-500 mt-0.5">Allergens: {dish.allergens.join(', ')}</div>
+                                                            )}
                                                         </div>
-                                                        {isAllergic && <div className="text-xs text-red-600 font-bold mt-1">⚠️ Warning: Contains your allergen!</div>}
+                                                        <div className="flex items-center gap-3 self-end sm:self-center">
+                                                            <span className="font-bold text-burgundy">{dish.price} KRW</span>
+                                                            <button 
+                                                                onClick={() => setSelectedDishModal(dish)} 
+                                                                className="bg-cream hover:bg-gold border border-beige text-darkbrown px-3 py-1 rounded text-xs font-semibold transition"
+                                                            >
+                                                                Details
+                                                            </button>
+                                                        </div>
                                                     </div>
-                                                );
-                                            })
-                                    )}
+                                                    {isAllergic && <div className="text-xs text-red-600 font-bold mt-1">⚠️ Warning: Contains your allergen!</div>}
+                                                </div>
+                                            );
+                                        });
+                                    })()}
                                 </div>
                             </div>
                         )}
 
                         {/* PROFILE & ALLERGIES VIEW */}
                         {view === 'profile' && user && user.role !== 'admin' && (
-                            <div className="max-w-md mx-auto bg-white p-6 rounded-lg shadow border border-beige">
+                            <div className="max-w-lg mx-auto bg-white p-6 rounded-lg shadow border border-beige">
                                 <h2 className="text-xl font-bold mb-4 text-burgundy">My Profile & Allergies</h2>
                                 <form onSubmit={handleUpdateProfile} className="space-y-4">
                                     <div>
@@ -478,15 +797,31 @@
                                         <input type="email" value={user.email || ''} className="w-full border rounded p-2 text-sm bg-gray-100" disabled />
                                     </div>
                                     <div>
-                                        <label className="block text-sm font-semibold mb-1">Allergies (comma separated)</label>
+                                        <label className="block text-sm font-semibold mb-2">Select Your Allergens</label>
+                                        <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                                            {COMMON_ALLERGENS.map(item => {
+                                                const checked = (studentProfile.allergens || []).some(a => a.toLowerCase() === item.toLowerCase());
+                                                return (
+                                                    <label key={item} className={`flex items-center gap-2 p-2 rounded border text-xs cursor-pointer transition ${checked ? 'bg-burgundy text-white border-burgundy font-semibold' : 'bg-cream border-beige text-darkbrown'}`}>
+                                                        <input 
+                                                            type="checkbox" 
+                                                            checked={checked} 
+                                                            onChange={() => toggleProfileCommonAllergen(item)} 
+                                                            className="accent-gold"
+                                                        />
+                                                        <span>{item}</span>
+                                                    </label>
+                                                );
+                                            })}
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <label className="block text-sm font-semibold mb-1">Other Allergens (comma separated)</label>
                                         <input 
                                             type="text" 
-                                            value={studentProfile.allergens ? studentProfile.allergens.join(', ') : ''} 
-                                            onChange={e => setStudentProfile({
-                                                ...studentProfile, 
-                                                allergens: e.target.value.split(',').map(s => s.trim()).filter(Boolean)
-                                            })} 
-                                            placeholder="e.g. peanuts, milk, gluten, shrimp" 
+                                            value={profileOtherAllergen} 
+                                            onChange={e => setProfileOtherAllergen(e.target.value)} 
+                                            placeholder="e.g. kiwi, buckwheat, garlic" 
                                             className="w-full border rounded p-2 text-sm" 
                                         />
                                         <p className="text-[11px] text-gray-500 mt-1">Dishes containing these ingredients will be highlighted with a warning.</p>
@@ -496,15 +831,16 @@
                             </div>
                         )}
 
+                        {/* LOGIN / SIGNUP (С ВЫБОРОМ АЛЛЕРГЕНОВ ПРИ РЕГИСТРАЦИИ + СТРОЧКА OTHER) */}
                         {(view === 'login' || view === 'signup' || view === 'admin-login') && (
-                            <div className="max-w-md mx-auto bg-white p-6 rounded-lg shadow border border-beige">
+                            <div className="max-w-lg mx-auto bg-white p-6 rounded-lg shadow border border-beige">
                                 <h2 className="text-xl font-bold mb-4 text-burgundy">
-                                    {view === 'admin-login' ? 'Admin Login' : view === 'login' ? 'Login' : 'Sign Up'}
+                                    {view === 'admin-login' ? 'Admin Login' : view === 'login' ? 'Login' : 'Create Student Account'}
                                 </h2>
                                 {authError && <div className="bg-red-100 text-red-700 p-2 rounded mb-3 text-sm">{authError}</div>}
-                                <form onSubmit={view === 'signup' ? handleSignup : handleLogin} className="space-y-3">
+                                <form onSubmit={view === 'signup' ? handleSignup : handleLogin} className="space-y-4">
                                     <div>
-                                        <label className="block text-sm font-semibold mb-1">Username / Email</label>
+                                        <label className="block text-sm font-semibold mb-1">Username {view !== 'signup' && '/ Email'}</label>
                                         <input type="text" value={authForm.username} onChange={e => setAuthForm({...authForm, username: e.target.value})} className="w-full border rounded p-2 text-sm" required />
                                     </div>
                                     {view === 'signup' && (
@@ -517,6 +853,42 @@
                                         <label className="block text-sm font-semibold mb-1">Password</label>
                                         <input type="password" value={authForm.password} onChange={e => setAuthForm({...authForm, password: e.target.value})} className="w-full border rounded p-2 text-sm" required />
                                     </div>
+
+                                    {view === 'signup' && (
+                                        <div className="pt-2 border-t border-beige space-y-3">
+                                            <div>
+                                                <label className="block text-sm font-semibold mb-1">Select Allergens (optional)</label>
+                                                <p className="text-xs text-gray-500 mb-2">Choose any allergens so we can warn you about unsafe dishes:</p>
+                                                <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                                                    {COMMON_ALLERGENS.map(item => {
+                                                        const checked = authForm.selectedAllergens.includes(item);
+                                                        return (
+                                                            <label key={item} className={`flex items-center gap-2 p-2 rounded border text-xs cursor-pointer transition ${checked ? 'bg-burgundy text-white border-burgundy font-semibold' : 'bg-cream border-beige text-darkbrown'}`}>
+                                                                <input 
+                                                                    type="checkbox" 
+                                                                    checked={checked} 
+                                                                    onChange={() => toggleSignupAllergen(item)} 
+                                                                    className="accent-gold"
+                                                                />
+                                                                <span>{item}</span>
+                                                            </label>
+                                                        );
+                                                    })}
+                                                </div>
+                                            </div>
+                                            <div>
+                                                <label className="block text-sm font-semibold mb-1">Other Allergens (optional)</label>
+                                                <input 
+                                                    type="text" 
+                                                    value={authForm.otherAllergens} 
+                                                    onChange={e => setAuthForm({...authForm, otherAllergens: e.target.value})} 
+                                                    placeholder="Add any other allergens (comma separated, e.g. kiwi, buckwheat)" 
+                                                    className="w-full border rounded p-2 text-sm" 
+                                                />
+                                            </div>
+                                        </div>
+                                    )}
+
                                     <button type="submit" className="w-full bg-burgundy text-white py-2 rounded font-semibold text-sm">
                                         {view === 'signup' ? 'Create Account' : 'Login'}
                                     </button>
@@ -524,6 +896,7 @@
                             </div>
                         )}
 
+                        {/* ADMIN DASHBOARD */}
                         {view === 'admin-dashboard' && user?.role === 'admin' && (
                             <div className="space-y-6">
                                 <h1 className="text-2xl font-bold text-burgundy">Admin Dashboard</h1>
@@ -534,7 +907,7 @@
                                         <div>
                                             <label className="block text-sm font-semibold mb-1">Cafeteria</label>
                                             <select value={adminForm.cafeteriaId} onChange={e => setAdminForm({...adminForm, cafeteriaId: e.target.value})} className="w-full border rounded p-2 text-sm">
-                                                {INITIAL_CAFETERIAS.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
+                                                {INITIAL_CAFETERIAS.map(c => <option key={c.id} value={c.id}>{c.name} ({c.id})</option>)}
                                             </select>
                                         </div>
                                         <div>
@@ -582,6 +955,7 @@
                                 <div className="bg-white p-6 rounded-lg shadow border border-beige">
                                     <h2 className="text-lg font-bold mb-2">Bulk Import Weekly Menu (Text)</h2>
                                     <p className="text-xs text-gray-500 mb-3">
+                                        CafIDs: <code>c1</code> (Student Union), <code>c2</code> (Anam Dorm), <code>c3</code> (Sanhakwan), <code>c4</code> (Science Campus)<br/>
                                         Format per line: <code className="bg-gray-100 p-1 rounded">Date | CafId | Meal | KoName | EnName | Price | Description | Ingredients | Allergens</code><br/>
                                         Example: <code className="bg-gray-100 p-1 rounded">2026-06-01 | c1 | Lunch | 김치찌개 | Kimchi Stew | 5000 | Spicy stew | Pork, tofu | soy, pork</code>
                                     </p>
@@ -608,7 +982,7 @@
                                         {dishes.map(dish => (
                                             <div key={dish.id} className="flex justify-between items-center border-b p-2 text-sm">
                                                 <div>
-                                                    <span className="font-bold">{dish.koName}</span> ({dish.enName}) - <span className="text-burgundy">{dish.price} KRW</span> <span className="text-xs text-gray-500">[{dish.date} / {dish.mealType}]</span>
+                                                    <span className="font-bold">{dish.koName}</span> ({dish.enName}) - <span className="text-burgundy">{dish.price} KRW</span> <span className="text-xs text-gray-500">[{dish.cafeteriaId} / {dish.date} / {dish.mealType}]</span>
                                                 </div>
                                                 <button onClick={() => handleDeleteDish(dish.id)} className="text-red-600 font-bold px-2 py-1 text-xs">Delete</button>
                                             </div>
@@ -618,6 +992,85 @@
                             </div>
                         )}
                     </main>
+
+                    {/* МОДАЛЬНОЕ ОКНО ДЕТАЛЕЙ БЛЮДА */}
+                    {selectedDishModal && (
+                        <div 
+                            className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50"
+                            onClick={() => setSelectedDishModal(null)}
+                        >
+                            <div 
+                                className="bg-white rounded-xl max-w-md w-full p-6 shadow-xl border-2 border-burgundy space-y-4"
+                                onClick={e => e.stopPropagation()}
+                            >
+                                <div className="flex justify-between items-start gap-2 border-b border-beige pb-3">
+                                    <div>
+                                        <h3 className="text-xl font-bold text-burgundy">{selectedDishModal.koName}</h3>
+                                        <p className="text-sm font-medium text-gray-700">{selectedDishModal.enName}</p>
+                                    </div>
+                                    <button 
+                                        onClick={() => setSelectedDishModal(null)} 
+                                        className="text-gray-400 hover:text-darkbrown font-bold text-lg px-2"
+                                    >
+                                        ✕
+                                    </button>
+                                </div>
+
+                                <div className="space-y-2 text-sm">
+                                    <div className="flex justify-between">
+                                        <span className="text-gray-500">Cafeteria:</span>
+                                        <span className="font-semibold">
+                                            {INITIAL_CAFETERIAS.find(c => c.id === selectedDishModal.cafeteriaId)?.name || selectedDishModal.cafeteriaId}
+                                        </span>
+                                    </div>
+                                    <div className="flex justify-between">
+                                        <span className="text-gray-500">Date & Meal:</span>
+                                        <span className="font-semibold">{selectedDishModal.date} ({getDayName(selectedDishModal.date)}) — {selectedDishModal.mealType}</span>
+                                    </div>
+                                    <div className="flex justify-between">
+                                        <span className="text-gray-500">Price:</span>
+                                        <span className="font-bold text-burgundy">{selectedDishModal.price} KRW</span>
+                                    </div>
+                                </div>
+
+                                <div className="bg-cream p-3 rounded-lg border border-beige space-y-2 text-sm">
+                                    <div>
+                                        <span className="font-bold text-darkbrown block text-xs uppercase tracking-wide">Description</span>
+                                        <p className="text-gray-700 mt-0.5">{selectedDishModal.desc || 'No detailed description provided.'}</p>
+                                    </div>
+                                    <div>
+                                        <span className="font-bold text-darkbrown block text-xs uppercase tracking-wide">Ingredients</span>
+                                        <p className="text-gray-700 mt-0.5">{selectedDishModal.ingredients || 'Not specified.'}</p>
+                                    </div>
+                                    <div>
+                                        <span className="font-bold text-darkbrown block text-xs uppercase tracking-wide">Allergens</span>
+                                        <p className="text-gray-700 mt-0.5">
+                                            {selectedDishModal.allergens && selectedDishModal.allergens.length > 0 
+                                                ? selectedDishModal.allergens.join(', ') 
+                                                : 'None listed'}
+                                        </p>
+                                    </div>
+                                </div>
+
+                                {checkAllergy(selectedDishModal.allergens) ? (
+                                    <div className="bg-red-100 border border-red-400 text-red-800 p-3 rounded text-xs font-semibold">
+                                        ⚠️ Caution: This dish contains allergen(s) listed in your profile ({getMatchingUserAllergens(selectedDishModal.allergens).join(', ')}).
+                                    </div>
+                                ) : user && user.role !== 'admin' ? (
+                                    <div className="bg-green-50 border border-green-300 text-green-800 p-2.5 rounded text-xs font-medium">
+                                        ✅ Safe based on your registered allergen profile.
+                                    </div>
+                                ) : null}
+
+                                <button 
+                                    onClick={() => setSelectedDishModal(null)} 
+                                    className="w-full bg-burgundy text-white py-2 rounded font-semibold text-sm"
+                                >
+                                    Close
+                                </button>
+                            </div>
+                        </div>
+                    )}
                 </div>
             );
         }
