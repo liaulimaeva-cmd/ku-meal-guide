@@ -71,8 +71,7 @@
             },
         ];
 
-        // Инициализация Supabase
-        const SUPABASE_URL = 'https://fzdseiswlhckroaliizn.supabase.co';
+     const SUPABASE_URL = 'https://fzdseiswlhckroaliizn.supabase.co';
         const SUPABASE_ANON_KEY = 'sb_publishable_1ShB7yCEJTtL3uWYzNZElQ_XSN-EPVO';
         const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
@@ -109,13 +108,15 @@
                 imageUrl: ''
             });
 
+            // Состояние для массового текстового импорта
+            const [bulkText, setBulkText] = useState('');
+
             useEffect(() => { 
                 localStorage.setItem('ku_cloud_user', JSON.stringify(user)); 
             }, [user]);
 
             const switchView = (v) => { setAuthError(''); setView(v); };
 
-            // Вход через облачную базу данных Supabase (таблица users)
             const handleLogin = async (e) => {
                 e.preventDefault();
                 if (view === 'admin-login') {
@@ -148,7 +149,6 @@
                 switchView('home');
             };
 
-            // Регистрация с сохранением в облако Supabase
             const handleSignup = async (e) => {
                 e.preventDefault();
                 if (!authForm.username || !authForm.email || !authForm.password) {
@@ -192,7 +192,7 @@
                     return;
                 }
                 const newDish = {
-                    id: 'dish_' + Date.now(),
+                    id: 'dish_' + Date.now() + '_' + Math.random().toString(36.substring(2, 5)),
                     ...adminForm,
                     price: Number(adminForm.price),
                     allergens: adminForm.allergens ? adminForm.allergens.split(',').map(s => s.trim().toLowerCase()) : [],
@@ -206,6 +206,54 @@
                     setDishes([...dishes, newDish]);
                     alert('Menu item published and saved to cloud!');
                     setAdminForm({ ...adminForm, koName: '', enName: '', price: '', desc: '', ingredients: '', allergens: '', imageUrl: '' });
+                }
+            };
+
+            // Обработка массового текста меню
+            const handleBulkImport = async (e) => {
+                e.preventDefault();
+                if (!bulkText.trim()) {
+                    alert('Please enter text to parse.');
+                    return;
+                }
+
+                // Простой парсер текста по строкам (формат: Дата | Столовая ID | Тип | Корейское | Английское | Цена)
+                // Пример строки: 2026-06-01 | c1 | Lunch | 김치찌개 | Kimchi Stew | 5000
+                const lines = bulkText.split('\n');
+                const newDishes = [];
+
+                for (let line of lines) {
+                    if (!line.trim()) continue;
+                    const parts = line.split('|').map(p => p.trim());
+                    if (parts.length >= 6) {
+                        newDishes.push({
+                            id: 'dish_' + Date.now() + '_' + Math.random().toString(36).substring(2, 7),
+                            date: parts[0],
+                            cafeteriaId: parts[1],
+                            mealType: parts[2],
+                            koName: parts[3],
+                            enName: parts[4],
+                            price: Number(parts[5]) || 5000,
+                            desc: '',
+                            ingredients: '',
+                            allergens: [],
+                            published: true
+                        });
+                    }
+                }
+
+                if (newDishes.length === 0) {
+                    alert('No valid rows found. Please check format: Date | CafId | Meal | KoName | EnName | Price');
+                    return;
+                }
+
+                const { error } = await supabase.from('dishes').insert(newDishes);
+                if (error) {
+                    alert('Error bulk uploading: ' + error.message);
+                } else {
+                    setDishes([...dishes, ...newDishes]);
+                    alert(`Successfully parsed and uploaded ${newDishes.length} dishes to cloud!`);
+                    setBulkText('');
                 }
             };
 
@@ -391,8 +439,10 @@
                         {view === 'admin-dashboard' && user?.role === 'admin' && (
                             <div className="space-y-6">
                                 <h1 className="text-2xl font-bold text-burgundy">Admin Dashboard</h1>
+                                
+                                {/* 1. Форма одиночного добавления блюда */}
                                 <div className="bg-white p-6 rounded-lg shadow border border-beige">
-                                    <h2 className="text-lg font-bold mb-3">Add New Dish</h2>
+                                    <h2 className="text-lg font-bold mb-3">Add Single Dish</h2>
                                     <form onSubmit={handleAddDish} className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                         <div>
                                             <label className="block text-sm font-semibold mb-1">Cafeteria</label>
@@ -430,6 +480,26 @@
                                     </form>
                                 </div>
 
+                                {/* 2. Возвращенная функция массового импорта меню текстом */}
+                                <div className="bg-white p-6 rounded-lg shadow border border-beige">
+                                    <h2 className="text-lg font-bold mb-2">Bulk Import Weekly Menu (Text)</h2>
+                                    <p className="text-xs text-gray-500 mb-3">
+                                        Format per line: <code className="bg-gray-100 p-1 rounded">YYYY-MM-DD | cafeteriaId | MealType | Korean Name | English Name | Price</code><br/>
+                                        Cafeteria IDs: <code className="bg-gray-100 p-1 rounded">c1</code> (Student Union), <code className="bg-gray-100 p-1 rounded">c2</code> (Dorm), <code className="bg-gray-100 p-1 rounded">c3</code> (Sanhakwan), <code className="bg-gray-100 p-1 rounded">c4</code> (Science)<br/>
+                                        Example: <code className="bg-gray-100 p-1 rounded">2026-06-01 | c1 | Lunch | 김치찌개 | Kimchi Stew | 5000</code>
+                                    </p>
+                                    <form onSubmit={handleBulkImport} className="space-y-3">
+                                        <textarea 
+                                            rows="5" 
+                                            value={bulkText} 
+                                            onChange={e => setBulkText(e.target.value)} 
+                                            placeholder="2026-06-01 | c1 | Lunch | 김치찌개 | Kimchi Stew | 5000&#10;2026-06-01 | c2 | Dinner | 제육볶음 | Pork Stir Fry | 6000" 
+                                            className="w-full border rounded p-2 text-sm font-mono"
+                                        />
+                                        <button type="submit" className="bg-gold text-darkbrown font-bold px-4 py-2 rounded text-sm">Parse & Upload Weekly Menu</button>
+                                    </form>
+                                </div>
+
                                 <div className="bg-white p-6 rounded-lg shadow border border-beige">
                                     <div className="flex justify-between items-center mb-4">
                                         <h2 className="text-lg font-bold">Published Dishes in Cloud ({dishes.length})</h2>
@@ -441,7 +511,7 @@
                                         {dishes.map(dish => (
                                             <div key={dish.id} className="flex justify-between items-center border-b p-2 text-sm">
                                                 <div>
-                                                    <span className="font-bold">{dish.koName}</span> ({dish.enName}) - <span className="text-burgundy">{dish.price} KRW</span> <span className="text-xs text-gray-500">[{dish.mealType}]</span>
+                                                    <span className="font-bold">{dish.koName}</span> ({dish.enName}) - <span className="text-burgundy">{dish.price} KRW</span> <span className="text-xs text-gray-500">[{dish.date} / {dish.mealType}]</span>
                                                 </div>
                                                 <button onClick={() => handleDeleteDish(dish.id)} className="text-red-600 font-bold px-2 py-1 text-xs">Delete</button>
                                             </div>
