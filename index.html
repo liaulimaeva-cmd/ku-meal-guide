@@ -80,7 +80,12 @@
                 rateThis: "Rate this dish:",
                 noDishes: "No menu published for today yet.",
                 selectYourAllergens: "Select Your Allergens",
-                allergyCaution: "Caution: This dish contains allergen(s) listed in your profile"
+                allergyCaution: "Caution: This dish contains allergen(s) listed in your profile",
+                backToCafes: "← Back to All Cafeterias",
+                clickToViewMenu: "Click to view menu by days of week →",
+                weekLabel: "Week:",
+                itemsLabel: "items",
+                dishCountLabel: "dish(es)"
             },
             ru: {
                 brand: "🐯 KU MEAL GUIDE",
@@ -126,7 +131,12 @@
                 rateThis: "Оценить блюдо:",
                 noDishes: "На сегодня меню еще не опубликовано.",
                 selectYourAllergens: "Выберите ваши аллергены",
-                allergyCaution: "Внимание: Это блюдо содержит аллергены из вашего профиля"
+                allergyCaution: "Внимание: Это блюдо содержит аллергены из вашего профиля",
+                backToCafes: "← Назад ко всем столовым",
+                clickToViewMenu: "Нажмите, чтобы посмотреть меню по дням недели →",
+                weekLabel: "Неделя:",
+                itemsLabel: "блюд",
+                dishCountLabel: "блюдо(в)"
             },
             zh: {
                 brand: "🐯 KU MEAL GUIDE",
@@ -172,8 +182,28 @@
                 rateThis: "评价此菜品：",
                 noDishes: "今天暂未发布菜单。",
                 selectYourAllergens: "选择您的过敏原",
-                allergyCaution: "注意：这道菜包含您资料中列出的过敏原"
+                allergyCaution: "注意：这道菜包含您资料中列出的过敏原",
+                backToCafes: "← 返回所有食堂",
+                clickToViewMenu: "点击查看按星期划分的菜单 →",
+                weekLabel: "星期:",
+                itemsLabel: "项",
+                dishCountLabel: "道菜"
             }
+        };
+
+        const DAY_TRANSLATIONS = {
+            'Monday': { ru: 'Понедельник', zh: '星期一' },
+            'Tuesday': { ru: 'Вторник', zh: '星期二' },
+            'Wednesday': { ru: 'Среда', zh: '星期三' },
+            'Thursday': { ru: 'Четверг', zh: '星期四' },
+            'Friday': { ru: 'Пятница', zh: '星期五' },
+            'Saturday': { ru: 'Суббота', zh: '星期六' },
+            'Sunday': { ru: 'Воскресенье', zh: '星期日' }
+        };
+
+        const translateDay = (dayEn, lang) => {
+            if (!dayEn || lang === 'en') return dayEn;
+            return DAY_TRANSLATIONS[dayEn]?.[lang] || dayEn;
         };
 
         const ALLERGEN_TRANSLATIONS = {
@@ -199,6 +229,49 @@
             if (targetLang === 'en') return item.trim();
             const found = ALLERGEN_TRANSLATIONS[clean];
             return found ? (found[targetLang] || item.trim()) : item.trim();
+        };
+
+        // Полная локализация столовых, их расположения и часов работы
+        const CAFETERIAS_DATA = {
+            c1: {
+                koName: '학생회관 학생식당',
+                en: { name: 'Student Union Cafeteria', location: 'Student Union Building 2F, Humanities & Social Sciences Campus', hours: 'Breakfast: 08:00 - 09:30 | Lunch: 11:20 - 14:00 | Dinner: Closed' },
+                ru: { name: 'Столовая студенческого совета', location: 'Здание студсовета, 2 этаж, Кампус гуманитарных и общественных наук', hours: 'Завтрак: 08:00 - 09:30 | Обед: 11:20 - 14:00 | Ужин: Закрыто' },
+                zh: { name: '学生会馆食堂', location: '学生会馆2楼，人文社会科学校区', hours: '早餐: 08:00 - 09:30 | 午餐: 11:20 - 14:00 | 晚餐: 关闭' },
+                phone: '070-4242-1815'
+            },
+            c2: {
+                koName: '안암학사 식당',
+                en: { name: 'Anam Dormitory Cafeteria', location: 'Anam Dormitory Administration Building 2F', hours: 'Cheonwon Breakfast: 08:00 - 09:30 | Easy Meal: 08:00 - 19:00 | Lunch: 11:30 - 14:00 | Dinner: 17:00 - 19:00' },
+                ru: { name: 'Столовая общежития Анам', location: 'Административное здание общежития Анам, 2 этаж', hours: 'Завтрак Чхонвон: 08:00 - 09:30 | Перекус: 08:00 - 19:00 | Обед: 11:30 - 14:00 | Ужин: 17:00 - 19:00' },
+                zh: { name: '安岩宿舍食堂', location: '安岩宿舍行政楼2楼', hours: '千元早餐: 08:00 - 09:30 | 简餐: 08:00 - 19:00 | 午餐: 11:30 - 14:00 | 晚餐: 17:00 - 19:00' },
+                phone: 'Dormitory Cafeteria'
+            },
+            c3: {
+                koName: '산학관 식당',
+                en: { name: 'Sanhakwan Dining Hall', location: 'Sanhakwan 1F, Science & Technology Campus', hours: 'Lunch: 11:20 - 13:50 | Dinner: 17:30 - 18:50 (Last Order 18:30) | Saturday: Lunch only (11:20 - 13:30)' },
+                ru: { name: 'Столовая Санакван', location: 'Санакван, 1 этаж, Кампус точных наук и технологий', hours: 'Обед: 11:20 - 13:50 | Ужин: 17:30 - 18:50 (Заказ до 18:30) | Суббота: только обед (11:20 - 13:30)' },
+                zh: { name: '山学馆食堂', location: '山学馆1楼，科学技术校区', hours: '午餐: 11:20 - 13:50 | 晚餐: 17:30 - 18:50 (最后点餐 18:30) | 周六: 仅午餐 (11:20 - 13:30)' },
+                phone: '02-921-5770'
+            },
+            c4: {
+                koName: '자연계 학생식당',
+                en: { name: 'Science Campus Student Cafeteria', location: 'Agineung Living Hall 2F', hours: 'Cafe: 08:00 - 17:00 | Student Cafeteria - Breakfast: 08:00 - 09:30 / Lunch: 11:00 - 13:30 | Staff Cafeteria - Lunch: 11:00 - 14:00 / Dinner: 17:30 - 19:00' },
+                ru: { name: 'Студенческая столовая естественнонаучного кампуса', location: 'Агинынг Ливинг Холл, 2 этаж', hours: 'Кафе: 08:00 - 17:00 | Студенческая столовая - Завтрак: 08:00 - 09:30 / Обед: 11:00 - 13:30 | Столовая сотрудников - Обед: 11:00 - 14:00 / Ужин: 17:30 - 19:00' },
+                zh: { name: '自然园区学生食堂', location: '峨嵋陵生活馆2楼', hours: '咖啡厅: 08:00 - 17:00 | 学生食堂 - 早餐: 08:00 - 09:30 / 午餐: 11:00 - 13:30 | 教职工食堂 - 午餐: 11:00 - 14:00 / 晚餐: 17:30 - 19:00' },
+                phone: '02-3290-4351'
+            }
+        };
+
+        const getCafeterias = (lang) => {
+            return Object.keys(CAFETERIAS_DATA).map(id => ({
+                id,
+                name: CAFETERIAS_DATA[id][lang]?.name || CAFETERIAS_DATA[id]['en'].name,
+                koName: CAFETERIAS_DATA[id].koName,
+                location: CAFETERIAS_DATA[id][lang]?.location || CAFETERIAS_DATA[id]['en'].location,
+                hours: CAFETERIAS_DATA[id][lang]?.hours || CAFETERIAS_DATA[id]['en'].hours,
+                phone: CAFETERIAS_DATA[id].phone
+            }));
         };
 
         const useAutoTranslate = (text, targetLang) => {
@@ -237,41 +310,6 @@
             const translated = useAutoTranslate(text, lang);
             return <>{translated}</>;
         }
-
-        const INITIAL_CAFETERIAS = [
-            { 
-                id: 'c1', 
-                name: 'Student Union Cafeteria', 
-                koName: '학생회관 학생식당', 
-                location: 'Student Union Building 2F, Humanities & Social Sciences Campus', 
-                hours: 'Breakfast: 08:00 - 09:30 | Lunch: 11:20 - 14:00 | Dinner: Closed',
-                phone: '070-4242-1815'
-            },
-            { 
-                id: 'c2', 
-                name: 'Anam Dormitory Cafeteria', 
-                koName: '안암학사 식당', 
-                location: 'Anam Dormitory Administration Building 2F', 
-                hours: 'Cheonwon Breakfast: 08:00 - 09:30 | Easy Meal: 08:00 - 19:00 | Lunch: 11:30 - 14:00 | Dinner: 17:00 - 19:00',
-                phone: 'Dormitory Cafeteria'
-            },
-            { 
-                id: 'c3', 
-                name: 'Sanhakwan Dining Hall', 
-                koName: '산학관 식당', 
-                location: 'Sanhakwan 1F, Science & Technology Campus', 
-                hours: 'Lunch: 11:20 - 13:50 | Dinner: 17:30 - 18:50 (Last Order 18:30) | Saturday: Lunch only (11:20 - 13:30)',
-                phone: '02-921-5770'
-            },
-            { 
-                id: 'c4', 
-                name: 'Science Campus Student Cafeteria', 
-                koName: '자연계 학생식당', 
-                location: 'Agineung Living Hall 2F', 
-                hours: 'Cafe: 08:00 - 17:00 | Student Cafeteria - Breakfast: 08:00 - 09:30 / Lunch: 11:00 - 13:30 | Staff Cafeteria - Lunch: 11:00 - 14:00 / Dinner: 17:30 - 19:00',
-                phone: '02-3290-4351'
-            }
-        ];
 
         const COMMON_ALLERGENS = [
             'Eggs', 'Milk', 'Peanuts', 'Tree Nuts', 'Soy', 'Wheat / Gluten', 
@@ -328,6 +366,7 @@
             const [view, setView] = useState('home');
             const [lang, setLang] = useState('en');
             const t = TRANSLATIONS[lang];
+            const INITIAL_CAFETERIAS = getCafeterias(lang);
 
             const [user, setUser] = useState(() => JSON.parse(localStorage.getItem('ku_cloud_user') || 'null'));
             const [dishes, setDishes] = useState([]);
@@ -781,11 +820,12 @@
                                                             cafDishes.slice(0, 3).map(dish => {
                                                                 const isAllergic = checkAllergy(dish.allergens);
                                                                 const stats = getDishRatingStats(dish.id);
+                                                                const mealLocalized = t[(dish.mealType || '').toLowerCase()] || dish.mealType;
                                                                 return (
                                                                     <div key={dish.id} className={`p-2 rounded border text-xs flex justify-between items-center ${isAllergic ? 'bg-red-50 border-red-300' : 'border-gray-100'}`}>
                                                                         <div>
-                                                                            <span className="font-semibold">{dish.koName}</span> (<TranslatedText text={dish.enName} lang={lang} />)
-                                                                            <span className="bg-beige px-1 rounded ml-1 text-burgundy font-bold">{dish.mealType}</span>
+                                                                            <span className="font-semibold">{dish.koName}</span> (<TranslatedText lang="{lang}" text="{dish.enName}"/>)
+                                                                            <span className="bg-beige px-1 rounded ml-1 text-burgundy font-bold">{mealLocalized}</span>
                                                                             {stats.count > 0 && <span className="ml-2 text-amber-600 font-bold">★ {stats.avg}</span>}
                                                                         </div>
                                                                         <div className="flex items-center gap-2">
@@ -808,13 +848,13 @@
                         {view === 'cafeterias' && (
                             <div className="space-y-4">
                                 <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
-                                    <h1 className="text-2xl font-bold text-burgundy">Campus Cafeterias & Operating Hours</h1>
+                                    <h1 className="text-2xl font-bold text-burgundy">{t.cafeterias}</h1>
                                     {selectedCafeteriaObj && (
                                         <button 
                                             onClick={() => setSelectedCafeteriaId(null)} 
                                             className="text-xs bg-beige hover:bg-gold text-darkbrown font-semibold px-3 py-1.5 rounded transition"
                                         >
-                                            ← Back to All Cafeterias
+                                            {t.backToCafes}
                                         </button>
                                     )}
                                 </div>
@@ -833,7 +873,7 @@
                                                         <div className="flex justify-between items-start gap-2">
                                                             <h2 className="font-bold text-lg text-burgundy">{caf.name} <span className="text-xs text-gray-500">({caf.koName})</span></h2>
                                                             <span className="text-xs bg-cream border border-beige text-burgundy font-semibold px-2 py-0.5 rounded whitespace-nowrap">
-                                                                {cafDishCount} items
+                                                                {cafDishCount} {t.itemsLabel}
                                                             </span>
                                                         </div>
                                                         <p className="text-sm text-gray-700">📍 <strong>{t.location}:</strong> {caf.location}</p>
@@ -841,7 +881,7 @@
                                                         <p className="text-sm text-gray-700">📞 <strong>{t.phone}:</strong> {caf.phone}</p>
                                                     </div>
                                                     <div className="pt-2 border-t border-cream flex justify-end">
-                                                        <span className="text-xs font-bold text-burgundy">Click to view menu by days of week →</span>
+                                                        <span className="text-xs font-bold text-burgundy">{t.clickToViewMenu}</span>
                                                     </div>
                                                 </div>
                                             );
@@ -882,25 +922,28 @@
                                                     .filter(d => matchesDishFilters(d, { includeDay: false }))
                                                     .sort((a, b) => new Date(getSafeDateString(a.date)) - new Date(getSafeDateString(b.date)));
 
+                                                const dayLocalized = translateDay(dayName, lang);
+
                                                 return (
                                                     <div key={dayName} className="bg-white p-4 rounded-lg shadow border border-beige">
                                                         <h3 className="font-bold text-burgundy border-b border-beige pb-1.5 mb-3 flex justify-between items-center">
-                                                            <span>{dayName}</span>
-                                                            <span className="text-xs font-normal text-gray-500">{dayDishes.length} dish(es)</span>
+                                                            <span>{dayLocalized}</span>
+                                                            <span className="text-xs font-normal text-gray-500">{dayDishes.length} {t.dishCountLabel}</span>
                                                         </h3>
                                                         {dayDishes.length === 0 ? (
-                                                            <p className="text-xs text-gray-400 italic">No dishes scheduled for {dayName}.</p>
+                                                            <p className="text-xs text-gray-400 italic">No dishes scheduled for {dayLocalized}.</p>
                                                         ) : (
                                                             <div className="space-y-2">
                                                                 {dayDishes.map(dish => {
                                                                     const isAllergic = checkAllergy(dish.allergens);
                                                                     const stats = getDishRatingStats(dish.id);
+                                                                    const mealLocalized = t[(dish.mealType || '').toLowerCase()] || dish.mealType;
                                                                     return (
                                                                         <div key={dish.id} className={`p-2.5 rounded border text-sm flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 ${isAllergic ? 'bg-red-50 border-red-300' : 'border-gray-100'}`}>
                                                                             <div>
                                                                                 <div className="font-semibold">
-                                                                                    {dish.koName} (<TranslatedText text={dish.enName} lang={lang} />)
-                                                                                    <span className="text-xs bg-beige px-1.5 py-0.5 rounded ml-1.5 text-burgundy font-bold">{dish.mealType}</span>
+                                                                                    {dish.koName} (<TranslatedText lang="{lang}" text="{dish.enName}"/>)
+                                                                                    <span className="text-xs bg-beige px-1.5 py-0.5 rounded ml-1.5 text-burgundy font-bold">{mealLocalized}</span>
                                                                                     <span className="text-xs text-gray-400 ml-2">{getSafeDateString(dish.date)}</span>
                                                                                     {stats.count > 0 && <span className="ml-2 text-amber-600 font-bold">★ {stats.avg} ({stats.count})</span>}
                                                                                 </div>
@@ -934,11 +977,11 @@
                         {view === 'todays-menu' && (
                             <div className="space-y-4">
                                 <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
-                                    <h1 className="text-2xl font-bold text-burgundy">{t.todaysMenu} ({selectedQuickDate} — {getDayName(selectedQuickDate)})</h1>
+                                    <h1 className="text-2xl font-bold text-burgundy">{t.todaysMenu} ({selectedQuickDate} — {translateDay(getDayName(selectedQuickDate), lang)})</h1>
                                 </div>
 
                                 <div className="bg-white p-3 rounded-lg shadow border border-beige flex items-center gap-2 overflow-x-auto">
-                                    <span className="text-xs font-bold text-burgundy uppercase whitespace-nowrap">Week:</span>
+                                    <span className="text-xs font-bold text-burgundy uppercase whitespace-nowrap">{t.weekLabel}</span>
                                     {weekDates.map(item => {
                                         const isSelected = item.dateStr === selectedQuickDate;
                                         return (
@@ -947,7 +990,7 @@
                                                 onClick={() => setSelectedQuickDate(item.dateStr)}
                                                 className={`px-3 py-1.5 rounded text-xs font-semibold whitespace-nowrap transition ${isSelected ? 'bg-burgundy text-white' : 'bg-cream hover:bg-beige text-darkbrown'}`}
                                             >
-                                                {item.name} {item.dayNum}
+                                                {translateDay(item.name, lang)} {item.dayNum}
                                             </button>
                                         );
                                     })}
@@ -997,12 +1040,13 @@
                                                         cafDishes.map(dish => {
                                                             const isAllergic = checkAllergy(dish.allergens);
                                                             const stats = getDishRatingStats(dish.id);
+                                                            const mealLocalized = t[(dish.mealType || '').toLowerCase()] || dish.mealType;
                                                             return (
                                                                 <div key={dish.id} className={`p-2.5 rounded border text-sm ${isAllergic ? 'bg-red-50 border-red-300' : 'border-gray-100'}`}>
                                                                     <div className="flex justify-between items-start gap-2">
                                                                         <div>
-                                                                            <span className="font-semibold">{dish.koName}</span> (<TranslatedText text={dish.enName} lang={lang} />)
-                                                                            <span className="text-xs bg-beige px-1.5 py-0.5 rounded ml-1 text-burgundy font-bold">{dish.mealType}</span>
+                                                                            <span className="font-semibold">{dish.koName}</span> (<TranslatedText lang="{lang}" text="{dish.enName}"/>)
+                                                                            <span className="text-xs bg-beige px-1.5 py-0.5 rounded ml-1 text-burgundy font-bold">{mealLocalized}</span>
                                                                             {stats.count > 0 && <span className="ml-2 text-amber-600 font-bold">★ {stats.avg} ({stats.count})</span>}
                                                                         </div>
                                                                         <div className="flex items-center gap-2 shrink-0">
@@ -1051,7 +1095,7 @@
                                         <label className="block text-[11px] font-bold text-gray-500 uppercase mb-1">{t.dayOfWeek}</label>
                                         <select value={dayFilter} onChange={e => setDayFilter(e.target.value)} className="w-full border rounded p-2 text-xs bg-white">
                                             <option value="all">{t.allDays}</option>
-                                            {DAYS_OF_WEEK.map(day => <option key={day} value={day}>{day}</option>)}
+                                            {DAYS_OF_WEEK.map(day => <option key={day} value={day}>{translateDay(day, lang)}</option>)}
                                         </select>
                                     </div>
                                     <div>
@@ -1097,18 +1141,19 @@
                                         return filteredDishes.map(dish => {
                                             const caf = INITIAL_CAFETERIAS.find(c => c.id === dish.cafeteriaId);
                                             const isAllergic = checkAllergy(dish.allergens);
-                                            const dayLabel = getDayName(dish.date);
+                                            const dayLabel = translateDay(getDayName(dish.date), lang);
                                             const stats = getDishRatingStats(dish.id);
+                                            const mealLocalized = t[(dish.mealType || '').toLowerCase()] || dish.mealType;
                                             return (
                                                 <div key={dish.id} className={`p-3 rounded border text-sm ${isAllergic ? 'bg-red-50 border-red-300' : 'border-gray-100'}`}>
                                                     <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
                                                         <div>
                                                             <div className="font-bold text-burgundy">
-                                                                {dish.koName} (<TranslatedText text={dish.enName} lang={lang} />)
+                                                                {dish.koName} (<TranslatedText lang="{lang}" text="{dish.enName}"/>)
                                                                 {stats.count > 0 && <span className="ml-2 text-amber-600 font-bold text-xs">★ {stats.avg} ({stats.count})</span>}
                                                             </div>
                                                             <div className="text-xs text-gray-500">
-                                                                {caf ? caf.name : ''} | 📅 {getSafeDateString(dish.date)} ({dayLabel}) — <span className="font-semibold text-burgundy">{dish.mealType}</span>
+                                                                {caf ? caf.name : ''} | 📅 {getSafeDateString(dish.date)} ({dayLabel}) — <span className="font-semibold text-burgundy">{mealLocalized}</span>
                                                             </div>
                                                             {dish.allergens && dish.allergens.length > 0 && (
                                                                 <div className="text-xs text-gray-500 mt-0.5">{t.allergens}: {dish.allergens.map(a => translateAllergen(a, lang)).join(', ')}</div>
@@ -1351,7 +1396,7 @@
                                     <div>
                                         <h3 className="text-xl font-bold text-burgundy">{selectedDishModal.koName}</h3>
                                         <p className="text-sm font-medium text-gray-700">
-                                            <TranslatedText text={selectedDishModal.enName} lang={lang} />
+                                            <TranslatedText lang="{lang}" text="{selectedDishModal.enName}"/>
                                         </p>
                                     </div>
                                     <button 
@@ -1371,7 +1416,7 @@
                                     </div>
                                     <div className="flex justify-between">
                                         <span className="text-gray-500">{t.dateAndMeal}:</span>
-                                        <span className="font-semibold">{getSafeDateString(selectedDishModal.date)} ({getDayName(selectedDishModal.date)}) — {selectedDishModal.mealType}</span>
+                                        <span className="font-semibold">{getSafeDateString(selectedDishModal.date)} ({translateDay(getDayName(selectedDishModal.date), lang)}) — {t[(selectedDishModal.mealType || '').toLowerCase()] || selectedDishModal.mealType}</span>
                                     </div>
                                     <div className="flex justify-between">
                                         <span className="text-gray-500">{t.price}:</span>
@@ -1389,13 +1434,13 @@
                                     <div>
                                         <span className="font-bold text-darkbrown block text-xs uppercase tracking-wide">{t.description}</span>
                                         <p className="text-gray-700 mt-0.5">
-                                            {selectedDishModal.desc ? <TranslatedText text={selectedDishModal.desc} lang={lang} /> : 'No detailed description provided.'}
+                                            {selectedDishModal.desc ? <TranslatedText lang="{lang}" text="{selectedDishModal.desc}"/> : 'No detailed description provided.'}
                                         </p>
                                     </div>
                                     <div>
                                         <span className="font-bold text-darkbrown block text-xs uppercase tracking-wide">{t.ingredients}</span>
                                         <p className="text-gray-700 mt-0.5">
-                                            {selectedDishModal.ingredients ? <TranslatedText text={selectedDishModal.ingredients} lang={lang} /> : 'Not specified.'}
+                                            {selectedDishModal.ingredients ? <TranslatedText lang="{lang}" text="{selectedDishModal.ingredients}"/> : 'Not specified.'}
                                         </p>
                                     </div>
                                     <div>
@@ -1452,7 +1497,7 @@
             );
         }
 
-        ReactDOM.render(<App />, document.getElementById('root'));
+        ReactDOM.render(<App/>, document.getElementById('root'));
     </script>
 </body>
 </html>
