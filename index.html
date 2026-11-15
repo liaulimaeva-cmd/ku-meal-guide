@@ -57,6 +57,7 @@
                 hours: "Hours",
                 phone: "Phone",
                 price: "KRW",
+                priceUnknown: "Price unknown",
                 details: "Details",
                 warningAllergy: "⚠️ Warning: Contains your allergen!",
                 safeDish: "✅ Safe based on your registered allergen profile.",
@@ -119,6 +120,7 @@
                 hours: "Часы работы",
                 phone: "Телефон",
                 price: "вон",
+                priceUnknown: "Цена не указана",
                 details: "Подробнее",
                 warningAllergy: "⚠️ Внимание: Содержит ваш аллерген!",
                 safeDish: "✅ Безопасно по вашему профилю аллергенов.",
@@ -181,6 +183,7 @@
                 hours: "营业时间",
                 phone: "电话",
                 price: "韩元",
+                priceUnknown: "价格未知",
                 details: "详情",
                 warningAllergy: "⚠️ 警告：包含您的过敏原！",
                 safeDish: "✅ 根据您的过敏原档案确认安全。",
@@ -255,64 +258,62 @@
         };
 
         const ALLERGEN_TRANSLATIONS = {
-    'egg': { ru: 'Яйца', zh: '鸡蛋' },
-    'eggs': { ru: 'Яйца', zh: '鸡蛋' },
-    'milk': { ru: 'Молоко', zh: '牛奶' },
-    'dairy': { ru: 'Молочные продукты', zh: '乳制品' },
-    'peanuts': { ru: 'Арахис', zh: '花生' },
-    'peanut': { ru: 'Арахис', zh: '花生' },
-    'tree nuts': { ru: 'Орехи', zh: '坚果' },
-    'nuts': { ru: 'Орехи', zh: '坚果' },
-    'soy': { ru: 'Соя', zh: '大豆' },
-    'soybean': { ru: 'Соя', zh: '大豆' },
-    'wheat / gluten': { ru: 'Пшеница / Глютен', zh: '小麦 / 面筋' },
-    'wheat': { ru: 'Пшеница', zh: '小麦' },
-    'gluten': { ru: 'Глютен', zh: '面筋' },
-    'fish': { ru: 'Рыба', zh: '鱼类' },
-    'shellfish': { ru: 'Моллюски / Ракообразные', zh: '甲壳类海鲜' },
-    'crustaceans': { ru: 'Ракообразные', zh: '甲壳类' },
-    'crustacean': { ru: 'Ракообразные', zh: '甲壳类' },
-    'mollusc': { ru: 'Моллюски', zh: '软体动物' },
-    'molluscs': { ru: 'Моллюски', zh: '软体动物' },
-    'pork': { ru: 'Свинина', zh: '猪肉' },
-    'beef': { ru: 'Говядина', zh: '牛肉' },
-    'chicken': { ru: 'Курица', zh: '鸡肉' },
-    'poultry': { ru: 'Птица', zh: '家禽' },
-    'duck': { ru: 'Утка', zh: '鸭肉' },
-    'sesame': { ru: 'Кунжут', zh: '芝麻' },
-    'garlic': { ru: 'Чеснок', zh: '大蒜' },
-    'tomato': { ru: 'Томаты', zh: '番茄' },
-    'shrimp': { ru: 'Креветки', zh: '虾' },
-    'crab': { ru: 'Краб', zh: '蟹' },
-    'squid': { ru: 'Кальмар', zh: '鱿鱼' },
-    'mushrooms': { ru: 'Грибы', zh: '蘑菇' },
-    'buckwheat': { ru: 'Гречка', zh: '荞麦' }
-};
+            'egg': { ru: 'Яйца', zh: '鸡蛋' },
+            'eggs': { ru: 'Яйца', zh: '鸡蛋' },
+            'milk': { ru: 'Молоко', zh: '牛奶' },
+            'dairy': { ru: 'Молочные продукты', zh: '乳制品' },
+            'peanuts': { ru: 'Арахис', zh: '花生' },
+            'peanut': { ru: 'Арахис', zh: '花生' },
+            'tree nuts': { ru: 'Орехи', zh: '坚果' },
+            'nuts': { ru: 'Орехи', zh: '坚果' },
+            'soy': { ru: 'Соя', zh: '大豆' },
+            'soybean': { ru: 'Соя', zh: '大豆' },
+            'wheat / gluten': { ru: 'Пшеница / Глютен', zh: '小麦 / 面筋' },
+            'wheat': { ru: 'Пшеница', zh: '小麦' },
+            'gluten': { ru: 'Глютен', zh: '面筋' },
+            'fish': { ru: 'Рыба', zh: '鱼类' },
+            'shellfish': { ru: 'Моллюски / Ракообразные', zh: '甲壳类海鲜' },
+            'crustaceans': { ru: 'Ракообразные', zh: '甲壳类' },
+            'crustacean': { ru: 'Ракообразные', zh: '甲壳类' },
+            'mollusc': { ru: 'Моллюски', zh: '软体动物' },
+            'molluscs': { ru: 'Моллюски', zh: '软体动物' },
+            'pork': { ru: 'Свинина', zh: '猪肉' },
+            'beef': { ru: 'Говядина', zh: '牛肉' },
+            'chicken': { ru: 'Курица', zh: '鸡肉' },
+            'poultry': { ru: 'Птица', zh: '家禽' },
+            'duck': { ru: 'Утка', zh: '鸭肉' },
+            'sesame': { ru: 'Кунжут', zh: '芝麻' },
+            'garlic': { ru: 'Чеснок', zh: '大蒜' },
+            'tomato': { ru: 'Томаты', zh: '番茄' },
+            'shrimp': { ru: 'Креветки', zh: '虾' },
+            'crab': { ru: 'Краб', zh: '蟹' },
+            'squid': { ru: 'Кальмар', zh: '鱿鱼' },
+            'mushrooms': { ru: 'Грибы', zh: '蘑菇' },
+            'buckwheat': { ru: 'Гречка', zh: '荞麦' }
+        };
 
-const translateAllergen = (item, targetLang) => {
-    if (!item) return '';
-    if (Array.isArray(item)) {
-        return item.map(subItem => translateAllergen(subItem, targetLang)).join(', ');
-    }
-    
-    const clean = String(item).trim().toLowerCase();
-    if (targetLang === 'en') return item.trim();
-    
-    // 1. Ищем точное совпадение
-    if (ALLERGEN_TRANSLATIONS[clean]) {
-        return ALLERGEN_TRANSLATIONS[clean][targetLang] || item.trim();
-    }
-    
-    // 2. Ищем по подстроке
-    for (const [key, translations] of Object.entries(ALLERGEN_TRANSLATIONS)) {
-        if (clean.includes(key)) {
-            return translations[targetLang] || item.trim();
-        }
-    }
-    
-    return item.trim();
-};
-    
+        const translateAllergen = (item, targetLang) => {
+            if (!item) return '';
+            if (Array.isArray(item)) {
+                return item.map(subItem => translateAllergen(subItem, targetLang)).join(', ');
+            }
+            
+            const clean = String(item).trim().toLowerCase();
+            if (targetLang === 'en') return item.trim();
+            
+            if (ALLERGEN_TRANSLATIONS[clean]) {
+                return ALLERGEN_TRANSLATIONS[clean][targetLang] || item.trim();
+            }
+            
+            for (const [key, translations] of Object.entries(ALLERGEN_TRANSLATIONS)) {
+                if (clean.includes(key)) {
+                    return translations[targetLang] || item.trim();
+                }
+            }
+            
+            return item.trim();
+        };
+        
         const getLocalizedField = (dish, field, lang) => {
             if (!dish) return '';
             if (lang === 'ru' && dish[`ru${field}`]) return dish[`ru${field}`];
@@ -389,25 +390,6 @@ const translateAllergen = (item, targetLang) => {
             if (!y || !m || !d) return '';
             const dateObj = new Date(y, m - 1, d);
             return isNaN(dateObj.getTime()) ? '' : dateObj.toLocaleDateString('en-US', { weekday: 'long' });
-        };
-
-        const getCurrWeekDates = () => {
-            const now = new Date();
-            const currentDayOfWeek = now.getDay();
-            const monday = new Date(now);
-            monday.setDate(now.getDate() - (currentDayOfWeek === 0 ? 6 : currentDayOfWeek - 1));
-            
-            const week = [];
-            for (let i = 0; i < 7; i++) {
-                const d = new Date(monday);
-                d.setDate(monday.getDate() + i);
-                week.push({
-                    dateStr: d.toISOString().split('T')[0],
-                    name: d.toLocaleDateString('en-US', { weekday: 'short' }),
-                    dayNum: d.getDate()
-                });
-            }
-            return week;
         };
 
         const SUPABASE_URL = 'https://fzdseiswlhckroaliizn.supabase.co';
@@ -678,8 +660,8 @@ const translateAllergen = (item, targetLang) => {
 
             const handleAddDish = async (e) => {
                 e.preventDefault();
-                if (!adminForm.koName || !adminForm.enName || !adminForm.price) {
-                    alert('Fill in Korean name, English name, and Price.');
+                if (!adminForm.koName || !adminForm.enName) {
+                    alert('Fill in Korean name and English name.');
                     return;
                 }
                 const newDish = {
@@ -691,7 +673,7 @@ const translateAllergen = (item, targetLang) => {
                     zhDesc: adminForm.zhDesc || adminForm.enDesc,
                     ruIngredients: adminForm.ruIngredients || adminForm.enIngredients,
                     zhIngredients: adminForm.zhIngredients || adminForm.enIngredients,
-                    price: Number(adminForm.price),
+                    price: adminForm.price ? Number(adminForm.price) : 0,
                     allergens: adminForm.allergens ? adminForm.allergens.split(',').map(s => s.trim().toLowerCase()) : [],
                     published: true
                 };
@@ -717,453 +699,424 @@ const translateAllergen = (item, targetLang) => {
                     alert('Please enter text to parse.');
                     return;
                 }
-
-                const lines = bulkText.split('\n');
+                const lines = bulkText.split('\n').filter(l => l.trim().length > 0);
                 const newDishes = [];
-
                 for (let line of lines) {
-                    if (!line.trim()) continue;
                     const parts = line.split('|').map(p => p.trim());
-                    // Формат: Date | CafId | Meal | KoName | EnName | RuName | ZhName | Price | EnDesc | RuDesc | ZhDesc | EnIngr | RuIngr | ZhIngr | Allergens
-                    if (parts.length >= 15) {
+                    if (parts.length >= 4) {
+                        const rawPrice = parts[7] ? Number(parts[7]) : 0;
                         newDishes.push({
-                            id: 'dish_' + Date.now() + '_' + Math.random().toString(36).substring(2, 7),
-                            date: getSafeDateString(parts[0]),
-                            cafeteriaId: parts[1],
-                            mealType: parts[2],
-                            koName: parts[3],
-                            enName: parts[4],
-                            ruName: parts[5] || parts[4],
-                            zhName: parts[6] || parts[4],
-                            price: Number(parts[7]) || 5000,
+                            id: 'dish_' + Date.now() + '_' + Math.random().toString(36).substring(2, 5),
+                            date: parts[0] || adminForm.date,
+                            cafeteriaId: parts[1] || 'c1',
+                            mealType: parts[2] || 'Lunch',
+                            koName: parts[3] || '',
+                            enName: parts[4] || parts[3] || '',
+                            ruName: parts[5] || parts[4] || parts[3] || '',
+                            zhName: parts[6] || parts[4] || parts[3] || '',
+                            price: isNaN(rawPrice) ? 0 : rawPrice,
                             enDesc: parts[8] || '',
-                            ruDesc: parts[9] || parts[8],
-                            zhDesc: parts[10] || parts[8],
+                            ruDesc: parts[9] || '',
+                            zhDesc: parts[10] || '',
                             enIngredients: parts[11] || '',
-                            ruIngredients: parts[12] || parts[11],
-                            zhIngredients: parts[13] || parts[11],
+                            ruIngredients: parts[12] || '',
+                            zhIngredients: parts[13] || '',
                             allergens: parts[14] ? parts[14].split(',').map(s => s.trim().toLowerCase()) : [],
-                            published: true
-                        });
-                    } else if (parts.length >= 11) {
-                        newDishes.push({
-                            id: 'dish_' + Date.now() + '_' + Math.random().toString(36).substring(2, 7),
-                            date: getSafeDateString(parts[0]),
-                            cafeteriaId: parts[1],
-                            mealType: parts[2],
-                            koName: parts[3],
-                            enName: parts[4],
-                            ruName: parts[5] || parts[4],
-                            zhName: parts[6] || parts[4],
-                            price: Number(parts[7]) || 5000,
-                            enDesc: parts[8] || '',
-                            ruDesc: parts[8],
-                            zhDesc: parts[8],
-                            enIngredients: parts[9] || '',
-                            ruIngredients: parts[9],
-                            zhIngredients: parts[9],
-                            allergens: parts[10] ? parts[10].split(',').map(s => s.trim().toLowerCase()) : [],
+                            spice: 'Mild',
                             published: true
                         });
                     }
                 }
-
                 if (newDishes.length === 0) {
-                    alert('No valid rows found. Check column count.');
+                    alert('Could not parse any dishes. Check format.');
                     return;
                 }
-
                 const { error } = await supabase.from('dishes').insert(newDishes);
                 if (error) {
-                    alert('Error bulk uploading: ' + error.message);
+                    alert('Error bulk importing: ' + error.message);
                 } else {
                     setDishes([...dishes, ...newDishes]);
-                    alert(`Successfully parsed and uploaded ${newDishes.length} dishes to cloud!`);
                     setBulkText('');
+                    alert(`Successfully imported ${newDishes.length} dishes!`);
                 }
             };
 
-            const handleDeleteDish = async (id) => {
-                if (confirm('Are you sure you want to delete this menu item?')) {
-                    const { error } = await supabase.from('dishes').delete().eq('id', id);
-                    if (error) alert('Error deleting: ' + error.message);
-                    else setDishes(dishes.filter(d => d.id !== id));
+            const handleDeleteDish = async (dishId) => {
+                if (!confirm('Are you sure you want to delete this dish?')) return;
+                const { error } = await supabase.from('dishes').delete().eq('id', dishId);
+                if (error) {
+                    alert('Error deleting dish: ' + error.message);
+                } else {
+                    setDishes(dishes.filter(d => d.id !== dishId));
                 }
             };
 
-            const handleClearAllDishes = async () => {
-                if (confirm('Are you sure you want to delete ALL published menus?')) {
-                    const { error } = await supabase.from('dishes').delete().neq('id', '');
-                    if (error) alert('Error: ' + error.message);
-                    else setDishes([]);
-                }
-            };
-
-            const todayStr = new Date().toISOString().split('T')[0];
-
-            const getMatchingUserAllergens = (dishAllergens) => {
-                if (!user || !user.profile || !user.profile.allergens || !Array.isArray(dishAllergens)) return [];
-                const userAllergensLower = user.profile.allergens.map(al => al.trim().toLowerCase());
-                return dishAllergens.filter(a => {
-                    const dishAl = a.trim().toLowerCase();
-                    return userAllergensLower.some(uAl => uAl.includes(dishAl) || dishAl.includes(uAl));
-                });
-            };
-
-            const checkAllergy = (dishAllergens) => getMatchingUserAllergens(dishAllergens).length > 0;
-
-            const matchesDishFilters = (dish, { includeDay = true } = {}) => {
-                if (includeDay && dayFilter !== 'all') {
-                    if (getDayName(dish.date) !== dayFilter) return false;
-                }
-                if (mealFilter !== 'all') {
-                    if ((dish.mealType || '').toLowerCase() !== mealFilter.toLowerCase()) return false;
-                }
-                if (allergenFilter !== 'all') {
-                    const dishAllergens = Array.isArray(dish.allergens) ? dish.allergens.map(a => a.toLowerCase()) : [];
-                    if (allergenFilter === 'safe_for_me') {
-                        if (checkAllergy(dish.allergens)) return false;
-                    } else if (allergenFilter.startsWith('exclude:')) {
-                        const target = allergenFilter.replace('exclude:', '').toLowerCase();
-                        if (dishAllergens.some(a => a.includes(target) || target.includes(a))) return false;
-                    }
-                }
-                return true;
-            };
-
-            const resetFilters = () => {
-                setWeeklyCafFilter('all');
-                setDayFilter('all');
-                setMealFilter('all');
-                setAllergenFilter('all');
-            };
-
-            const selectedCafeteriaObj = INITIAL_CAFETERIAS.find(c => c.id === selectedCafeteriaId);
-            const weekDates = getCurrWeekDates();
-
-            return (
-                <div className="flex flex-col min-h-screen">
-                    <header className="bg-burgundy text-white shadow-md sticky top-0 z-40">
-                        <div className="max-w-6xl mx-auto px-4 py-3 flex flex-col md:flex-row justify-between items-center gap-3">
-                            <div className="flex items-center gap-4">
-                                <div className="cursor-pointer font-bold text-lg" onClick={() => switchView('home')}>
-                                    {t.brand}
-                                </div>
-                                <div className="flex bg-burgundy-dark border border-beige/30 rounded text-xs overflow-hidden">
-                                    <button onClick={() => setLang('en')} className={`px-2 py-1 ${lang === 'en' ? 'bg-gold text-darkbrown font-bold' : 'text-white'}`}>EN</button>
-                                    <button onClick={() => setLang('ru')} className={`px-2 py-1 ${lang === 'ru' ? 'bg-gold text-darkbrown font-bold' : 'text-white'}`}>RU</button>
-                                    <button onClick={() => setLang('zh')} className={`px-2 py-1 ${lang === 'zh' ? 'bg-gold text-darkbrown font-bold' : 'text-white'}`}>中文</button>
-                                </div>
-                            </div>
-                            
-                            <nav className="flex flex-wrap items-center justify-center gap-2 text-sm font-medium">
-                                <button onClick={() => switchView('home')} className={`px-3 py-1 rounded transition ${view === 'home' ? 'bg-gold text-darkbrown font-bold' : 'hover:bg-burgundy-dark'}`}>{t.home}</button>
-                                <button onClick={() => { setSelectedCafeteriaId(null); switchView('cafeterias'); }} className={`px-3 py-1 rounded transition ${view === 'cafeterias' ? 'bg-gold text-darkbrown font-bold' : 'hover:bg-burgundy-dark'}`}>{t.cafeterias}</button>
-                                <button onClick={() => switchView('todays-menu')} className={`px-3 py-1 rounded transition ${view === 'todays-menu' ? 'bg-gold text-darkbrown font-bold' : 'hover:bg-burgundy-dark'}`}>{t.todaysMenu}</button>
-                                <button onClick={() => switchView('weekly-menu')} className={`px-3 py-1 rounded transition ${view === 'weekly-menu' ? 'bg-gold text-darkbrown font-bold' : 'hover:bg-burgundy-dark'}`}>{t.weeklyMenu}</button>
+            const renderHeader = () => (
+                <header className="bg-burgundy text-cream shadow-md sticky top-0 z-50">
+                    <div className="max-w-7xl mx-auto px-4 py-3 flex justify-between items-center">
+                        <div className="flex items-center gap-6">
+                            <h1 className="text-xl font-bold tracking-wide cursor-pointer" onClick={() => switchView('home')}>
+                                {t.brand}
+                            </h1>
+                            <nav className="hidden md:flex items-center gap-4 text-sm font-medium">
+                                <button onClick={() => switchView('home')} className={`hover:text-gold transition ${view === 'home' ? 'text-gold underline underline-offset-4' : ''}`}>{t.home}</button>
+                                <button onClick={() => switchView('cafeterias')} className={`hover:text-gold transition ${view === 'cafeterias' ? 'text-gold underline underline-offset-4' : ''}`}>{t.cafeterias}</button>
+                                <button onClick={() => switchView('todays-menu')} className={`hover:text-gold transition ${view === 'todays-menu' ? 'text-gold underline underline-offset-4' : ''}`}>{t.todaysMenu}</button>
+                                <button onClick={() => switchView('weekly-menu')} className={`hover:text-gold transition ${view === 'weekly-menu' ? 'text-gold underline underline-offset-4' : ''}`}>{t.weeklyMenu}</button>
+                                {user?.role === 'admin' && (
+                                    <button onClick={() => switchView('admin-dashboard')} className={`hover:text-gold transition ${view === 'admin-dashboard' ? 'text-gold underline underline-offset-4' : ''}`}>{t.admin}</button>
+                                )}
                             </nav>
-
-                            <div className="flex items-center gap-3">
-                                {user ? (
-                                    <>
-                                        <span className="text-xs">{t.hiUser}{user.username}</span>
-                                        {user.role === 'admin' ? (
-                                            <button onClick={() => switchView('admin-dashboard')} className="bg-gold text-darkbrown px-2 py-1 rounded text-xs font-semibold">{t.admin}</button>
-                                        ) : (
-                                            <button onClick={() => switchView('profile')} className="bg-gold text-darkbrown px-2 py-1 rounded text-xs font-semibold">{t.profile}</button>
-                                        )}
-                                        <button onClick={() => { setUser(null); switchView('home'); }} className="text-xs underline">{t.logout}</button>
-                                    </>
-                                ) : (
-                                    <>
-                                        <button onClick={() => switchView('login')} className="text-xs">{t.login}</button>
-                                        <button onClick={() => switchView('signup')} className="bg-gold text-darkbrown px-2 py-1 rounded text-xs font-semibold">{t.signup}</button>
-                                        <button onClick={() => switchView('admin-login')} className="text-[10px] opacity-75">Admin</button>
-                                    </>
-                                )}
-                            </div>
                         </div>
-                    </header>
-
-                    <main className="flex-grow max-w-6xl w-full mx-auto px-4 py-6">
-                        {view === 'home' && (
-                            <div className="space-y-6">
-                                <div className="bg-white p-6 rounded-lg shadow border border-beige text-center">
-                                    <h1 className="text-2xl font-bold mb-2 text-burgundy">{t.welcomeTitle}</h1>
-                                    <p className="text-gray-600 mb-4">{t.welcomeSub}</p>
-                                    <div className="flex justify-center gap-3 flex-wrap">
-                                        <button onClick={() => switchView('todays-menu')} className="bg-burgundy text-white px-4 py-2 rounded text-sm font-semibold">{t.viewTodays}</button>
-                                        <button onClick={() => { setSelectedCafeteriaId(null); switchView('cafeterias'); }} className="bg-gold text-darkbrown px-4 py-2 rounded text-sm font-semibold">{t.viewCafes}</button>
-                                    </div>
-                                </div>
-
-                                <div className="space-y-4">
-                                    <div className="flex justify-between items-center">
-                                        <h2 className="text-xl font-bold text-burgundy">{t.todaysOverview} ({todayStr})</h2>
-                                        <button onClick={() => switchView('todays-menu')} className="text-xs text-burgundy font-semibold underline">{t.viewAll}</button>
-                                    </div>
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                        {INITIAL_CAFETERIAS.map(caf => {
-                                            const cafDishes = dishes.filter(d => d.cafeteriaId === caf.id && getSafeDateString(d.date) === todayStr);
-                                            return (
-                                                <div key={caf.id} className="bg-white p-4 rounded-lg shadow border border-beige">
-                                                    <h3 className="font-bold text-burgundy">{caf.name}</h3>
-                                                    <p className="text-xs text-gray-500 mb-2">{caf.hours}</p>
-                                                    <div className="space-y-2 mt-2">
-                                                        {cafDishes.length === 0 ? (
-                                                            <p className="text-sm text-gray-400 italic">{t.noDishes}</p>
-                                                        ) : (
-                                                            cafDishes.slice(0, 3).map(dish => {
-                                                                const isAllergic = checkAllergy(dish.allergens);
-                                                                const stats = getDishRatingStats(dish.id);
-                                                                const mealLocalized = t[(dish.mealType || '').toLowerCase()] || dish.mealType;
-                                                                return (
-                                                                    <div key={dish.id} className={`p-2 rounded border text-xs flex justify-between items-center ${isAllergic ? 'bg-red-50 border-red-300' : 'border-gray-100'}`}>
-                                                                        <div>
-                                                                            <span className="font-semibold">{dish.koName}</span> ({getLocalizedField(dish, 'Name', lang)})
-                                                                            <span className="bg-beige px-1 rounded ml-1 text-burgundy font-bold">{mealLocalized}</span>
-                                                                            {stats.count > 0 && <span className="ml-2 text-amber-600 font-bold">★ {stats.avg}</span>}
-                                                                        </div>
-                                                                        <div className="flex items-center gap-2">
-                                                                            <span className="text-burgundy font-bold">{dish.price} {t.price}</span>
-                                                                            <button onClick={() => setSelectedDishModal(dish)} className="bg-cream hover:bg-gold border border-beige px-2 py-0.5 rounded font-semibold">{t.details}</button>
-                                                                        </div>
-                                                                    </div>
-                                                                );
-                                                            })
-                                                        )}
-                                                    </div>
-                                                </div>
-                                            );
-                                        })}
-                                    </div>
-                                </div>
+                        <div className="flex items-center gap-3">
+                            <div className="flex bg-burgundy-dark rounded p-0.5 border border-gold/40 text-xs">
+                                <button onClick={() => setLang('en')} className={`px-2 py-1 rounded ${lang === 'en' ? 'bg-gold text-darkbrown font-bold' : 'text-cream'}`}>EN</button>
+                                <button onClick={() => setLang('ru')} className={`px-2 py-1 rounded ${lang === 'ru' ? 'bg-gold text-darkbrown font-bold' : 'text-cream'}`}>RU</button>
+                                <button onClick={() => setLang('zh')} className={`px-2 py-1 rounded ${lang === 'zh' ? 'bg-gold text-darkbrown font-bold' : 'text-cream'}`}>中文</button>
                             </div>
-                        )}
-
-                        {view === 'cafeterias' && (
-                            <div className="space-y-4">
-                                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
-                                    <h1 className="text-2xl font-bold text-burgundy">{t.cafeterias}</h1>
-                                    {selectedCafeteriaObj && (
-                                        <button 
-                                            onClick={() => setSelectedCafeteriaId(null)} 
-                                            className="text-xs bg-beige hover:bg-gold text-darkbrown font-semibold px-3 py-1.5 rounded transition"
-                                        >
-                                            {t.backToCafes}
-                                        </button>
-                                    )}
-                                </div>
-
-                                {!selectedCafeteriaObj ? (
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                        {INITIAL_CAFETERIAS.map(caf => {
-                                            const cafDishCount = dishes.filter(d => d.cafeteriaId === caf.id).length;
-                                            return (
-                                                <div 
-                                                    key={caf.id} 
-                                                    onClick={() => setSelectedCafeteriaId(caf.id)}
-                                                    className="bg-white p-5 rounded-lg shadow border border-beige hover:border-burgundy hover:shadow-md transition cursor-pointer space-y-2 flex flex-col justify-between"
-                                                >
-                                                    <div className="space-y-2">
-                                                        <div className="flex justify-between items-start gap-2">
-                                                            <h2 className="font-bold text-lg text-burgundy">{caf.name} <span className="text-xs text-gray-500">({caf.koName})</span></h2>
-                                                            <span className="text-xs bg-cream border border-beige text-burgundy font-semibold px-2 py-0.5 rounded whitespace-nowrap">
-                                                                {cafDishCount} {t.itemsLabel}
-                                                            </span>
-                                                        </div>
-                                                        <p className="text-sm text-gray-700">📍 <strong>{t.location}:</strong> {caf.location}</p>
-                                                        <p className="text-sm text-gray-700">🕒 <strong>{t.hours}:</strong> {caf.hours}</p>
-                                                        <p className="text-sm text-gray-700">📞 <strong>{t.phone}:</strong> {caf.phone}</p>
-                                                    </div>
-                                                    <div className="pt-2 border-t border-cream flex justify-end">
-                                                        <span className="text-xs font-bold text-burgundy">{t.clickToViewMenu}</span>
-                                                    </div>
-                                                </div>
-                                            );
-                                        })}
-                                    </div>
-                                ) : (
-                                    <div className="space-y-4">
-                                        <div className="bg-white p-5 rounded-lg shadow border border-burgundy space-y-1">
-                                            <h2 className="font-bold text-xl text-burgundy">{selectedCafeteriaObj.name} <span className="text-sm text-gray-500">({selectedCafeteriaObj.koName})</span></h2>
-                                            <p className="text-sm text-gray-700">📍 {selectedCafeteriaObj.location}</p>
-                                            <p className="text-sm text-gray-700">🕒 {selectedCafeteriaObj.hours}</p>
-                                            <p className="text-sm text-gray-700">📞 {selectedCafeteriaObj.phone}</p>
-                                        </div>
-
-                                        <div className="bg-white p-3 rounded-lg shadow border border-beige flex flex-wrap items-center gap-3">
-                                            <span className="text-xs font-bold text-burgundy uppercase">{t.filters}:</span>
-                                            <select value={mealFilter} onChange={e => setMealFilter(e.target.value)} className="border rounded p-1.5 text-xs bg-white">
-                                                <option value="all">{t.allMeals}</option>
-                                                <option value="Breakfast">{t.breakfast}</option>
-                                                <option value="Lunch">{t.lunch}</option>
-                                                <option value="Dinner">{t.dinner}</option>
-                                            </select>
-                                            <select value={allergenFilter} onChange={e => setAllergenFilter(e.target.value)} className="border rounded p-1.5 text-xs bg-white">
-                                                <option value="all">{t.allAllergensShowAll}</option>
-                                                {user && user.profile?.allergens?.length > 0 && (
-                                                    <option value="safe_for_me">{t.hideMyAllergens}</option>
-                                                )}
-                                                {COMMON_ALLERGENS.map(al => (
-                                                    <option key={al} value={`exclude:${al}`}>{t.excludeText} {translateAllergen(al, lang)}</option>
-                                                ))}
-                                            </select>
-                                        </div>
-
-                                        <div className="space-y-4">
-                                            {DAYS_OF_WEEK.map(dayName => {
-                                                const dayDishes = dishes
-                                                    .filter(d => d.cafeteriaId === selectedCafeteriaObj.id && getDayName(d.date) === dayName)
-                                                    .filter(d => matchesDishFilters(d, { includeDay: false }))
-                                                    .sort((a, b) => new Date(getSafeDateString(a.date)) - new Date(getSafeDateString(b.date)));
-
-                                                const dayLocalized = translateDay(dayName, lang);
-
-                                                return (
-                                                    <div key={dayName} className="bg-white p-4 rounded-lg shadow border border-beige">
-                                                        <h3 className="font-bold text-burgundy border-b border-beige pb-1.5 mb-3 flex justify-between items-center">
-                                                            <span>{dayLocalized}</span>
-                                                            <span className="text-xs font-normal text-gray-500">{dayDishes.length} {t.dishCountLabel}</span>
-                                                        </h3>
-                                                        {dayDishes.length === 0 ? (
-                                                            <p className="text-xs text-gray-400 italic">{t.noDishesForDay} {dayLocalized}.</p>
-                                                        ) : (
-                                                            <div className="space-y-2">
-                                                                {dayDishes.map(dish => {
-                                                                    const isAllergic = checkAllergy(dish.allergens);
-                                                                    const stats = getDishRatingStats(dish.id);
-                                                                    const mealLocalized = t[(dish.mealType || '').toLowerCase()] || dish.mealType;
-                                                                    return (
-                                                                        <div key={dish.id} className={`p-2.5 rounded border text-sm flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 ${isAllergic ? 'bg-red-50 border-red-300' : 'border-gray-100'}`}>
-                                                                            <div>
-                                                                                <div className="font-semibold">
-                                                                                    {dish.koName} ({getLocalizedField(dish, 'Name', lang)})
-                                                                                    <span className="text-xs bg-beige px-1.5 py-0.5 rounded ml-1.5 text-burgundy font-bold">{mealLocalized}</span>
-                                                                                    <span className="text-xs text-gray-400 ml-2">{getSafeDateString(dish.date)}</span>
-                                                                                    {stats.count > 0 && <span className="ml-2 text-amber-600 font-bold">★ {stats.avg} ({stats.count})</span>}
-                                                                                </div>
-                                                                                {isAllergic && (
-                                                                                    <div className="text-xs text-red-600 font-bold mt-0.5">{t.warningAllergy}</div>
-                                                                                )}
-                                                                            </div>
-                                                                            <div className="flex items-center gap-3 self-end sm:self-center">
-                                                                                <span className="text-burgundy font-bold">{dish.price} {t.price}</span>
-                                                                                <button 
-                                                                                    onClick={() => setSelectedDishModal(dish)} 
-                                                                                    className="bg-cream hover:bg-gold border border-beige text-darkbrown px-2.5 py-1 rounded text-xs font-semibold transition"
-                                                                                >
-                                                                                    {t.details}
-                                                                                </button>
-                                                                            </div>
-                                                                        </div>
-                                                                    );
-                                                                })}
-                                                            </div>
-                                                        )}
-                                                    </div>
-                                                );
-                                            })}
-                                        </div>
-                                    </div>
-                                )}
-                            </div>
-                        )}
-
-                        {view === 'todays-menu' && (
-                            <div className="space-y-4">
-                                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
-                                    <h1 className="text-2xl font-bold text-burgundy">{t.todaysMenu} ({selectedQuickDate} — {translateDay(getDayName(selectedQuickDate), lang)})</h1>
-                                </div>
-
-                                <div className="bg-white p-3 rounded-lg shadow border border-beige flex items-center gap-3">
-                                    <span className="text-xs font-bold text-burgundy uppercase whitespace-nowrap">{t.selectDateLabel || "Select Date:"}</span>
-                                    <input 
-                                        type="date" 
-                                        value={selectedQuickDate} 
-                                        onChange={e => setSelectedQuickDate(e.target.value)} 
-                                        className="border border-beige rounded p-1.5 text-xs bg-cream text-darkbrown font-semibold focus:outline-none focus:border-burgundy cursor-pointer"
-                                    />
-                                    <button 
-                                        onClick={() => setSelectedQuickDate(new Date().toISOString().split('T')[0])}
-                                        className="text-xs bg-burgundy/10 hover:bg-burgundy text-burgundy hover:text-white px-2.5 py-1 rounded transition font-semibold"
-                                    >
-                                        {lang === 'ru' ? 'Сегодня' : lang === 'zh' ? '今天' : 'Today'}
+                            {user ? (
+                                <div className="flex items-center gap-2 text-xs">
+                                    <button onClick={() => switchView('profile')} className="bg-gold/20 hover:bg-gold/30 text-gold px-3 py-1.5 rounded transition font-semibold border border-gold/40">
+                                        {t.hiUser}{user.username}
+                                    </button>
+                                    <button onClick={() => { setUser(null); localStorage.removeItem('ku_cloud_user'); switchView('home'); }} className="bg-burgundy-dark hover:bg-burgundy-light px-3 py-1.5 rounded transition">
+                                        {t.logout}
                                     </button>
                                 </div>
-                                
-                                {user && user.profile?.allergens?.length > 0 && (
-                                    <div className="bg-amber-50 border border-amber-200 p-3 rounded text-xs text-amber-800">
-                                        ⚠️ Your registered allergies: <strong>{user.profile.allergens.map(a => translateAllergen(a, lang)).join(', ')}</strong>. Unsafe dishes will be highlighted.
-                                    </div>
-                                )}
-
-                                <div className="bg-white p-3 rounded-lg shadow border border-beige flex flex-wrap items-center gap-3">
-                                    <span className="text-xs font-bold text-burgundy uppercase">{t.filters}:</span>
-                                    <select value={mealFilter} onChange={e => setMealFilter(e.target.value)} className="border rounded p-1.5 text-xs bg-white">
-                                        <option value="all">{t.allMeals}</option>
-                                        <option value="Breakfast">{t.breakfast}</option>
-                                        <option value="Lunch">{t.lunch}</option>
-                                        <option value="Dinner">{t.dinner}</option>
-                                    </select>
-                                    <select value={allergenFilter} onChange={e => setAllergenFilter(e.target.value)} className="border rounded p-1.5 text-xs bg-white">
-                                        <option value="all">{t.allAllergensShowAll}</option>
-                                        {user && user.profile?.allergens?.length > 0 && (
-                                            <option value="safe_for_me">{t.hideMyAllergens}</option>
-                                        )}
-                                        {COMMON_ALLERGENS.map(al => (
-                                            <option key={al} value={`exclude:${al}`}>{t.excludeText} {translateAllergen(al, lang)}</option>
-                                        ))}
-                                    </select>
-                                    {(mealFilter !== 'all' || allergenFilter !== 'all') && (
-                                        <button onClick={resetFilters} className="text-xs text-burgundy underline">{t.reset}</button>
-                                    )}
+                            ) : (
+                                <div className="flex items-center gap-2 text-xs">
+                                    <button onClick={() => switchView('login')} className="bg-gold text-darkbrown font-bold px-3 py-1.5 rounded hover:bg-gold/90 transition">{t.login}</button>
+                                    <button onClick={() => switchView('signup')} className="bg-burgundy-dark text-cream px-3 py-1.5 rounded border border-gold/40 hover:bg-burgundy-light transition">{t.signup}</button>
                                 </div>
+                            )}
+                        </div>
+                    </div>
+                </header>
+            );
 
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                    {INITIAL_CAFETERIAS.map(caf => {
-                                        const cafDishes = dishes
-                                            .filter(d => d.cafeteriaId === caf.id && getSafeDateString(d.date) === selectedQuickDate)
-                                            .filter(d => matchesDishFilters(d, { includeDay: false }));
+            const renderDishCard = (dish) => {
+                const koName = dish.koName || '';
+                const mainName = getLocalizedField(dish, 'Name', lang);
+                const allergens = dish.allergens || [];
+                const userAllergens = user?.profile?.allergens || [];
+                const hasAllergy = allergens.some(al => userAllergens.some(ua => ua.toLowerCase() === al.toLowerCase()));
+                const stats = getDishRatingStats(dish.id);
+
+                return (
+                    <div key={dish.id} onClick={() => setSelectedDishModal(dish)} className={`bg-white rounded-lg shadow border p-4 cursor-pointer transition hover:shadow-md flex flex-col justify-between ${hasAllergy ? 'border-red-400 bg-red-50/20' : 'border-beige'}`}>
+                        <div>
+                            <div className="flex justify-between items-start gap-2 mb-1">
+                                <div>
+                                    <h4 className="font-bold text-darkbrown text-base">{koName}</h4>
+                                    <p className="text-xs text-gray-600 font-medium">{mainName}</p>
+                                </div>
+                                <span className="bg-burgundy/10 text-burgundy text-xs font-semibold px-2 py-0.5 rounded whitespace-nowrap">
+                                    {dish.mealType}
+                                </span>
+                            </div>
+                            <div className="text-xs text-gray-500 my-2">
+                                <span className="font-medium text-darkbrown">{CAFETERIAS_DATA[dish.cafeteriaId]?.[lang]?.name || CAFETERIAS_DATA[dish.cafeteriaId]?.en?.name}</span>
+                                <span className="mx-1">•</span>
+                                <span>{dish.date}</span>
+                            </div>
+                            {allergens.length > 0 && (
+                                <div className="text-xs text-gray-600 mt-2">
+                                    <span className="font-semibold text-darkbrown">{t.allergens}:</span> {allergens.map(al => translateAllergen(al, lang)).join(', ')}
+                                </div>
+                            )}
+                            {hasAllergy && (
+                                <div className="mt-2 text-xs text-red-600 font-bold flex items-center gap-1">
+                                    ⚠️ {t.warningAllergy}
+                                </div>
+                            )}
+                        </div>
+                        <div className="mt-4 pt-3 border-t border-beige flex justify-between items-center text-xs">
+                            <span className="text-burgundy font-bold">
+                                {(!dish.price || dish.price === 0) ? t.priceUnknown : `${dish.price} ${t.price}`}
+                            </span>
+                            <div className="flex items-center gap-2">
+                                <span className="text-yellow-600 font-bold">★ {stats.avg} ({stats.count})</span>
+                                <span className="text-burgundy font-semibold hover:underline">{t.details} →</span>
+                            </div>
+                        </div>
+                    </div>
+                );
+            };
+
+            const renderDishModal = () => {
+                if (!selectedDishModal) return null;
+                const dish = selectedDishModal;
+                const koName = dish.koName || '';
+                const mainName = getLocalizedField(dish, 'Name', lang);
+                const desc = getLocalizedField(dish, 'Desc', lang);
+                const ingredients = getLocalizedField(dish, 'Ingredients', lang);
+                const allergens = dish.allergens || [];
+                const userAllergens = user?.profile?.allergens || [];
+                const hasAllergy = allergens.some(al => userAllergens.some(ua => ua.toLowerCase() === al.toLowerCase()));
+                const stats = getDishRatingStats(dish.id);
+                const userRating = getUserDishRating(dish.id);
+
+                return (
+                    <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+                        <div className="bg-white rounded-xl shadow-2xl max-w-lg w-full p-6 relative max-h-[90vh] overflow-y-auto border border-beige">
+                            <button onClick={() => setSelectedDishModal(null)} className="absolute top-4 right-4 text-gray-400 hover:text-darkbrown font-bold text-lg">✕</button>
+                            
+                            <h3 className="text-xl font-bold text-darkbrown">{koName}</h3>
+                            <p className="text-sm text-gray-600 font-medium mb-4">{mainName}</p>
+
+                            <div className="space-y-3 text-xs text-gray-700 bg-cream p-3 rounded-lg border border-beige mb-4">
+                                <div><strong className="text-darkbrown">{t.cafeteria}:</strong> {CAFETERIAS_DATA[dish.cafeteriaId]?.[lang]?.name || CAFETERIAS_DATA[dish.cafeteriaId]?.en?.name}</div>
+                                <div><strong className="text-darkbrown">{t.dateAndMeal}:</strong> {dish.date} ({translateDay(getDayName(dish.date), lang)}) — {dish.mealType}</div>
+                                <div><strong className="text-darkbrown">{t.price}:</strong> {(!dish.price || dish.price === 0) ? t.priceUnknown : `${dish.price} ${t.price}`}</div>
+                                <div><strong className="text-darkbrown">{t.rating}:</strong> ★ {stats.avg} ({stats.count})</div>
+                            </div>
+
+                            {desc && (
+                                <div className="mb-3">
+                                    <h4 className="text-xs font-bold uppercase tracking-wide text-burgundy mb-1">{t.description}</h4>
+                                    <p className="text-xs text-gray-700 leading-relaxed">{desc}</p>
+                                </div>
+                            )}
+
+                            {ingredients && (
+                                <div className="mb-3">
+                                    <h4 className="text-xs font-bold uppercase tracking-wide text-burgundy mb-1">{t.ingredients}</h4>
+                                    <p className="text-xs text-gray-700 leading-relaxed">{ingredients}</p>
+                                </div>
+                            )}
+
+                            {allergens.length > 0 && (
+                                <div className="mb-4">
+                                    <h4 className="text-xs font-bold uppercase tracking-wide text-burgundy mb-1">{t.allergens}</h4>
+                                    <p className="text-xs text-gray-700">{allergens.map(al => translateAllergen(al, lang)).join(', ')}</p>
+                                </div>
+                            )}
+
+                            {hasAllergy && (
+                                <div className="mb-4 p-3 bg-red-50 border border-red-300 rounded text-xs text-red-700 font-bold flex items-center gap-2">
+                                    <span>⚠️</span> {t.allergyCaution}
+                                </div>
+                            )}
+
+                            {user && user.role !== 'admin' && (
+                                <div className="mt-6 pt-4 border-t border-beige">
+                                    <h4 className="text-xs font-bold text-darkbrown mb-2">{t.rateThis}</h4>
+                                    <div className="flex gap-1">
+                                        {[1, 2, 3, 4, 5].map(star => (
+                                            <button key={star} onClick={() => handleRateDish(dish.id, star)} className={`text-xl ${userRating >= star ? 'text-yellow-500' : 'text-gray-300 hover:text-yellow-400'}`}>★</button>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
+
+                            <div className="mt-6 flex justify-end">
+                                <button onClick={() => setSelectedDishModal(null)} className="bg-burgundy text-cream px-4 py-2 rounded text-xs font-semibold hover:bg-burgundy-dark transition">
+                                    {t.close}
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                );
+            };
+
+            const renderHome = () => (
+                <div className="max-w-7xl mx-auto px-4 py-8 flex-grow">
+                    <div className="bg-burgundy text-cream rounded-2xl p-8 mb-8 shadow-md flex flex-col md:flex-row justify-between items-center gap-6">
+                        <div>
+                            <h2 className="text-3xl font-bold mb-2">{t.welcomeTitle}</h2>
+                            <p className="text-sm text-cream/80 max-w-xl">{t.welcomeSub}</p>
+                        </div>
+                        <div className="flex flex-col sm:flex-row gap-3">
+                            <button onClick={() => switchView('todays-menu')} className="bg-gold text-darkbrown font-bold px-5 py-2.5 rounded-lg text-xs hover:bg-gold/90 transition shadow">
+                                {t.viewTodays}
+                            </button>
+                            <button onClick={() => switchView('cafeterias')} className="bg-burgundy-dark text-cream border border-gold/40 px-5 py-2.5 rounded-lg text-xs font-semibold hover:bg-burgundy-light transition">
+                                {t.viewCafes}
+                            </button>
+                        </div>
+                    </div>
+
+                    <div className="flex justify-between items-center mb-4">
+                        <h3 className="text-lg font-bold text-darkbrown">{t.todaysOverview}</h3>
+                        <button onClick={() => switchView('todays-menu')} className="text-xs font-bold text-burgundy hover:underline">{t.viewAll}</button>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                        {INITIAL_CAFETERIAS.map(caf => {
+                            const cafDishes = dishes.filter(d => d.cafeteriaId === caf.id && d.date === selectedQuickDate);
+                            return (
+                                <div key={caf.id} className="bg-white rounded-lg shadow border border-beige p-4 flex flex-col justify-between">
+                                    <div>
+                                        <h4 className="font-bold text-darkbrown text-sm mb-1">{caf.name}</h4>
+                                        <p className="text-xs text-gray-500 mb-3">{caf.hours}</p>
+                                        <div className="text-xs text-gray-700 space-y-1 mb-4">
+                                            {cafDishes.length === 0 ? (
+                                                <p className="text-gray-400 italic text-xs">{t.noDishes}</p>
+                                            ) : (
+                                                cafDishes.slice(0, 3).map(d => (
+                                                    <div key={d.id} className="truncate font-medium">• {d.koName || getLocalizedField(d, 'Name', lang)}</div>
+                                                ))
+                                            )}
+                                        </div>
+                                    </div>
+                                    <button onClick={() => { setSelectedCafeteriaId(caf.id); switchView('weekly-menu'); }} className="text-xs text-burgundy font-bold hover:underline text-left pt-2 border-t border-beige">
+                                        {t.clickToViewMenu}
+                                    </button>
+                                </div>
+                            );
+                        })}
+                    </div>
+                </div>
+            );
+
+            const renderCafeteriasView = () => (
+                <div className="max-w-7xl mx-auto px-4 py-8 flex-grow">
+                    <h2 className="text-2xl font-bold text-darkbrown mb-6">{t.cafeterias}</h2>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        {INITIAL_CAFETERIAS.map(caf => (
+                            <div key={caf.id} className="bg-white rounded-xl shadow border border-beige p-6 flex flex-col justify-between">
+                                <div>
+                                    <h3 className="text-lg font-bold text-burgundy mb-2">{caf.name}</h3>
+                                    <p className="text-xs text-gray-600 mb-4"><strong className="text-darkbrown">{t.location}:</strong> {caf.location}</p>
+                                    <p className="text-xs text-gray-600 mb-4"><strong className="text-darkbrown">{t.hours}:</strong> {caf.hours}</p>
+                                    <p className="text-xs text-gray-600 mb-6"><strong className="text-darkbrown">{t.phone}:</strong> {caf.phone}</p>
+                                </div>
+                                <button onClick={() => { setSelectedCafeteriaId(caf.id); switchView('weekly-menu'); }} className="bg-burgundy text-cream text-xs font-semibold py-2 px-4 rounded hover:bg-burgundy-dark transition self-start">
+                                    {t.clickToViewMenu}
+                                </button>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            );
+
+            const renderTodaysMenuView = () => {
+                const filteredDishes = dishes.filter(d => d.date === selectedQuickDate);
+
+                return (
+                    <div className="max-w-7xl mx-auto px-4 py-8 flex-grow">
+                        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
+                            <h2 className="text-2xl font-bold text-darkbrown">{t.todaysMenu}</h2>
+                            <div className="bg-white p-3 rounded-lg shadow border border-beige flex items-center gap-3">
+                                <span className="text-xs font-bold text-burgundy uppercase whitespace-nowrap">{t.selectDateLabel}</span>
+                                <input 
+                                    type="date" 
+                                    value={selectedQuickDate} 
+                                    onChange={e => setSelectedQuickDate(e.target.value)} 
+                                    className="border border-beige rounded p-1.5 text-xs bg-cream text-darkbrown font-semibold focus:outline-none focus:border-burgundy cursor-pointer"
+                                />
+                                <button 
+                                    onClick={() => setSelectedQuickDate(new Date().toISOString().split('T')[0])}
+                                    className="text-xs bg-burgundy/10 hover:bg-burgundy text-burgundy hover:text-white px-2.5 py-1 rounded transition font-semibold"
+                                >
+                                    {lang === 'ru' ? 'Сегодня' : lang === 'zh' ? '今天' : 'Today'}
+                                </button>
+                            </div>
+                        </div>
+
+                        {filteredDishes.length === 0 ? (
+                            <div className="bg-white rounded-lg shadow border border-beige p-8 text-center text-gray-400 italic text-sm">
+                                {t.noMatchingDishes}
+                            </div>
+                        ) : (
+                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                                {filteredDishes.map(d => renderDishCard(d))}
+                            </div>
+                        )}
+                    </div>
+                );
+            };
+
+            const renderWeeklyMenuView = () => {
+                const cafes = getCafeterias(lang);
+                const weekDates = getCurrWeekDates();
+
+                const filteredDishes = dishes.filter(d => {
+                    if (weeklyCafFilter !== 'all' && d.cafeteriaId !== weeklyCafFilter) return false;
+                    if (dayFilter !== 'all' && getDayName(d.date) !== dayFilter) return false;
+                    if (mealFilter !== 'all' && d.mealType !== mealFilter) return false;
+                    if (allergenFilter !== 'all') {
+                        const hasThisAllergen = (d.allergens || []).some(a => a.toLowerCase() === allergenFilter.toLowerCase());
+                        if (hasThisAllergen) return false;
+                    }
+                    return true;
+                });
+
+                return (
+                    <div className="max-w-7xl mx-auto px-4 py-8 flex-grow">
+                        <div className="flex justify-between items-center mb-6">
+                            <h2 className="text-2xl font-bold text-darkbrown">{t.weeklyMenu}</h2>
+                            {selectedCafeteriaId && (
+                                <button onClick={() => setSelectedCafeteriaId(null)} className="text-xs text-burgundy font-bold hover:underline">
+                                    {t.backToCafes}
+                                </button>
+                            )}
+                        </div>
+
+                        <div className="bg-white rounded-xl shadow border border-beige p-4 mb-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                            <div>
+                                <label className="block text-xs font-bold text-gray-600 mb-1">{t.filterCafeteria}</label>
+                                <select value={selectedCafeteriaId || weeklyCafFilter} onChange={e => { setSelectedCafeteriaId(null); setWeeklyCafFilter(e.target.value); }} className="w-full border border-beige rounded p-2 text-xs bg-cream text-darkbrown font-semibold">
+                                    <option value="all">{t.allCafeterias}</option>
+                                    {cafes.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
+                                </select>
+                            </div>
+                            <div>
+                                <label className="block text-xs font-bold text-gray-600 mb-1">{t.filterDayOfWeek}</label>
+                                <select value={dayFilter} onChange={e => setDayFilter(e.target.value)} className="w-full border border-beige rounded p-2 text-xs bg-cream text-darkbrown font-semibold">
+                                    <option value="all">{t.allDays}</option>
+                                    {DAYS_OF_WEEK.map(day => <option key={day} value={day}>{translateDay(day, lang)}</option>)}
+                                </select>
+                            </div>
+                            <div>
+                                <label className="block text-xs font-bold text-gray-600 mb-1">{t.filterMealType}</label>
+                                <select value={mealFilter} onChange={e => setMealFilter(e.target.value)} className="w-full border border-beige rounded p-2 text-xs bg-cream text-darkbrown font-semibold">
+                                    <option value="all">{t.allMeals}</option>
+                                    <option value="Breakfast">{t.breakfast}</option>
+                                    <option value="Lunch">{t.lunch}</option>
+                                    <option value="Dinner">{t.dinner}</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label className="block text-xs font-bold text-gray-600 mb-1">{t.filterAllergens}</label>
+                                <select value={allergenFilter} onChange={e => setAllergenFilter(e.target.value)} className="w-full border border-beige rounded p-2 text-xs bg-cream text-darkbrown font-semibold">
+                                    <option value="all">{t.allAllergensShowAll}</option>
+                                    {COMMON_ALLERGENS.map(al => <option key={al} value={al}>{t.excludeText} {translateAllergen(al, lang)}</option>)}
+                                </select>
+                            </div>
+                        </div>
+
+                        {selectedCafeteriaId ? (
+                            <div className="space-y-6">
+                                <div className="bg-burgundy/10 p-4 rounded-xl border border-burgundy/20">
+                                    <h3 className="text-lg font-bold text-burgundy">{CAFETERIAS_DATA[selectedCafeteriaId]?.[lang]?.name}</h3>
+                                    <p className="text-xs text-gray-600 mt-1">{CAFETERIAS_DATA[selectedCafeteriaId]?.[lang]?.location}</p>
+                                </div>
+                                <div className="grid grid-cols-1 md:grid-cols-7 gap-4">
+                                    {weekDates.map(dayObj => {
+                                        const dayEnName = getDayName(dayObj.dateStr);
+                                        const dayDishes = filteredDishes.filter(d => d.cafeteriaId === selectedCafeteriaId && d.date === dayObj.dateStr);
+                                        const dayLocalized = translateDay(dayEnName, lang);
                                         return (
-                                            <div key={caf.id} className="bg-white p-4 rounded-lg shadow border border-beige">
-                                                <h2 className="font-bold text-burgundy">{caf.name}</h2>
-                                                <p className="text-xs text-gray-500 mb-2">{caf.hours}</p>
-                                                <div className="space-y-3 mt-2">
-                                                    {cafDishes.length === 0 ? (
-                                                        <p className="text-sm text-gray-400 italic">{t.noMatchingDishes}</p>
+                                            <div key={dayObj.dateStr} className="bg-white rounded-lg shadow border border-beige p-3 flex flex-col">
+                                                <div className="border-b border-beige pb-2 mb-2 text-center">
+                                                    <div className="text-xs font-bold text-burgundy">{dayLocalized}</div>
+                                                    <div className="text-xs text-gray-500">{dayObj.dateStr}</div>
+                                                </div>
+                                                <div className="space-y-2 flex-grow">
+                                                    {dayDishes.length === 0 ? (
+                                                        <p className="text-xs text-gray-400 italic text-center py-4">{t.noDishesForDay} {dayLocalized}.</p>
                                                     ) : (
-                                                        cafDishes.map(dish => {
-                                                            const isAllergic = checkAllergy(dish.allergens);
-                                                            const stats = getDishRatingStats(dish.id);
-                                                            const mealLocalized = t[(dish.mealType || '').toLowerCase()] || dish.mealType;
-                                                            return (
-                                                                <div key={dish.id} className={`p-2.5 rounded border text-sm ${isAllergic ? 'bg-red-50 border-red-300' : 'border-gray-100'}`}>
-                                                                    <div className="flex justify-between items-start gap-2">
-                                                                        <div>
-                                                                            <span className="font-semibold">{dish.koName}</span> ({getLocalizedField(dish, 'Name', lang)})
-                                                                            <span className="text-xs bg-beige px-1.5 py-0.5 rounded ml-1 text-burgundy font-bold">{mealLocalized}</span>
-                                                                            {stats.count > 0 && <span className="ml-2 text-amber-600 font-bold">★ {stats.avg} ({stats.count})</span>}
-                                                                        </div>
-                                                                        <div className="flex items-center gap-2 shrink-0">
-                                                                            <span className="text-burgundy font-bold">{dish.price} {t.price}</span>
-                                                                            <button 
-                                                                                onClick={() => setSelectedDishModal(dish)} 
-                                                                                className="bg-cream hover:bg-gold border border-beige text-darkbrown px-2 py-0.5 rounded text-xs font-semibold transition"
-                                                                            >
-                                                                                {t.details}
-                                                                            </button>
-                                                                        </div>
-                                                                    </div>
-                                                                    {dish.allergens && dish.allergens.length > 0 && (
-                                                                        <p className="text-xs text-gray-500 mt-1">{t.allergens}: {dish.allergens.map(a => translateAllergen(a, lang)).join(', ')}</p>
-                                                                    )}
-                                                                    {isAllergic && (
-                                                                        <div className="text-xs text-red-600 font-bold mt-1">{t.warningAllergy}</div>
-                                                                    )}
+                                                        dayDishes.map(d => (
+                                                            <div key={d.id} onClick={() => setSelectedDishModal(d)} className="p-2 bg-cream rounded border border-beige/60 cursor-pointer hover:border-burgundy transition">
+                                                                <div className="font-bold text-darkbrown text-xs truncate">{d.koName}</div>
+                                                                <div className="text-[10px] text-gray-600 truncate">{getLocalizedField(d, 'Name', lang)}</div>
+                                                                <div className="text-[10px] text-burgundy font-semibold mt-1 flex justify-between">
+                                                                    <span>{d.mealType}</span>
+                                                                    <span>{(!d.price || d.price === 0) ? t.priceUnknown : `${d.price} ${t.price}`}</span>
                                                                 </div>
-                                                            );
-                                                        })
+                                                            </div>
+                                                        ))
                                                     )}
                                                 </div>
                                             </div>
@@ -1171,456 +1124,262 @@ const translateAllergen = (item, targetLang) => {
                                     })}
                                 </div>
                             </div>
-                        )}
-
-                        {view === 'weekly-menu' && (
-                            <div className="space-y-4">
-                                <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-3">
-                                    <h1 className="text-2xl font-bold text-burgundy">{t.weeklyMenu}</h1>
-                                </div>
-
-                                <div className="bg-white p-4 rounded-lg shadow border border-beige grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 items-end">
-                                    <div>
-                                        <label className="block text-[11px] font-bold text-gray-500 uppercase mb-1">{t.filterCafeteria}</label>
-                                        <select value={weeklyCafFilter} onChange={e => setWeeklyCafFilter(e.target.value)} className="w-full border rounded p-2 text-xs bg-white h-[34px]">
-                                            <option value="all">{t.allCafeterias}</option>
-                                            {INITIAL_CAFETERIAS.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
-                                        </select>
-                                    </div>
-                                    <div>
-                                        <label className="block text-[11px] font-bold text-gray-500 uppercase mb-1">{t.filterDayOfWeek}</label>
-                                        <select value={dayFilter} onChange={e => setDayFilter(e.target.value)} className="w-full border rounded p-2 text-xs bg-white h-[34px]">
-                                            <option value="all">{t.allDays}</option>
-                                            {DAYS_OF_WEEK.map(day => <option key={day} value={day}>{translateDay(day, lang)}</option>)}
-                                        </select>
-                                    </div>
-                                    <div>
-                                        <label className="block text-[11px] font-bold text-gray-500 uppercase mb-1">{t.filterMealType}</label>
-                                        <select value={mealFilter} onChange={e => setMealFilter(e.target.value)} className="w-full border rounded p-2 text-xs bg-white h-[34px]">
-                                            <option value="all">{t.allMeals}</option>
-                                            <option value="Breakfast">{t.breakfast}</option>
-                                            <option value="Lunch">{t.lunch}</option>
-                                            <option value="Dinner">{t.dinner}</option>
-                                        </select>
-                                    </div>
-                                    <div>
-                                        <label className="block text-[11px] font-bold text-gray-500 uppercase mb-1">{t.filterAllergens}</label>
-                                        <select value={allergenFilter} onChange={e => setAllergenFilter(e.target.value)} className="w-full border rounded p-2 text-xs bg-white h-[34px]">
-                                            <option value="all">{t.allAllergensShowAll}</option>
-                                            {user && user.profile?.allergens?.length > 0 && (
-                                                <option value="safe_for_me">{t.hideMyAllergens}</option>
-                                            )}
-                                            {COMMON_ALLERGENS.map(al => (
-                                                <option key={al} value={`exclude:${al}`}>{t.excludeText} {translateAllergen(al, lang)}</option>
-                                            ))}
-                                        </select>
-                                    </div>
-                                </div>
-
-                                {(weeklyCafFilter !== 'all' || dayFilter !== 'all' || mealFilter !== 'all' || allergenFilter !== 'all') && (
-                                    <div className="flex justify-end">
-                                        <button onClick={resetFilters} className="text-xs text-burgundy font-semibold underline">{t.reset}</button>
-                                    </div>
-                                )}
-
-                                <div className="bg-white p-4 rounded-lg shadow border border-beige space-y-3">
-                                    {(() => {
-                                        const filteredDishes = dishes
-                                            .filter(d => weeklyCafFilter === 'all' || d.cafeteriaId === weeklyCafFilter)
-                                            .filter(d => matchesDishFilters(d, { includeDay: true }))
-                                            .sort((a, b) => new Date(getSafeDateString(a.date)) - new Date(getSafeDateString(b.date)));
-
-                                        if (filteredDishes.length === 0) {
-                                            return <p className="text-sm text-gray-400 italic">No menu items match the selected filters.</p>;
-                                        }
-
-                                        return filteredDishes.map(dish => {
-                                            const caf = INITIAL_CAFETERIAS.find(c => c.id === dish.cafeteriaId);
-                                            const isAllergic = checkAllergy(dish.allergens);
-                                            const dayLabel = translateDay(getDayName(dish.date), lang);
-                                            const stats = getDishRatingStats(dish.id);
-                                            const mealLocalized = t[(dish.mealType || '').toLowerCase()] || dish.mealType;
-                                            return (
-                                                <div key={dish.id} className={`p-3 rounded border text-sm ${isAllergic ? 'bg-red-50 border-red-300' : 'border-gray-100'}`}>
-                                                    <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
-                                                        <div>
-                                                            <div className="font-bold text-burgundy">
-                                                                {dish.koName} ({getLocalizedField(dish, 'Name', lang)})
-                                                                {stats.count > 0 && <span className="ml-2 text-amber-600 font-bold text-xs">★ {stats.avg} ({stats.count})</span>}
-                                                            </div>
-                                                            <div className="text-xs text-gray-500">
-                                                                {caf ? caf.name : ''} | 📅 {getSafeDateString(dish.date)} ({dayLabel}) — <span className="font-semibold text-burgundy">{mealLocalized}</span>
-                                                            </div>
-                                                            {dish.allergens && dish.allergens.length > 0 && (
-                                                                <div className="text-xs text-gray-500 mt-0.5">{t.allergens}: {dish.allergens.map(a => translateAllergen(a, lang)).join(', ')}</div>
-                                                            )}
-                                                        </div>
-                                                        <div className="flex items-center gap-3 self-end sm:self-center">
-                                                            <span className="font-bold text-burgundy">{dish.price} {t.price}</span>
-                                                            <button 
-                                                                onClick={() => setSelectedDishModal(dish)} 
-                                                                className="bg-cream hover:bg-gold border border-beige text-darkbrown px-3 py-1 rounded text-xs font-semibold transition"
-                                                            >
-                                                                {t.details}
-                                                            </button>
-                                                        </div>
-                                                    </div>
-                                                    {isAllergic && <div className="text-xs text-red-600 font-bold mt-1">{t.warningAllergy}</div>}
-                                                </div>
-                                            );
-                                        });
-                                    })()}
-                                </div>
-                            </div>
-                        )}
-
-                        {view === 'profile' && user && user.role !== 'admin' && (
-                            <div className="max-w-lg mx-auto bg-white p-6 rounded-lg shadow border border-beige">
-                                <h2 className="text-xl font-bold mb-4 text-burgundy">{t.profile}</h2>
-                                <form onSubmit={handleUpdateProfile} className="space-y-4">
-                                    <div>
-                                        <label className="block text-sm font-semibold mb-1">Username</label>
-                                        <input type="text" value={user.username} className="w-full border rounded p-2 text-sm bg-gray-100" disabled />
-                                    </div>
-                                    <div>
-                                        <label className="block text-sm font-semibold mb-1">Email</label>
-                                        <input type="email" value={user.email || ''} className="w-full border rounded p-2 text-sm bg-gray-100" disabled />
-                                    </div>
-                                    <div>
-                                        <label className="block text-sm font-semibold mb-2">{t.selectYourAllergens}</label>
-                                        <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-                                            {COMMON_ALLERGENS.map(item => {
-                                                const checked = (studentProfile.allergens || []).some(a => a.toLowerCase() === item.toLowerCase());
-                                                return (
-                                                    <label key={item} className={`flex items-center gap-2 p-2 rounded border text-xs cursor-pointer transition ${checked ? 'bg-burgundy text-white border-burgundy font-semibold' : 'bg-cream border-beige text-darkbrown'}`}>
-                                                        <input 
-                                                            type="checkbox" 
-                                                            checked={checked} 
-                                                            onChange={() => toggleProfileCommonAllergen(item)} 
-                                                            className="accent-gold"
-                                                        />
-                                                        <span>{translateAllergen(item, lang)}</span>
-                                                    </label>
-                                                );
-                                            })}
-                                        </div>
-                                    </div>
-                                    <div>
-                                        <label className="block text-sm font-semibold mb-1">Other Allergens (comma separated)</label>
-                                        <input 
-                                            type="text" 
-                                            value={profileOtherAllergen} 
-                                            onChange={e => setProfileOtherAllergen(e.target.value)} 
-                                            placeholder="e.g. kiwi, buckwheat, garlic" 
-                                            className="w-full border rounded p-2 text-sm" 
-                                        />
-                                        <p className="text-[11px] text-gray-500 mt-1">Dishes containing these ingredients will be highlighted with a warning.</p>
-                                    </div>
-                                    <button type="submit" className="w-full bg-burgundy text-white py-2 rounded font-semibold text-sm">Save Profile</button>
-                                </form>
-                            </div>
-                        )}
-
-                        {(view === 'login' || view === 'signup' || view === 'admin-login') && (
-                            <div className="max-w-lg mx-auto bg-white p-6 rounded-lg shadow border border-beige">
-                                <h2 className="text-xl font-bold mb-4 text-burgundy">
-                                    {view === 'admin-login' ? 'Admin Login' : view === 'login' ? t.login : 'Create Student Account'}
-                                </h2>
-                                {authError && <div className="bg-red-100 text-red-700 p-2 rounded mb-3 text-sm">{authError}</div>}
-                                <form onSubmit={view === 'signup' ? handleSignup : handleLogin} className="space-y-4">
-                                    <div>
-                                        <label className="block text-sm font-semibold mb-1">Username {view !== 'signup' && '/ Email'}</label>
-                                        <input type="text" value={authForm.username} onChange={e => setAuthForm({...authForm, username: e.target.value})} className="w-full border rounded p-2 text-sm" required />
-                                    </div>
-                                    {view === 'signup' && (
-                                        <div>
-                                            <label className="block text-sm font-semibold mb-1">Email</label>
-                                            <input type="email" value={authForm.email} onChange={e => setAuthForm({...authForm, email: e.target.value})} className="w-full border rounded p-2 text-sm" required />
-                                        </div>
-                                    )}
-                                    <div>
-                                        <label className="block text-sm font-semibold mb-1">Password</label>
-                                        <input type="password" value={authForm.password} onChange={e => setAuthForm({...authForm, password: e.target.value})} className="w-full border rounded p-2 text-sm" required />
-                                    </div>
-
-                                    {view === 'signup' && (
-                                        <div className="pt-2 border-t border-beige space-y-3">
+                        ) : (
+                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                                {cafes.map(caf => {
+                                    const cafDishes = filteredDishes.filter(d => d.cafeteriaId === caf.id);
+                                    return (
+                                        <div key={caf.id} className="bg-white rounded-xl shadow border border-beige p-4 flex flex-col justify-between">
                                             <div>
-                                                <label className="block text-sm font-semibold mb-1">{t.selectYourAllergens} (optional)</label>
-                                                <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 mt-2">
-                                                    {COMMON_ALLERGENS.map(item => {
-                                                        const checked = authForm.selectedAllergens.includes(item);
-                                                        return (
-                                                            <label key={item} className={`flex items-center gap-2 p-2 rounded border text-xs cursor-pointer transition ${checked ? 'bg-burgundy text-white border-burgundy font-semibold' : 'bg-cream border-beige text-darkbrown'}`}>
-                                                                <input 
-                                                                    type="checkbox" 
-                                                                    checked={checked} 
-                                                                    onChange={() => toggleSignupAllergen(item)} 
-                                                                    className="accent-gold"
-                                                                />
-                                                                <span>{translateAllergen(item, lang)}</span>
-                                                            </label>
-                                                        );
-                                                    })}
+                                                <h3 className="font-bold text-burgundy text-base mb-1">{caf.name}</h3>
+                                                <p className="text-xs text-gray-500 mb-4">{cafDishes.length} {t.dishCountLabel}</p>
+                                                <div className="space-y-2 max-h-96 overflow-y-auto pr-1">
+                                                    {cafDishes.map(d => (
+                                                        <div key={d.id} onClick={() => setSelectedDishModal(d)} className="p-2 bg-cream rounded border border-beige cursor-pointer hover:border-burgundy transition">
+                                                            <div className="text-xs font-bold text-darkbrown truncate">{d.koName}</div>
+                                                            <div className="text-[10px] text-gray-600 truncate">{getLocalizedField(d, 'Name', lang)}</div>
+                                                            <div className="text-[10px] text-burgundy font-semibold mt-1 flex justify-between">
+                                                                <span>{d.date} ({d.mealType})</span>
+                                                                <span>{(!d.price || d.price === 0) ? t.priceUnknown : `${d.price} ${t.price}`}</span>
+                                                            </div>
+                                                        </div>
+                                                    ))}
                                                 </div>
                                             </div>
-                                            <div>
-                                                <label className="block text-sm font-semibold mb-1">Other Allergens (optional)</label>
+                                            <button onClick={() => setSelectedCafeteriaId(caf.id)} className="mt-4 w-full bg-burgundy/10 text-burgundy text-xs font-bold py-2 rounded hover:bg-burgundy hover:text-cream transition">
+                                                {t.details} →
+                                            </button>
+                                        </div>
+                                    );
+                                })}
+                            </div>
+                        )}
+                    </div>
+                );
+            };
+
+            const renderProfileView = () => (
+                <div className="max-w-xl mx-auto px-4 py-8 flex-grow">
+                    <div className="bg-white rounded-xl shadow border border-beige p-6">
+                        <h2 className="text-2xl font-bold text-darkbrown mb-4">{t.profile}</h2>
+                        <form onSubmit={handleUpdateProfile} className="space-y-6">
+                            <div>
+                                <label className="block text-xs font-bold text-gray-700 mb-2">{t.selectYourAllergens}</label>
+                                <div className="grid grid-cols-2 gap-2">
+                                    {COMMON_ALLERGENS.map(al => {
+                                        const isChecked = (studentProfile.allergens || []).some(a => a.toLowerCase() === al.toLowerCase());
+                                        return (
+                                            <label key={al} className={`flex items-center gap-2 p-2 rounded border cursor-pointer text-xs ${isChecked ? 'bg-burgundy/10 border-burgundy font-bold text-burgundy' : 'bg-cream border-beige text-darkbrown'}`}>
                                                 <input 
-                                                    type="text" 
-                                                    value={authForm.otherAllergens} 
-                                                    onChange={e => setAuthForm({...authForm, otherAllergens: e.target.value})} 
-                                                    placeholder="Add any other allergens (comma separated)" 
-                                                    className="w-full border rounded p-2 text-sm" 
+                                                    type="checkbox" 
+                                                    checked={isChecked} 
+                                                    onChange={() => toggleProfileCommonAllergen(al)} 
+                                                    className="rounded border-beige text-burgundy focus:ring-burgundy"
                                                 />
-                                            </div>
-                                        </div>
-                                    )}
-
-                                    <button type="submit" className="w-full bg-burgundy text-white py-2 rounded font-semibold text-sm">
-                                        {view === 'signup' ? t.signup : t.login}
-                                    </button>
-                                </form>
-                            </div>
-                        )}
-
-                        {view === 'admin-dashboard' && user?.role === 'admin' && (
-                            <div className="space-y-6">
-                                <h1 className="text-2xl font-bold text-burgundy">Admin Dashboard</h1>
-                                
-                                <div className="bg-white p-6 rounded-lg shadow border border-beige">
-                                    <h2 className="text-lg font-bold mb-3">Add Single Dish (Full Multi-language)</h2>
-                                    <form onSubmit={handleAddDish} className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                        <div>
-                                            <label className="block text-sm font-semibold mb-1">Cafeteria</label>
-                                            <select value={adminForm.cafeteriaId} onChange={e => setAdminForm({...adminForm, cafeteriaId: e.target.value})} className="w-full border rounded p-2 text-sm">
-                                                {INITIAL_CAFETERIAS.map(c => <option key={c.id} value={c.id}>{c.name} ({c.id})</option>)}
-                                            </select>
-                                        </div>
-                                        <div>
-                                            <label className="block text-sm font-semibold mb-1">Date</label>
-                                            <input type="date" value={adminForm.date} onChange={e => setAdminForm({...adminForm, date: e.target.value})} className="w-full border rounded p-2 text-sm" />
-                                        </div>
-                                        <div>
-                                            <label className="block text-sm font-semibold mb-1">Meal Type</label>
-                                            <select value={adminForm.mealType} onChange={e => setAdminForm({...adminForm, mealType: e.target.value})} className="w-full border rounded p-2 text-sm">
-                                                <option value="Lunch">Lunch</option>
-                                                <option value="Dinner">Dinner</option>
-                                                <option value="Breakfast">Breakfast</option>
-                                            </select>
-                                        </div>
-                                        <div>
-                                            <label className="block text-sm font-semibold mb-1">Price (KRW)</label>
-                                            <input type="number" value={adminForm.price} onChange={e => setAdminForm({...adminForm, price: e.target.value})} className="w-full border rounded p-2 text-sm" placeholder="5000" />
-                                        </div>
-
-                                        <div className="md:col-span-2 border-t pt-3 font-bold text-burgundy">Названия блюда (Dish Names)</div>
-                                        <div>
-                                            <label className="block text-xs font-semibold mb-1">Korean Name (Корейский)</label>
-                                            <input type="text" value={adminForm.koName} onChange={e => setAdminForm({...adminForm, koName: e.target.value})} className="w-full border rounded p-2 text-sm" placeholder="김치찌개" />
-                                        </div>
-                                        <div>
-                                            <label className="block text-xs font-semibold mb-1">English Name (Английский)</label>
-                                            <input type="text" value={adminForm.enName} onChange={e => setAdminForm({...adminForm, enName: e.target.value})} className="w-full border rounded p-2 text-sm" placeholder="Kimchi Stew" />
-                                        </div>
-                                        <div>
-                                            <label className="block text-xs font-semibold mb-1">Russian Name (Русский)</label>
-                                            <input type="text" value={adminForm.ruName} onChange={e => setAdminForm({...adminForm, ruName: e.target.value})} className="w-full border rounded p-2 text-sm" placeholder="Кимчи чиге" />
-                                        </div>
-                                        <div>
-                                            <label className="block text-xs font-semibold mb-1">Chinese Name (Китайский)</label>
-                                            <input type="text" value={adminForm.zhName} onChange={e => setAdminForm({...adminForm, zhName: e.target.value})} className="w-full border rounded p-2 text-sm" placeholder="泡菜汤" />
-                                        </div>
-
-                                        <div className="md:col-span-2 border-t pt-3 font-bold text-burgundy">Описания блюда (Descriptions)</div>
-                                        <div>
-                                            <label className="block text-xs font-semibold mb-1">English Description</label>
-                                            <input type="text" value={adminForm.enDesc} onChange={e => setAdminForm({...adminForm, enDesc: e.target.value})} className="w-full border rounded p-2 text-sm" placeholder="Spicy traditional stew" />
-                                        </div>
-                                        <div>
-                                            <label className="block text-xs font-semibold mb-1">Russian Description</label>
-                                            <input type="text" value={adminForm.ruDesc} onChange={e => setAdminForm({...adminForm, ruDesc: e.target.value})} className="w-full border rounded p-2 text-sm" placeholder="Острый традиционный суп" />
-                                        </div>
-                                        <div className="md:col-span-2">
-                                            <label className="block text-xs font-semibold mb-1">Chinese Description</label>
-                                            <input type="text" value={adminForm.zhDesc} onChange={e => setAdminForm({...adminForm, zhDesc: e.target.value})} className="w-full border rounded p-2 text-sm" placeholder="辣味传统汤" />
-                                        </div>
-
-                                        <div className="md:col-span-2 border-t pt-3 font-bold text-burgundy">Ингредиенты (Ingredients)</div>
-                                        <div>
-                                            <label className="block text-xs font-semibold mb-1">English Ingredients</label>
-                                            <input type="text" value={adminForm.enIngredients} onChange={e => setAdminForm({...adminForm, enIngredients: e.target.value})} className="w-full border rounded p-2 text-sm" placeholder="Kimchi, pork, tofu" />
-                                        </div>
-                                        <div>
-                                            <label className="block text-xs font-semibold mb-1">Russian Ingredients</label>
-                                            <input type="text" value={adminForm.ruIngredients} onChange={e => setAdminForm({...adminForm, ruIngredients: e.target.value})} className="w-full border rounded p-2 text-sm" placeholder="Кимчи, свинина, тофу" />
-                                        </div>
-                                        <div className="md:col-span-2">
-                                            <label className="block text-xs font-semibold mb-1">Chinese Ingredients</label>
-                                            <input type="text" value={adminForm.zhIngredients} onChange={e => setAdminForm({...adminForm, zhIngredients: e.target.value})} className="w-full border rounded p-2 text-sm" placeholder="泡菜，猪肉，豆腐" />
-                                        </div>
-
-                                        <div className="md:col-span-2 border-t pt-3">
-                                            <label className="block text-sm font-semibold mb-1">Allergens (через запятую, например: soy, pork, garlic)</label>
-                                            <input type="text" value={adminForm.allergens} onChange={e => setAdminForm({...adminForm, allergens: e.target.value})} className="w-full border rounded p-2 text-sm" placeholder="soy, pork" />
-                                        </div>
-
-                                        <div className="md:col-span-2">
-                                            <button type="submit" className="bg-burgundy text-white px-4 py-2 rounded font-semibold text-sm">Publish to Cloud</button>
-                                        </div>
-                                    </form>
-                                </div>
-
-                                <div className="bg-white p-6 rounded-lg shadow border border-beige">
-                                    <h2 className="text-lg font-bold mb-2">Bulk Import Weekly Menu (Text)</h2>
-                                    <p className="text-xs text-gray-500 mb-3">
-                                        CafIDs: <code>c1</code>, <code>c2</code>, <code>c3</code>, <code>c4</code><br/>
-                                        Формат строки: <code className="bg-gray-100 p-1 rounded">Date | CafId | Meal | KoName | EnName | RuName | ZhName | Price | EnDesc | RuDesc | ZhDesc | EnIngr | RuIngr | ZhIngr | Allergens</code>
-                                    </p>
-                                    <form onSubmit={handleBulkImport} className="space-y-3">
-                                        <textarea 
-                                            rows="5" 
-                                            value={bulkText} 
-                                            onChange={e => setBulkText(e.target.value)} 
-                                            placeholder="2026-06-01 | c1 | Lunch | 김치찌개 | Kimchi Stew | Кимчи чиге | 泡菜汤 | 5000 | Spicy stew | Острый суп | 辣汤 | Pork, tofu | Свинина, тофу | 猪肉，豆腐 | soy, pork" 
-                                            className="w-full border rounded p-2 text-sm font-mono"
-                                        />
-                                        <button type="submit" className="bg-gold text-darkbrown font-bold px-4 py-2 rounded text-sm">Parse & Upload Weekly Menu</button>
-                                    </form>
-                                </div>
-
-                                <div className="bg-white p-6 rounded-lg shadow border border-beige">
-                                    <div className="flex justify-between items-center mb-4">
-                                        <h2 className="text-lg font-bold">Published Dishes in Cloud ({dishes.length})</h2>
-                                        {dishes.length > 0 && (
-                                            <button onClick={handleClearAllDishes} className="bg-red-600 text-white px-3 py-1 rounded text-xs font-semibold">Delete All</button>
-                                        )}
-                                    </div>
-                                    <div className="space-y-2 max-h-96 overflow-y-auto">
-                                        {dishes.map(dish => (
-                                            <div key={dish.id} className="flex justify-between items-center border-b p-2 text-sm">
-                                                <div>
-                                                    <span className="font-bold">{dish.koName}</span> ({dish.enName} / {dish.ruName} / {dish.zhName}) - <span className="text-burgundy">{dish.price} KRW</span> <span className="text-xs text-gray-500">[{dish.cafeteriaId} / {dish.date} / {dish.mealType}]</span>
-                                                </div>
-                                                <button onClick={() => handleDeleteDish(dish.id)} className="text-red-600 font-bold px-2 py-1 text-xs">Delete</button>
-                                            </div>
-                                        ))}
-                                    </div>
+                                                {translateAllergen(al, lang)}
+                                            </label>
+                                        );
+                                    })}
                                 </div>
                             </div>
-                        )}
-                    </main>
+                            <div>
+                                <label className="block text-xs font-bold text-gray-700 mb-1">Other Allergens (comma separated)</label>
+                                <input 
+                                    type="text" 
+                                    value={profileOtherAllergen} 
+                                    onChange={e => setProfileOtherAllergen(e.target.value)} 
+                                    placeholder="e.g. kiwi, buckwheat, garlic" 
+                                    className="w-full border border-beige rounded p-2 text-xs bg-cream text-darkbrown"
+                                />
+                            </div>
+                            <button type="submit" className="w-full bg-burgundy text-cream font-bold py-2.5 rounded text-xs hover:bg-burgundy-dark transition">
+                                Save Profile
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            );
 
-                    {selectedDishModal && (
-                        <div 
-                            className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50"
-                            onClick={() => setSelectedDishModal(null)}
-                        >
-                            <div 
-                                className="bg-white rounded-xl max-w-md w-full p-6 shadow-xl border-2 border-burgundy space-y-4"
-                                onClick={e => e.stopPropagation()}
-                            >
-                                <div className="flex justify-between items-start gap-2 border-b border-beige pb-3">
+            const renderAdminDashboard = () => (
+                <div className="max-w-7xl mx-auto px-4 py-8 flex-grow">
+                    <h2 className="text-2xl font-bold text-darkbrown mb-6">Admin Dashboard</h2>
+                    
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+                        <div className="bg-white rounded-xl shadow border border-beige p-6">
+                            <h3 className="text-lg font-bold text-burgundy mb-4">Add Single Dish</h3>
+                            <form onSubmit={handleAddDish} className="space-y-4">
+                                <div className="grid grid-cols-2 gap-3">
                                     <div>
-                                        <h3 className="text-xl font-bold text-burgundy">{selectedDishModal.koName}</h3>
-                                        <p className="text-sm font-medium text-gray-700">
-                                            {getLocalizedField(selectedDishModal, 'Name', lang)}
-                                        </p>
+                                        <label className="block text-xs font-bold text-gray-700 mb-1">Cafeteria</label>
+                                        <select value={adminForm.cafeteriaId} onChange={e => setAdminForm({...adminForm, cafeteriaId: e.target.value})} className="w-full border border-beige rounded p-2 text-xs bg-cream text-darkbrown">
+                                            {getCafeterias(lang).map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
+                                        </select>
                                     </div>
-                                    <button 
-                                        onClick={() => setSelectedDishModal(null)} 
-                                        className="text-gray-400 hover:text-darkbrown font-bold text-lg px-2"
-                                    >
-                                        ✕
-                                    </button>
-                                </div>
-
-                                <div className="space-y-2 text-sm">
-                                    <div className="flex justify-between">
-                                        <span className="text-gray-500">{t.cafeteriaLabel}:</span>
-                                        <span className="font-semibold">
-                                            {INITIAL_CAFETERIAS.find(c => c.id === selectedDishModal.cafeteriaId)?.name || selectedDishModal.cafeteriaId}
-                                        </span>
-                                    </div>
-                                    <div className="flex justify-between">
-                                        <span className="text-gray-500">{t.dateAndMeal}:</span>
-                                        <span className="font-semibold">{getSafeDateString(selectedDishModal.date)} ({translateDay(getDayName(selectedDishModal.date), lang)}) — {t[(selectedDishModal.mealType || '').toLowerCase()] || selectedDishModal.mealType}</span>
-                                    </div>
-                                    <div className="flex justify-between">
-                                        <span className="text-gray-500">{t.price}:</span>
-                                        <span className="font-bold text-burgundy">{selectedDishModal.price} {t.price}</span>
-                                    </div>
-                                    <div className="flex justify-between items-center bg-amber-50 p-2 rounded">
-                                        <span className="text-amber-800 font-semibold text-xs">{t.rating}:</span>
-                                        <span className="font-bold text-amber-700 text-sm">
-                                            ★ {getDishRatingStats(selectedDishModal.id).avg} ({getDishRatingStats(selectedDishModal.id).count})
-                                        </span>
+                                    <div>
+                                        <label className="block text-xs font-bold text-gray-700 mb-1">Date</label>
+                                        <input type="date" value={adminForm.date} onChange={e => setAdminForm({...adminForm, date: e.target.value})} className="w-full border border-beige rounded p-2 text-xs bg-cream text-darkbrown" />
                                     </div>
                                 </div>
-
-                                <div className="bg-cream p-3 rounded-lg border border-beige space-y-2 text-sm">
+                                <div className="grid grid-cols-2 gap-3">
                                     <div>
-                                        <span className="font-bold text-darkbrown block text-xs uppercase tracking-wide">{t.description}</span>
-                                        <p className="text-gray-700 mt-0.5">
-                                            {getLocalizedField(selectedDishModal, 'Desc', lang) || 'No detailed description provided.'}
-                                        </p>
+                                        <label className="block text-xs font-bold text-gray-700 mb-1">Meal Type</label>
+                                        <select value={adminForm.mealType} onChange={e => setAdminForm({...adminForm, mealType: e.target.value})} className="w-full border border-beige rounded p-2 text-xs bg-cream text-darkbrown">
+                                            <option value="Breakfast">Breakfast</option>
+                                            <option value="Lunch">Lunch</option>
+                                            <option value="Dinner">Dinner</option>
+                                        </select>
                                     </div>
                                     <div>
-                                        <span className="font-bold text-darkbrown block text-xs uppercase tracking-wide">{t.ingredients}</span>
-                                        <p className="text-gray-700 mt-0.5">
-                                            {getLocalizedField(selectedDishModal, 'Ingredients', lang) || 'Not specified.'}
-                                        </p>
-                                    </div>
-                                    <div>
-                                        <span className="font-bold text-darkbrown block text-xs uppercase tracking-wide">{t.allergens}</span>
-                                        <p className="text-gray-700 mt-0.5">
-                                            {selectedDishModal.allergens && selectedDishModal.allergens.length > 0 
-                                                ? selectedDishModal.allergens.map(a => translateAllergen(a, lang)).join(', ') 
-                                                : 'None listed'}
-                                        </p>
+                                        <label className="block text-xs font-bold text-gray-700 mb-1">Price (optional)</label>
+                                        <input type="number" value={adminForm.price} onChange={e => setAdminForm({...adminForm, price: e.target.value})} placeholder="e.g. 5000" className="w-full border border-beige rounded p-2 text-xs bg-cream text-darkbrown" />
                                     </div>
                                 </div>
-
-                                {user && user.role !== 'admin' ? (
-                                    <div className="bg-beige/40 p-3 rounded-lg border border-beige text-center space-y-1">
-                                        <span className="text-xs font-bold text-burgundy">{t.rateThis}</span>
-                                        <div className="flex justify-center gap-1 text-2xl cursor-pointer">
-                                            {[1, 2, 3, 4, 5].map(star => {
-                                                const currentRating = getUserDishRating(selectedDishModal.id);
-                                                const isHighlighted = star <= currentRating;
-                                                return (
-                                                    <span 
-                                                        key={star} 
-                                                        onClick={() => handleRateDish(selectedDishModal.id, star)}
-                                                        className={`transition hover:scale-125 ${isHighlighted ? 'text-amber-500' : 'text-gray-300'}`}
-                                                    >
-                                                        ★
-                                                    </span>
-                                                );
-                                            })}
-                                        </div>
+                                <div>
+                                    <label className="block text-xs font-bold text-gray-700 mb-1">Korean Name *</label>
+                                    <input type="text" value={adminForm.koName} onChange={e => setAdminForm({...adminForm, koName: e.target.value})} className="w-full border border-beige rounded p-2 text-xs bg-cream text-darkbrown" />
+                                </div>
+                                <div>
+                                    <label className="block text-xs font-bold text-gray-700 mb-1">English Name *</label>
+                                    <input type="text" value={adminForm.enName} onChange={e => setAdminForm({...adminForm, enName: e.target.value})} className="w-full border border-beige rounded p-2 text-xs bg-cream text-darkbrown" />
+                                </div>
+                                <div className="grid grid-cols-2 gap-3">
+                                    <div>
+                                        <label className="block text-xs font-bold text-gray-700 mb-1">Russian Name</label>
+                                        <input type="text" value={adminForm.ruName} onChange={e => setAdminForm({...adminForm, ruName: e.target.value})} className="w-full border border-beige rounded p-2 text-xs bg-cream text-darkbrown" />
                                     </div>
-                                ) : null}
-
-                                {checkAllergy(selectedDishModal.allergens) ? (
-                                    <div className="bg-red-100 border border-red-400 text-red-800 p-3 rounded text-xs font-semibold">
-                                        ⚠️ {t.allergyCaution} ({getMatchingUserAllergens(selectedDishModal.allergens).map(a => translateAllergen(a, lang)).join(', ')}).
+                                    <div>
+                                        <label className="block text-xs font-bold text-gray-700 mb-1">Chinese Name</label>
+                                        <input type="text" value={adminForm.zhName} onChange={e => setAdminForm({...adminForm, zhName: e.target.value})} className="w-full border border-beige rounded p-2 text-xs bg-cream text-darkbrown" />
                                     </div>
-                                ) : user && user.role !== 'admin' ? (
-                                    <div className="bg-green-50 border border-green-300 text-green-800 p-2.5 rounded text-xs font-medium">
-                                        {t.safeDish}
-                                    </div>
-                                ) : null}
-
-                                <button 
-                                    onClick={() => setSelectedDishModal(null)} 
-                                    className="w-full bg-burgundy text-white py-2 rounded font-semibold text-sm"
-                                >
-                                    {t.close}
+                                </div>
+                                <div>
+                                    <label className="block text-xs font-bold text-gray-700 mb-1">Allergens (comma separated)</label>
+                                    <input type="text" value={adminForm.allergens} onChange={e => setAdminForm({...adminForm, allergens: e.target.value})} placeholder="pork, soy, wheat" className="w-full border border-beige rounded p-2 text-xs bg-cream text-darkbrown" />
+                                </div>
+                                <button type="submit" className="w-full bg-burgundy text-cream font-bold py-2 rounded text-xs hover:bg-burgundy-dark transition">
+                                    Publish Dish
                                 </button>
-                            </div>
+                            </form>
                         </div>
-                    )}
+
+                        <div className="bg-white rounded-xl shadow border border-beige p-6">
+                            <h3 className="text-lg font-bold text-burgundy mb-4">Bulk Import</h3>
+                            <form onSubmit={handleBulkImport} className="space-y-4">
+                                <div>
+                                    <label className="block text-xs font-bold text-gray-700 mb-1">Paste Data (Format: Date|CafId|Meal|Ko|En|Ru|Zh|Price|...)</label>
+                                    <textarea rows="10" value={bulkText} onChange={e => setBulkText(e.target.value)} placeholder="2026-11-18 | c1 | Lunch | 김치찌개 | Kimchi Stew | Кимчи чхиге | 泡菜汤 | 5000 | ..." className="w-full border border-beige rounded p-2 text-xs bg-cream text-darkbrown font-mono"></textarea>
+                                </div>
+                                <button type="submit" className="w-full bg-gold text-darkbrown font-bold py-2 rounded text-xs hover:bg-gold/90 transition">
+                                    Import Bulk Data
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+
+                    <div className="bg-white rounded-xl shadow border border-beige p-6">
+                        <h3 className="text-lg font-bold text-burgundy mb-4">Manage Published Dishes ({dishes.length})</h3>
+                        <div className="overflow-x-auto">
+                            <table className="w-full text-xs text-left">
+                                <thead className="bg-cream border-b border-beige text-darkbrown">
+                                    <tr>
+                                        <th className="p-2">Date</th>
+                                        <th className="p-2">Cafeteria</th>
+                                        <th className="p-2">Meal</th>
+                                        <th className="p-2">Korean Name</th>
+                                        <th className="p-2">English Name</th>
+                                        <th className="p-2">Price</th>
+                                        <th className="p-2 text-right">Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {dishes.map(d => (
+                                        <tr key={d.id} className="border-b border-beige/40 hover:bg-cream/40">
+                                            <td className="p-2">{d.date}</td>
+                                            <td className="p-2">{CAFETERIAS_DATA[d.cafeteriaId]?.en?.name}</td>
+                                            <td className="p-2">{d.mealType}</td>
+                                            <td className="p-2 font-bold">{d.koName}</td>
+                                            <td className="p-2">{d.enName}</td>
+                                            <td className="p-2">{(!d.price || d.price === 0) ? 'Unknown' : `${d.price} KRW`}</td>
+                                            <td className="p-2 text-right">
+                                                <button onClick={() => handleDeleteDish(d.id)} className="bg-red-100 text-red-600 px-2 py-1 rounded font-semibold hover:bg-red-200 transition">Delete</button>
+                                            </td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            );
+
+            const renderAuth = () => (
+                <div className="max-w-md mx-auto px-4 py-16 flex-grow">
+                    <div className="bg-white rounded-xl shadow border border-beige p-8">
+                        <h2 className="text-2xl font-bold text-darkbrown mb-6 text-center">
+                            {view === 'login' ? t.login : view === 'signup' ? t.signup : 'Admin Login'}
+                        </h2>
+                        {authError && <div className="mb-4 p-3 bg-red-50 border border-red-300 rounded text-xs text-red-600 font-semibold">{authError}</div>}
+                        <form onSubmit={view === 'signup' ? handleSignup : handleLogin} className="space-y-4">
+                            <div>
+                                <label className="block text-xs font-bold text-gray-700 mb-1">{view === 'admin-login' ? 'Admin Username' : 'Username or Email'}</label>
+                                <input type="text" value={authForm.username} onChange={e => setAuthForm({...authForm, username: e.target.value})} className="w-full border border-beige rounded p-2 text-xs bg-cream text-darkbrown" required />
+                            </div>
+                            {view === 'signup' && (
+                                <div>
+                                    <label className="block text-xs font-bold text-gray-700 mb-1">Email</label>
+                                    <input type="email" value={authForm.email} onChange={e => setAuthForm({...authForm, email: e.target.value})} className="w-full border border-beige rounded p-2 text-xs bg-cream text-darkbrown" required />
+                                </div>
+                            )}
+                            <div>
+                                <label className="block text-xs font-bold text-gray-700 mb-1">Password</label>
+                                <input type="password" value={authForm.password} onChange={e => setAuthForm({...authForm, password: e.target.value})} className="w-full border border-beige rounded p-2 text-xs bg-cream text-darkbrown" required />
+                            </div>
+
+                            {view === 'signup' && (
+                                <div>
+                                    <label className="block text-xs font-bold text-gray-700 mb-2">{t.selectYourAllergens}</label>
+                                    <div className="grid grid-cols-2 gap-2 max-h-40 overflow-y-auto p-1 border border-beige rounded">
+                                        {COMMON_ALLERGENS.map(al => {
+                                            const isChecked = authForm.selectedAllergens.includes(al);
+                                            return (
+                                                <label key={al} className={`flex items-center gap-2 p-1.5 rounded cursor-pointer text-xs ${isChecked ? 'bg-burgundy/10 border border-burgundy font-bold text-burgundy' : 'bg-cream text-darkbrown'}`}>
+                                                    <input type="checkbox" checked={isChecked} onChange={() => toggleSignupAllergen(al)} />
+                                                    {translateAllergen(al, lang)}
+                                                </label>
+                                            );
+                                        })}
+                                    </div>
+                                </div>
+                            )}
+
+                            <button type="submit" className="w-full bg-burgundy text-cream font-bold py-2.5 rounded text-xs hover:bg-burgundy-dark transition">
+                                {view === 'signup' ? t.signup : t.login}
+                            </button>
+                        </form>
+                        
+                        {view !== 'admin-login' && (
+                            <div className="mt-4 text-center text-xs">
+                                <button onClick={() => switchView('admin-login')} className="text-gray-500 hover:text-burgundy underline">Login as Admin</button>
+                            </div>
+                        )}
+                    </div>
+                </div>
+            );
+
+            return (
+                <div className="min-h-screen flex flex-col bg-cream">
+                    {renderHeader()}
+                    {view === 'home' && renderHome()}
+                    {view === 'cafeterias' && renderCafeteriasView()}
+                    {view === 'todays-menu' && renderTodaysMenuView()}
+                    {view === 'weekly-menu' && renderWeeklyMenuView()}
+                    {view === 'profile' && renderProfileView()}
+                    {view === 'admin-dashboard' && renderAdminDashboard()}
+                    {(view === 'login' || view === 'signup' || view === 'admin-login') && renderAuth()}
+                    {renderDishModal()}
+                    <footer className="bg-darkbrown text-cream/70 text-center py-4 text-xs mt-auto">
+                        <p>© 2026 Korea University Meal Guide. All rights reserved.</p>
+                    </footer>
                 </div>
             );
         }
