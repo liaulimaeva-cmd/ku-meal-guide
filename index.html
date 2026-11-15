@@ -277,31 +277,23 @@
     'buckwheat': { ru: 'Гречка', zh: '荞麦' }
 };
 
-const translateAllergen = (item, targetLang) => {
-    if (!item) return '';
-    const clean = String(item).trim().toLowerCase();
-    if (targetLang === 'en') return item.trim();
+    const translateAllergen = (item, targetLang) => {
+        if (!item) return '';
+        const clean = String(item).trim().toLowerCase();
+        if (targetLang === 'en') return item.trim();
     
-    if (ALLERGEN_TRANSLATIONS[clean]) {
-        return ALLERGEN_TRANSLATIONS[clean][targetLang] || item.trim();
-    }
-    
-    for (const [key, translations] of Object.entries(ALLERGEN_TRANSLATIONS)) {
-        if (clean.includes(key)) {
-            return translations[targetLang] || item.trim();
+        if (ALLERGEN_TRANSLATIONS[clean]) {
+            return ALLERGEN_TRANSLATIONS[clean][targetLang] || item.trim();
         }
-    }
     
-    return item.trim();
-};
-   
-        const translateAllergen = (item, targetLang) => {
-            if (!item) return '';
-            const clean = item.trim().toLowerCase();
-            if (targetLang === 'en') return item.trim();
-            const found = ALLERGEN_TRANSLATIONS[clean];
-            return found ? (found[targetLang] || item.trim()) : item.trim();
-        };
+        for (const [key, translations] of Object.entries(ALLERGEN_TRANSLATIONS)) {
+            if (clean.includes(key)) {
+                return translations[targetLang] || item.trim();
+            }
+        }
+        
+        return item.trim();
+    };
 
         const getLocalizedField = (dish, field, lang) => {
             if (!dish) return '';
