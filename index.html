@@ -246,51 +246,64 @@
         };
 
         const ALLERGEN_TRANSLATIONS = {
-            'egg': { ru: 'Яйца', zh: '鸡蛋' },
-            'milk': { ru: 'Молоко', zh: '牛奶' },
-            'dairy': { ru: 'Молочные продукты', zh: '乳制品' },
-            'peanuts': { ru: 'Арахис', zh: '花生' },
-            'peanut': { ru: 'Арахис', zh: '花生' },
-            'tree nuts': { ru: 'Орехи', zh: '坚果' },
-            'nuts': { ru: 'Орехи', zh: '坚果' },
-            'soy': { ru: 'Соя', zh: '大豆' },
-            'soybean': { ru: 'Соя', zh: '大豆' },
-            'wheat / gluten': { ru: 'Пшеница / Глютен', zh: '小麦 / 面筋' },
-            'wheat': { ru: 'Пшеница', zh: '小麦' },
-            'gluten': { ru: 'Глютен', zh: '面筋' },
-            'fish': { ru: 'Рыба', zh: '鱼类' },
-            'shellfish': { ru: 'Моллюски / Ракообразные', zh: '甲壳类海鲜' },
-            'pork': { ru: 'Свинина', zh: '猪肉' },
-            'beef': { ru: 'Говядина', zh: '牛肉' },
-            'chicken': { ru: 'Курица', zh: '鸡肉' },
-            'sesame': { ru: 'Кунжут', zh: '芝麻' },
-            'garlic': { ru: 'Чеснок', zh: '大蒜' },
-            'tomato': { ru: 'Томаты', zh: '番茄' },
-            'shrimp': { ru: 'Креветки', zh: '虾' },
-            'crab': { ru: 'Краб', zh: '蟹' },
-            'squid': { ru: 'Кальмар', zh: '鱿鱼' },
-            'mushrooms': { ru: 'Грибы', zh: '蘑菇' },
-            'buckwheat': { ru: 'Гречка', zh: '荞麦' }
-        };
+    'egg': { ru: 'Яйца', zh: '鸡蛋' },
+    'eggs': { ru: 'Яйца', zh: '鸡蛋' },
+    'milk': { ru: 'Молоко', zh: '牛奶' },
+    'dairy': { ru: 'Молочные продукты', zh: '乳制品' },
+    'peanuts': { ru: 'Арахис', zh: '花生' },
+    'peanut': { ru: 'Арахис', zh: '花生' },
+    'tree nuts': { ru: 'Орехи', zh: '坚果' },
+    'nuts': { ru: 'Орехи', zh: '坚果' },
+    'soy': { ru: 'Соя', zh: '大豆' },
+    'soybean': { ru: 'Соя', zh: '大豆' },
+    'wheat / gluten': { ru: 'Пшеница / Глютен', zh: '小麦 / 面筋' },
+    'wheat': { ru: 'Пшеница', zh: '小麦' },
+    'gluten': { ru: 'Глютен', zh: '面筋' },
+    'fish': { ru: 'Рыба', zh: '鱼类' },
+    'shellfish': { ru: 'Моллюски / Ракообразные', zh: '甲壳类海鲜' },
+    'crustaceans': { ru: 'Ракообразные', zh: '甲壳类' },
+    'crustacean': { ru: 'Ракообразные', zh: '甲壳类' },
+    'mollusc': { ru: 'Моллюски', zh: '软体动物' },
+    'molluscs': { ru: 'Моллюски', zh: '软体动物' },
+    'pork': { ru: 'Свинина', zh: '猪肉' },
+    'beef': { ru: 'Говядина', zh: '牛肉' },
+    'chicken': { ru: 'Курица', zh: '鸡肉' },
+    'poultry': { ru: 'Птица', zh: '家禽' },
+    'duck': { ru: 'Утка', zh: '鸭肉' },
+    'sesame': { ru: 'Кунжут', zh: '芝麻' },
+    'garlic': { ru: 'Чеснок', zh: '大蒜' },
+    'tomato': { ru: 'Томаты', zh: '番茄' },
+    'shrimp': { ru: 'Креветки', zh: '虾' },
+    'crab': { ru: 'Краб', zh: '蟹' },
+    'squid': { ru: 'Кальмар', zh: '鱿鱼' },
+    'mushrooms': { ru: 'Грибы', zh: '蘑菇' },
+    'buckwheat': { ru: 'Гречка', zh: '荞麦' }
+};
 
-        const translateAllergen = (item, targetLang) => {
-            if (!item) return '';
-            const clean = String(item).trim().toLowerCase();
-            if (targetLang === 'en') return item.trim();
+const translateAllergen = (item, targetLang) => {
+    if (!item) return '';
+    if (Array.isArray(item)) {
+        return item.map(subItem => translateAllergen(subItem, targetLang)).join(', ');
+    }
     
-            if (ALLERGEN_TRANSLATIONS[clean]) {
-                return ALLERGEN_TRANSLATIONS[clean][targetLang] || item.trim();
-            }
+    const clean = String(item).trim().toLowerCase();
+    if (targetLang === 'en') return item.trim();
     
-        for (const [key, translations] of Object.entries(ALLERGEN_TRANSLATIONS)) {
-            if (clean.includes(key)) {
-                return translations[targetLang] || item.trim();
-            }
+    // 1. Ищем точное совпадение
+    if (ALLERGEN_TRANSLATIONS[clean]) {
+        return ALLERGEN_TRANSLATIONS[clean][targetLang] || item.trim();
+    }
+    
+    // 2. Ищем по подстроке
+    for (const [key, translations] of Object.entries(ALLERGEN_TRANSLATIONS)) {
+        if (clean.includes(key)) {
+            return translations[targetLang] || item.trim();
         }
-        
-        return item.trim();
-    };
-
+    }
+    
+    return item.trim();
+};
+    
         const getLocalizedField = (dish, field, lang) => {
             if (!dish) return '';
             if (lang === 'ru' && dish[`ru${field}`]) return dish[`ru${field}`];
