@@ -270,11 +270,12 @@
             return found ? (found[targetLang] || item.trim()) : item.trim();
         };
 
-        const getLocalizedDishName = (dish, lang) => {
+        const getLocalizedField = (dish, field, lang) => {
             if (!dish) return '';
-            if (lang === 'ru' && dish.ruName) return dish.ruName;
-            if (lang === 'zh' && dish.zhName) return dish.zhName;
-            return dish.enName || dish.koName || '';
+            if (lang === 'ru' && dish[`ru${field}`]) return dish[`ru${field}`];
+            if (lang === 'zh' && dish[`zh${field}`]) return dish[`zh${field}`];
+            if (lang === 'en' && dish[`en${field}`]) return dish[`en${field}`];
+            return dish[`en${field}`] || dish[`ko${field}`] || '';
         };
 
         const CAFETERIAS_DATA = {
@@ -290,13 +291,13 @@
                 en: { name: 'Anam Dormitory Cafeteria', location: 'Anam Dormitory Administration Building 2F', hours: 'Cheonwon Breakfast: 08:00 - 09:30 | Easy Meal: 08:00 - 19:00 | Lunch: 11:30 - 14:00 | Dinner: 17:00 - 19:00' },
                 ru: { name: 'Столовая общежития Анам', location: 'Административное здание общежития Анам, 2 этаж', hours: 'Завтрак Чхонвон: 08:00 - 09:30 | Перекус: 08:00 - 19:00 | Обед: 11:30 - 14:00 | Ужин: 17:00 - 19:00' },
                 zh: { name: '安岩宿舍食堂', location: '安岩宿舍行政楼2楼', hours: '千元早餐: 08:00 - 09:30 | 简餐: 08:00 - 19:00 | 午餐: 11:30 - 14:00 | 晚餐: 17:00 - 19:00' },
-                phone: 'Dormitory Cafeteria'
+                phone: '070-4120-3229'
             },
             c3: {
                 koName: '산학관 식당',
-                en: { name: 'Sanhakwan Dining Hall', location: 'Sanhakwan 1F, Science & Technology Campus', hours: 'Lunch: 11:20 - 13:50 | Dinner: 17:30 - 18:50 (Last Order 18:30) | Saturday: Lunch only (11:20 - 13:30)' },
-                ru: { name: 'Столовая Санакван', location: 'Санакван, 1 этаж, Кампус точных наук и технологий', hours: 'Обед: 11:20 - 13:50 | Ужин: 17:30 - 18:50 (Заказ до 18:30) | Суббота: только обед (11:20 - 13:30)' },
-                zh: { name: '山学馆食堂', location: '山学馆1楼，科学技术校区', hours: '午餐: 11:20 - 13:50 | 晚餐: 17:30 - 18:50 (最后点餐 18:30) | 周六: 仅午餐 (11:20 - 13:30)' },
+                en: { name: 'Sanhakwan Dining Hall', location: 'Sanhakwan 1F, Science & Technology Campus', hours: 'Lunch: 11:20 - 13:50 | Dinner: 17:30 - 18:50 (Last Order 18:30)' },
+                ru: { name: 'Столовая Санакван', location: 'Санакван, 1 этаж, Кампус точных наук и технологий', hours: 'Обед: 11:20 - 13:50 | Ужин: 17:30 - 18:50 (Заказ до 18:30)' },
+                zh: { name: '山学馆食堂', location: '山学馆1楼，科学技术校区', hours: '午餐: 11:20 - 13:50 | 晚餐: 17:30 - 18:50 (最后点餐 18:30)' },
                 phone: '02-921-5770'
             },
             c4: {
@@ -424,8 +425,12 @@
                 ruName: '',
                 zhName: '',
                 price: '',
-                desc: '',
-                ingredients: '',
+                enDesc: '',
+                ruDesc: '',
+                zhDesc: '',
+                enIngredients: '',
+                ruIngredients: '',
+                zhIngredients: '',
                 allergens: '',
                 spice: 'Mild'
             });
@@ -639,6 +644,10 @@
                     ...adminForm,
                     ruName: adminForm.ruName || adminForm.enName,
                     zhName: adminForm.zhName || adminForm.enName,
+                    ruDesc: adminForm.ruDesc || adminForm.enDesc,
+                    zhDesc: adminForm.zhDesc || adminForm.enDesc,
+                    ruIngredients: adminForm.ruIngredients || adminForm.enIngredients,
+                    zhIngredients: adminForm.zhIngredients || adminForm.enIngredients,
                     price: Number(adminForm.price),
                     allergens: adminForm.allergens ? adminForm.allergens.split(',').map(s => s.trim().toLowerCase()) : [],
                     published: true
@@ -650,7 +659,12 @@
                 } else {
                     setDishes([...dishes, newDish]);
                     alert('Menu item published and saved to cloud!');
-                    setAdminForm({ ...adminForm, koName: '', enName: '', ruName: '', zhName: '', price: '', desc: '', ingredients: '', allergens: '' });
+                    setAdminForm({ 
+                        ...adminForm, 
+                        koName: '', enName: '', ruName: '', zhName: '', 
+                        price: '', enDesc: '', ruDesc: '', zhDesc: '', 
+                        enIngredients: '', ruIngredients: '', zhIngredients: '', allergens: '' 
+                    });
                 }
             };
 
@@ -667,9 +681,8 @@
                 for (let line of lines) {
                     if (!line.trim()) continue;
                     const parts = line.split('|').map(p => p.trim());
-                    // Поддержка расширенного формата: Date | CafId | Meal | KoName | EnName | RuName | ZhName | Price | Desc | Ingredients | Allergens
-                    // Или старого: Date | CafId | Meal | KoName | EnName | Price | Desc | Ingredients | Allergens
-                    if (parts.length >= 10) {
+                    // Формат: Date | CafId | Meal | KoName | EnName | RuName | ZhName | Price | EnDesc | RuDesc | ZhDesc | EnIngr | RuIngr | ZhIngr | Allergens
+                    if (parts.length >= 15) {
                         newDishes.push({
                             id: 'dish_' + Date.now() + '_' + Math.random().toString(36).substring(2, 7),
                             date: getSafeDateString(parts[0]),
@@ -680,12 +693,16 @@
                             ruName: parts[5] || parts[4],
                             zhName: parts[6] || parts[4],
                             price: Number(parts[7]) || 5000,
-                            desc: parts[8] || '',
-                            ingredients: parts[9] || '',
-                            allergens: parts[10] ? parts[10].split(',').map(s => s.trim().toLowerCase()) : [],
+                            enDesc: parts[8] || '',
+                            ruDesc: parts[9] || parts[8],
+                            zhDesc: parts[10] || parts[8],
+                            enIngredients: parts[11] || '',
+                            ruIngredients: parts[12] || parts[11],
+                            zhIngredients: parts[13] || parts[11],
+                            allergens: parts[14] ? parts[14].split(',').map(s => s.trim().toLowerCase()) : [],
                             published: true
                         });
-                    } else if (parts.length >= 8) {
+                    } else if (parts.length >= 11) {
                         newDishes.push({
                             id: 'dish_' + Date.now() + '_' + Math.random().toString(36).substring(2, 7),
                             date: getSafeDateString(parts[0]),
@@ -693,19 +710,23 @@
                             mealType: parts[2],
                             koName: parts[3],
                             enName: parts[4],
-                            ruName: parts[4],
-                            zhName: parts[4],
-                            price: Number(parts[5]) || 5000,
-                            desc: parts[6] || '',
-                            ingredients: parts[7] || '',
-                            allergens: parts[8] ? parts[8].split(',').map(s => s.trim().toLowerCase()) : [],
+                            ruName: parts[5] || parts[4],
+                            zhName: parts[6] || parts[4],
+                            price: Number(parts[7]) || 5000,
+                            enDesc: parts[8] || '',
+                            ruDesc: parts[8],
+                            zhDesc: parts[8],
+                            enIngredients: parts[9] || '',
+                            ruIngredients: parts[9],
+                            zhIngredients: parts[9],
+                            allergens: parts[10] ? parts[10].split(',').map(s => s.trim().toLowerCase()) : [],
                             published: true
                         });
                     }
                 }
 
                 if (newDishes.length === 0) {
-                    alert('No valid rows found. Format: Date | CafId | Meal | KoName | EnName | RuName | ZhName | Price | Desc | Ingredients | Allergens');
+                    alert('No valid rows found. Check column count.');
                     return;
                 }
 
@@ -856,7 +877,7 @@
                                                                 return (
                                                                     <div key={dish.id} className={`p-2 rounded border text-xs flex justify-between items-center ${isAllergic ? 'bg-red-50 border-red-300' : 'border-gray-100'}`}>
                                                                         <div>
-                                                                            <span className="font-semibold">{dish.koName}</span> ({getLocalizedDishName(dish, lang)})
+                                                                            <span className="font-semibold">{dish.koName}</span> ({getLocalizedField(dish, 'Name', lang)})
                                                                             <span className="bg-beige px-1 rounded ml-1 text-burgundy font-bold">{mealLocalized}</span>
                                                                             {stats.count > 0 && <span className="ml-2 text-amber-600 font-bold">★ {stats.avg}</span>}
                                                                         </div>
@@ -974,7 +995,7 @@
                                                                         <div key={dish.id} className={`p-2.5 rounded border text-sm flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 ${isAllergic ? 'bg-red-50 border-red-300' : 'border-gray-100'}`}>
                                                                             <div>
                                                                                 <div className="font-semibold">
-                                                                                    {dish.koName} ({getLocalizedDishName(dish, lang)})
+                                                                                    {dish.koName} ({getLocalizedField(dish, 'Name', lang)})
                                                                                     <span className="text-xs bg-beige px-1.5 py-0.5 rounded ml-1.5 text-burgundy font-bold">{mealLocalized}</span>
                                                                                     <span className="text-xs text-gray-400 ml-2">{getSafeDateString(dish.date)}</span>
                                                                                     {stats.count > 0 && <span className="ml-2 text-amber-600 font-bold">★ {stats.avg} ({stats.count})</span>}
@@ -1077,7 +1098,7 @@
                                                                 <div key={dish.id} className={`p-2.5 rounded border text-sm ${isAllergic ? 'bg-red-50 border-red-300' : 'border-gray-100'}`}>
                                                                     <div className="flex justify-between items-start gap-2">
                                                                         <div>
-                                                                            <span className="font-semibold">{dish.koName}</span> ({getLocalizedDishName(dish, lang)})
+                                                                            <span className="font-semibold">{dish.koName}</span> ({getLocalizedField(dish, 'Name', lang)})
                                                                             <span className="text-xs bg-beige px-1.5 py-0.5 rounded ml-1 text-burgundy font-bold">{mealLocalized}</span>
                                                                             {stats.count > 0 && <span className="ml-2 text-amber-600 font-bold">★ {stats.avg} ({stats.count})</span>}
                                                                         </div>
@@ -1115,7 +1136,6 @@
                                     <h1 className="text-2xl font-bold text-burgundy">{t.weeklyMenu}</h1>
                                 </div>
 
-                                {/* Исправленные фильтры в один ряд с переводимыми названиями */}
                                 <div className="bg-white p-4 rounded-lg shadow border border-beige grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 items-end">
                                     <div>
                                         <label className="block text-[11px] font-bold text-gray-500 uppercase mb-1">{t.filterCafeteria}</label>
@@ -1182,7 +1202,7 @@
                                                     <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
                                                         <div>
                                                             <div className="font-bold text-burgundy">
-                                                                {dish.koName} ({getLocalizedDishName(dish, lang)})
+                                                                {dish.koName} ({getLocalizedField(dish, 'Name', lang)})
                                                                 {stats.count > 0 && <span className="ml-2 text-amber-600 font-bold text-xs">★ {stats.avg} ({stats.count})</span>}
                                                             </div>
                                                             <div className="text-xs text-gray-500">
@@ -1326,7 +1346,7 @@
                                 <h1 className="text-2xl font-bold text-burgundy">Admin Dashboard</h1>
                                 
                                 <div className="bg-white p-6 rounded-lg shadow border border-beige">
-                                    <h2 className="text-lg font-bold mb-3">Add Single Dish (Multi-language)</h2>
+                                    <h2 className="text-lg font-bold mb-3">Add Single Dish (Full Multi-language)</h2>
                                     <form onSubmit={handleAddDish} className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                         <div>
                                             <label className="block text-sm font-semibold mb-1">Cafeteria</label>
@@ -1347,37 +1367,61 @@
                                             </select>
                                         </div>
                                         <div>
-                                            <label className="block text-sm font-semibold mb-1">Korean Name (Корейский)</label>
-                                            <input type="text" value={adminForm.koName} onChange={e => setAdminForm({...adminForm, koName: e.target.value})} className="w-full border rounded p-2 text-sm" placeholder="김치찌개" />
-                                        </div>
-                                        <div>
-                                            <label className="block text-sm font-semibold mb-1">English Name (Английский)</label>
-                                            <input type="text" value={adminForm.enName} onChange={e => setAdminForm({...adminForm, enName: e.target.value})} className="w-full border rounded p-2 text-sm" placeholder="Kimchi Stew" />
-                                        </div>
-                                        <div>
-                                            <label className="block text-sm font-semibold mb-1">Russian Name (Русский)</label>
-                                            <input type="text" value={adminForm.ruName} onChange={e => setAdminForm({...adminForm, ruName: e.target.value})} className="w-full border rounded p-2 text-sm" placeholder="Кимчи чиге" />
-                                        </div>
-                                        <div>
-                                            <label className="block text-sm font-semibold mb-1">Chinese Name (Китайский)</label>
-                                            <input type="text" value={adminForm.zhName} onChange={e => setAdminForm({...adminForm, zhName: e.target.value})} className="w-full border rounded p-2 text-sm" placeholder="泡菜汤" />
-                                        </div>
-                                        <div>
                                             <label className="block text-sm font-semibold mb-1">Price (KRW)</label>
                                             <input type="number" value={adminForm.price} onChange={e => setAdminForm({...adminForm, price: e.target.value})} className="w-full border rounded p-2 text-sm" placeholder="5000" />
                                         </div>
+
+                                        <div className="md:col-span-2 border-t pt-3 font-bold text-burgundy">Названия блюда (Dish Names)</div>
+                                        <div>
+                                            <label className="block text-xs font-semibold mb-1">Korean Name (Корейский)</label>
+                                            <input type="text" value={adminForm.koName} onChange={e => setAdminForm({...adminForm, koName: e.target.value})} className="w-full border rounded p-2 text-sm" placeholder="김치찌개" />
+                                        </div>
+                                        <div>
+                                            <label className="block text-xs font-semibold mb-1">English Name (Английский)</label>
+                                            <input type="text" value={adminForm.enName} onChange={e => setAdminForm({...adminForm, enName: e.target.value})} className="w-full border rounded p-2 text-sm" placeholder="Kimchi Stew" />
+                                        </div>
+                                        <div>
+                                            <label className="block text-xs font-semibold mb-1">Russian Name (Русский)</label>
+                                            <input type="text" value={adminForm.ruName} onChange={e => setAdminForm({...adminForm, ruName: e.target.value})} className="w-full border rounded p-2 text-sm" placeholder="Кимчи чиге" />
+                                        </div>
+                                        <div>
+                                            <label className="block text-xs font-semibold mb-1">Chinese Name (Китайский)</label>
+                                            <input type="text" value={adminForm.zhName} onChange={e => setAdminForm({...adminForm, zhName: e.target.value})} className="w-full border rounded p-2 text-sm" placeholder="泡菜汤" />
+                                        </div>
+
+                                        <div className="md:col-span-2 border-t pt-3 font-bold text-burgundy">Описания блюда (Descriptions)</div>
+                                        <div>
+                                            <label className="block text-xs font-semibold mb-1">English Description</label>
+                                            <input type="text" value={adminForm.enDesc} onChange={e => setAdminForm({...adminForm, enDesc: e.target.value})} className="w-full border rounded p-2 text-sm" placeholder="Spicy traditional stew" />
+                                        </div>
+                                        <div>
+                                            <label className="block text-xs font-semibold mb-1">Russian Description</label>
+                                            <input type="text" value={adminForm.ruDesc} onChange={e => setAdminForm({...adminForm, ruDesc: e.target.value})} className="w-full border rounded p-2 text-sm" placeholder="Острый традиционный суп" />
+                                        </div>
                                         <div className="md:col-span-2">
-                                            <label className="block text-sm font-semibold mb-1">Description</label>
-                                            <input type="text" value={adminForm.desc} onChange={e => setAdminForm({...adminForm, desc: e.target.value})} className="w-full border rounded p-2 text-sm" placeholder="Spicy traditional stew with pork and tofu" />
+                                            <label className="block text-xs font-semibold mb-1">Chinese Description</label>
+                                            <input type="text" value={adminForm.zhDesc} onChange={e => setAdminForm({...adminForm, zhDesc: e.target.value})} className="w-full border rounded p-2 text-sm" placeholder="辣味传统汤" />
+                                        </div>
+
+                                        <div className="md:col-span-2 border-t pt-3 font-bold text-burgundy">Ингредиенты (Ingredients)</div>
+                                        <div>
+                                            <label className="block text-xs font-semibold mb-1">English Ingredients</label>
+                                            <input type="text" value={adminForm.enIngredients} onChange={e => setAdminForm({...adminForm, enIngredients: e.target.value})} className="w-full border rounded p-2 text-sm" placeholder="Kimchi, pork, tofu" />
                                         </div>
                                         <div>
-                                            <label className="block text-sm font-semibold mb-1">Ingredients</label>
-                                            <input type="text" value={adminForm.ingredients} onChange={e => setAdminForm({...adminForm, ingredients: e.target.value})} className="w-full border rounded p-2 text-sm" placeholder="Kimchi, pork, tofu, garlic" />
+                                            <label className="block text-xs font-semibold mb-1">Russian Ingredients</label>
+                                            <input type="text" value={adminForm.ruIngredients} onChange={e => setAdminForm({...adminForm, ruIngredients: e.target.value})} className="w-full border rounded p-2 text-sm" placeholder="Кимчи, свинина, тофу" />
                                         </div>
-                                        <div>
-                                            <label className="block text-sm font-semibold mb-1">Allergens (comma separated)</label>
-                                            <input type="text" value={adminForm.allergens} onChange={e => setAdminForm({...adminForm, allergens: e.target.value})} className="w-full border rounded p-2 text-sm" placeholder="soy, pork, garlic" />
+                                        <div className="md:col-span-2">
+                                            <label className="block text-xs font-semibold mb-1">Chinese Ingredients</label>
+                                            <input type="text" value={adminForm.zhIngredients} onChange={e => setAdminForm({...adminForm, zhIngredients: e.target.value})} className="w-full border rounded p-2 text-sm" placeholder="泡菜，猪肉，豆腐" />
                                         </div>
+
+                                        <div className="md:col-span-2 border-t pt-3">
+                                            <label className="block text-sm font-semibold mb-1">Allergens (через запятую, например: soy, pork, garlic)</label>
+                                            <input type="text" value={adminForm.allergens} onChange={e => setAdminForm({...adminForm, allergens: e.target.value})} className="w-full border rounded p-2 text-sm" placeholder="soy, pork" />
+                                        </div>
+
                                         <div className="md:col-span-2">
                                             <button type="submit" className="bg-burgundy text-white px-4 py-2 rounded font-semibold text-sm">Publish to Cloud</button>
                                         </div>
@@ -1388,14 +1432,14 @@
                                     <h2 className="text-lg font-bold mb-2">Bulk Import Weekly Menu (Text)</h2>
                                     <p className="text-xs text-gray-500 mb-3">
                                         CafIDs: <code>c1</code>, <code>c2</code>, <code>c3</code>, <code>c4</code><br/>
-                                        Format per line: <code className="bg-gray-100 p-1 rounded">Date | CafId | Meal | KoName | EnName | RuName | ZhName | Price | Description | Ingredients | Allergens</code>
+                                        Формат строки: <code className="bg-gray-100 p-1 rounded">Date | CafId | Meal | KoName | EnName | RuName | ZhName | Price | EnDesc | RuDesc | ZhDesc | EnIngr | RuIngr | ZhIngr | Allergens</code>
                                     </p>
                                     <form onSubmit={handleBulkImport} className="space-y-3">
                                         <textarea 
                                             rows="5" 
                                             value={bulkText} 
                                             onChange={e => setBulkText(e.target.value)} 
-                                            placeholder="2026-06-01 | c1 | Lunch | 김치찌개 | Kimchi Stew | Кимчи чиге | 泡菜汤 | 5000 | Spicy stew | Pork, tofu | soy, pork" 
+                                            placeholder="2026-06-01 | c1 | Lunch | 김치찌개 | Kimchi Stew | Кимчи чиге | 泡菜汤 | 5000 | Spicy stew | Острый суп | 辣汤 | Pork, tofu | Свинина, тофу | 猪肉，豆腐 | soy, pork" 
                                             className="w-full border rounded p-2 text-sm font-mono"
                                         />
                                         <button type="submit" className="bg-gold text-darkbrown font-bold px-4 py-2 rounded text-sm">Parse & Upload Weekly Menu</button>
@@ -1437,7 +1481,7 @@
                                     <div>
                                         <h3 className="text-xl font-bold text-burgundy">{selectedDishModal.koName}</h3>
                                         <p className="text-sm font-medium text-gray-700">
-                                            {getLocalizedDishName(selectedDishModal, lang)}
+                                            {getLocalizedField(selectedDishModal, 'Name', lang)}
                                         </p>
                                     </div>
                                     <button 
@@ -1475,13 +1519,13 @@
                                     <div>
                                         <span className="font-bold text-darkbrown block text-xs uppercase tracking-wide">{t.description}</span>
                                         <p className="text-gray-700 mt-0.5">
-                                            {selectedDishModal.desc || 'No detailed description provided.'}
+                                            {getLocalizedField(selectedDishModal, 'Desc', lang) || 'No detailed description provided.'}
                                         </p>
                                     </div>
                                     <div>
                                         <span className="font-bold text-darkbrown block text-xs uppercase tracking-wide">{t.ingredients}</span>
                                         <p className="text-gray-700 mt-0.5">
-                                            {selectedDishModal.ingredients || 'Not specified.'}
+                                            {getLocalizedField(selectedDishModal, 'Ingredients', lang) || 'Not specified.'}
                                         </p>
                                     </div>
                                     <div>
