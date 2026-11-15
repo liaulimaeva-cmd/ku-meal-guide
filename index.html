@@ -1,1619 +1,1502 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>KU MEAL GUIDE - Korea University</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        burgundy: { DEFAULT: '#8C183A', dark: '#6A1228', light: '#A61C38' },
-                        gold: '#C6A15B',
-                        cream: '#F8F3E9',
-                        beige: '#E8DCC8',
-                        darkbrown: '#332A27'
-                    }
-                }
-            }
-        }
-    </script>
-    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
-    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
-    <script crossorigin src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <style>
-        body { background-color: #F8F3E9; color: #332A27; font-family: system-ui, -apple-system, sans-serif; }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>KU MEAL GUIDE - Korea University</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+tailwind.config = {
+  theme: {
+    extend: {
+      colors: {
+        burgundy: { DEFAULT: '#8C183A', dark: '#6A1228', light: '#A61C38' },
+        gold: '#C6A15B',
+        cream: '#F8F3E9',
+        beige: '#E8DCC8',
+        darkbrown: '#332A27'
+      }
+    }
+  }
+}
+</script>
+<script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+<script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+<script crossorigin src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+body { background-color: #F8F3E9; color: #332A27; font-family: system-ui, -apple-system, sans-serif; }
+</style>
 </head>
 <body class="bg-cream text-darkbrown min-h-screen flex flex-col">
-    <div id="root"></div>
+<div id="root"></div>
+<script type="text/babel">
+const { useState, useEffect } = React;
+const TRANSLATIONS = {
+    en: {
+        brand: "KU MEAL GUIDE",
+        home: "Home",
+        cafeterias: "Cafeterias",
+        todaysMenu: "Today's Menu",
+        weeklyMenu: "Weekly Menu",
+        admin: "Admin",
+        profile: "Profile & Allergies",
+        logout: "Logout",
+        login: "Login",
+        signup: "Sign Up",
+        welcomeTitle: "Welcome to Korea University Campus Meals",
+        welcomeSub: "Your ultimate guide to campus dining halls, daily menus, and weekly schedules.",
+        viewTodays: "Full Today's Menu",
+        viewCafes: "View Cafeterias & Hours",
+        todaysOverview: "Today's Menu Overview",
+        viewAll: "View All →",
+        location: "Location",
+        hours: "Hours",
+        phone: "Phone",
+        price: "KRW",
+        priceUnknown: "Price unknown",
+        details: "Details",
+        warningAllergy: "⚠️ Warning: Contains your allergen!",
+        safeDish: "Safe based on your registered allergen profile.",
+        filters: "Filters",
+        cafeteria: "Cafeteria",
+        dateAndMeal: "Date & Meal",
+        rating: "Rating",
+        cafeteriaLabel: "Cafeteria",
+        filtersLabel: "Filters",
+        allergens: "Allergens",
+        ingredients: "Ingredients",
+        description: "Description",
+        reset: "Reset",
+        allCafeterias: "All Cafeterias",
+        allDays: "All Days",
+        allMeals: "All Meals",
+        breakfast: "Breakfast",
+        lunch: "Lunch",
+        dinner: "Dinner",
+        close: "Close",
+        rateThis: "Rate this dish:",
+        noDishes: "No menu published for today yet.",
+        selectYourAllergens: "Select Your Allergens",
+        allergyCaution: "Caution: This dish contains allergen(s) listed in your profile.",
+        backToCafes: "← Back to All Cafeterias",
+        clickToViewMenu: "Click to view menu by days of week →",
+        weekLabel: "Week:",
+        itemsLabel: "items",
+        dishCountLabel: "dish(es)",
+        excludeText: "Exclude",
+        allAllergensShowAll: "All Allergens (Show All)",
+        hideMyAllergens: "Hide My Allergens",
+        hiUser: "Hi, ",
+        filterCafeteria: "Cafeteria",
+        filterDayOfWeek: "Day of Week",
+        filterMealType: "Meal Type",
+        filterAllergens: "Allergens",
+        selectDateLabel: "Select Date:",
+        noMatchingDishes: "No matching menu items for this date.",
+        noDishesForDay: "No dishes scheduled for",
+        spiceLevel: "Spice Level",
+        mild: "Mild 🟢",
+        medium: "Medium 🟡",
+        spicy: "Spicy 🔴",
+        extraSpicy: "Extra Spicy 🔥"
+    },
+    ru: {
+        brand: "KU MEAL GUIDE",
+        home: "Главная",
+        cafeterias: "Столовые",
+        todaysMenu: "Меню на сегодня",
+        weeklyMenu: "Меню на неделю",
+        admin: "Админ",
+        profile: "Профиль и аллергии",
+        logout: "Выйти",
+        login: "Вход",
+        signup: "Регистрация",
+        welcomeTitle: "Добро пожаловать в гид по столовым Korea University",
+        welcomeSub: "Ваш лучший путеводитель по кампусным столовым, ежедневным меню и расписанию.",
+        viewTodays: "Меню на сегодня",
+        viewCafes: "Столовые и часы работы",
+        todaysOverview: "Обзор меню на сегодня",
+        viewAll: "Все →",
+        location: "Расположение",
+        hours: "Часы работы",
+        phone: "Телефон",
+        price: "вон",
+        priceUnknown: "Цена не указана",
+        details: "Подробнее",
+        warningAllergy: "⚠️ Внимание: Содержит ваш аллерген!",
+        safeDish: "Безопасно по вашему профилю аллергенов.",
+        filters: "Фильтры",
+        cafeteria: "Столовая",
+        dateAndMeal: "Дата и прием пищи",
+        rating: "Рейтинг",
+        cafeteriaLabel: "Столовая",
+        filtersLabel: "Фильтры",
+        allergens: "Аллергены",
+        ingredients: "Ингредиенты",
+        description: "Описание",
+        reset: "Сбросить",
+        allCafeterias: "Все столовые",
+        allDays: "Все дни",
+        allMeals: "Все приемы пищи",
+        breakfast: "Завтрак",
+        lunch: "Обед",
+        dinner: "Ужин",
+        close: "Закрыть",
+        rateThis: "Оценить блюдо:",
+        noDishes: "На сегодня меню еще не опубликовано.",
+        selectYourAllergens: "Выберите ваши аллергены",
+        allergyCaution: "Внимание: Это блюдо содержит аллергены из вашего профиля",
+        backToCafes: "← Назад ко всем столовым",
+        clickToViewMenu: "Нажмите, чтобы посмотреть меню по дням недели →",
+        weekLabel: "Неделя:",
+        itemsLabel: "блюд",
+        dishCountLabel: "блюдо(в)",
+        excludeText: "Исключить",
+        allAllergensShowAll: "Все аллергены (показать все)",
+        hideMyAllergens: "Скрыть мои аллергены",
+        hiUser: "Привет, ",
+        filterCafeteria: "Столовая",
+        filterDayOfWeek: "День недели",
+        filterMealType: "Прием пищи",
+        filterAllergens: "Аллергены",
+        selectDateLabel: "Выберите дату:",
+        noMatchingDishes: "На выбранную дату нет подходящих блюд.",
+        noDishesForDay: "На этот день блюда не запланированы:",
+        spiceLevel: "Острота",
+        mild: "Не острое 🟢",
+        medium: "Умеренное 🟡",
+        spicy: "Острое 🔴",
+        extraSpicy: "Очень острое 🔥"
+    },
+    zh: {
+        brand: "KU MEAL GUIDE",
+        home: "首页",
+        cafeterias: "食堂",
+        todaysMenu: "今日菜单",
+        weeklyMenu: "每周菜单",
+        admin: "管理",
+        profile: "个人资料与过敏源",
+        logout: "登出",
+        login: "登录",
+        signup: "注册",
+        welcomeTitle: "欢迎来到高丽大学校园餐饮指南",
+        welcomeSub: "您寻找校园食堂、每日菜单和每周时间表的最佳指南。",
+        viewTodays: "今日完整菜单",
+        viewCafes: "查看食堂及营业时间",
+        todaysOverview: "今日菜单概览",
+        viewAll: "查看全部 →",
+        location: "位置",
+        hours: "营业时间",
+        phone: "电话",
+        price: "韩元",
+        priceUnknown: "价格未知",
+        details: "详情",
+        warningAllergy: "⚠️ 警告: 包含您的过敏原!",
+        safeDish: "根据您的过敏原档案确认安全。",
+        filters: "筛选",
+        cafeteria: "食堂",
+        dateAndMeal: "日期与餐次",
+        rating: "评分",
+        cafeteriaLabel: "食堂",
+        filtersLabel: "筛选",
+        allergens: "过敏原",
+        ingredients: "配料",
+        description: "描述",
+        reset: "重置",
+        allCafeterias: "所有食堂",
+        allDays: "所有日期",
+        allMeals: "所有餐次",
+        breakfast: "早餐",
+        lunch: "午餐",
+        dinner: "晚餐",
+        close: "关闭",
+        rateThis: "评价此菜品:",
+        noDishes: "今天暂未发布菜单。",
+        selectYourAllergens: "选择您的过敏原",
+        allergyCaution: "注意: 这道菜包含您资料中列出的过敏原",
+        backToCafes: "← 返回所有食堂",
+        clickToViewMenu: "点击查看按星期划分的菜单 →",
+        weekLabel: "星期:",
+        itemsLabel: "项",
+        dishCountLabel: "道菜",
+        excludeText: "排除",
+        allAllergensShowAll: "所有过敏原(显示全部)",
+        hideMyAllergens: "隐藏我的过敏原",
+        hiUser: "你好, ",
+        filterCafeteria: "食堂",
+        filterDayOfWeek: "星期",
+        filterMealType: "餐次",
+        filterAllergens: "过敏原",
+        selectDateLabel: "选择日期:",
+        noMatchingDishes: "所选日期没有匹配的菜单项。",
+        noDishesForDay: "该日期暂无安排菜品:",
+        spiceLevel: "辣度",
+        mild: "微辣 🟢",
+        medium: "中辣 🟡",
+        spicy: "辣 🔴",
+        extraSpicy: "特辣 🔥"
+    }
+};
 
-    <script type="text/babel">
-        const { useState, useEffect } = React;
+const DAY_TRANSLATIONS = {
+    'Monday': { ru: 'Понедельник', zh: '星期一' },
+    'Tuesday': { ru: 'Вторник', zh: '星期二' },
+    'Wednesday': { ru: 'Среда', zh: '星期三' },
+    'Thursday': { ru: 'Четверг', zh: '星期四' },
+    'Friday': { ru: 'Пятница', zh: '星期五' },
+    'Saturday': { ru: 'Суббота', zh: '星期六' },
+    'Sunday': { ru: 'Воскресенье', zh: '星期日' }
+};
 
-        const TRANSLATIONS = {
-            en: {
-                brand: "🐯 KU MEAL GUIDE",
-                home: "Home",
-                cafeterias: "Cafeterias",
-                todaysMenu: "Today’s Menu",
-                weeklyMenu: "Weekly Menu",
-                admin: "Admin",
-                profile: "Profile & Allergies",
-                logout: "Logout",
-                login: "Login",
-                signup: "Sign Up",
-                welcomeTitle: "Welcome to Korea University Campus Meals",
-                welcomeSub: "Your ultimate guide to campus dining halls, daily menus, and weekly schedules.",
-                viewTodays: "Full Today’s Menu",
-                viewCafes: "View Cafeterias & Hours",
-                todaysOverview: "Today’s Menu Overview",
-                viewAll: "View All →",
-                location: "Location",
-                hours: "Hours",
-                phone: "Phone",
-                price: "KRW",
-                priceUnknown: "Price unknown",
-                details: "Details",
-                warningAllergy: "⚠️ Warning: Contains your allergen!",
-                safeDish: "✅ Safe based on your registered allergen profile.",
-                filters: "Filters",
-                cafeteria: "Cafeteria",
-                dateAndMeal: "Date & Meal",
-                rating: "Rating",
-                cafeteriaLabel: "Cafeteria",
-                filtersLabel: "Filters",
-                allergens: "Allergens",
-                ingredients: "Ingredients",
-                description: "Description",
-                reset: "Reset",
-                allCafeterias: "All Cafeterias",
-                allDays: "All Days",
-                allMeals: "All Meals",
-                breakfast: "Breakfast",
-                lunch: "Lunch",
-                dinner: "Dinner",
-                close: "Close",
-                rateThis: "Rate this dish:",
-                noDishes: "No menu published for today yet.",
-                selectYourAllergens: "Select Your Allergens",
-                allergyCaution: "Caution: This dish contains allergen(s) listed in your profile",
-                backToCafes: "← Back to All Cafeterias",
-                clickToViewMenu: "Click to view menu by days of week →",
-                weekLabel: "Week:",
-                itemsLabel: "items",
-                dishCountLabel: "dish(es)",
-                excludeText: "Exclude",
-                allAllergensShowAll: "All Allergens (Show All)",
-                hideMyAllergens: "✅ Hide My Allergens",
-                hiUser: "Hi, ",
-                filterCafeteria: "Cafeteria",
-                filterDayOfWeek: "Day of Week",
-                filterMealType: "Meal Type",
-                filterAllergens: "Allergens",
-                selectDateLabel: "Select Date:",
-                noMatchingDishes: "No matching menu items for this date.",
-                noDishesForDay: "No dishes scheduled for",
-                spiceLevel: "Spice Level",
-                mild: "Mild 🟢",
-                medium: "Medium 🟡",
-                spicy: "Spicy 🔴",
-                extraSpicy: "Extra Spicy 🔥"
-            },
-            ru: {
-                brand: "🐯 KU MEAL GUIDE",
-                home: "Главная",
-                cafeterias: "Столовые",
-                todaysMenu: "Меню на сегодня",
-                weeklyMenu: "Меню на неделю",
-                admin: "Админ",
-                profile: "Профиль и аллергии",
-                logout: "Выйти",
-                login: "Вход",
-                signup: "Регистрация",
-                welcomeTitle: "Добро пожаловать в гид по столовым Korea University",
-                welcomeSub: "Ваш лучший путеводитель по кампусным столовым, ежедневным меню и расписанию.",
-                viewTodays: "Меню на сегодня",
-                viewCafes: "Столовые и часы работы",
-                todaysOverview: "Обзор меню на сегодня",
-                viewAll: "Все →",
-                location: "Расположение",
-                hours: "Часы работы",
-                phone: "Телефон",
-                price: "вон",
-                priceUnknown: "Цена не указана",
-                details: "Подробнее",
-                warningAllergy: "⚠️ Внимание: Содержит ваш аллерген!",
-                safeDish: "✅ Безопасно по вашему профилю аллергенов.",
-                filters: "Фильтры",
-                cafeteria: "Столовая",
-                dateAndMeal: "Дата и прием пищи",
-                rating: "Рейтинг",
-                cafeteriaLabel: "Столовая",
-                filtersLabel: "Фильтры",
-                allergens: "Аллергены",
-                ingredients: "Ингредиенты",
-                description: "Описание",
-                reset: "Сбросить",
-                allCafeterias: "Все столовые",
-                allDays: "Все дни",
-                allMeals: "Все приемы пищи",
-                breakfast: "Завтрак",
-                lunch: "Обед",
-                dinner: "Ужин",
-                close: "Закрыть",
-                rateThis: "Оценить блюдо:",
-                noDishes: "На сегодня меню еще не опубликовано.",
-                selectYourAllergens: "Выберите ваши аллергены",
-                allergyCaution: "Внимание: Это блюдо содержит аллергены из вашего профиля",
-                backToCafes: "← Назад ко всем столовым",
-                clickToViewMenu: "Нажмите, чтобы посмотреть меню по дням недели →",
-                weekLabel: "Неделя:",
-                itemsLabel: "блюд",
-                dishCountLabel: "блюдо(в)",
-                excludeText: "Исключить",
-                allAllergensShowAll: "Все аллергены (показать все)",
-                hideMyAllergens: "✅ Скрыть мои аллергены",
-                hiUser: "Привет, ",
-                filterCafeteria: "Столовая",
-                filterDayOfWeek: "День недели",
-                filterMealType: "Прием пищи",
-                filterAllergens: "Аллергены",
-                selectDateLabel: "Выберите дату:",
-                noMatchingDishes: "На выбранную дату нет подходящих блюд.",
-                noDishesForDay: "На этот день блюда не запланированы:",
-                spiceLevel: "Острота",
-                mild: "Не острое 🟢",
-                medium: "Умеренное 🟡",
-                spicy: "Острое 🔴",
-                extraSpicy: "Очень острое 🔥"
-            },
-            zh: {
-                brand: "🐯 KU MEAL GUIDE",
-                home: "首页",
-                cafeterias: "食堂",
-                todaysMenu: "今日菜单",
-                weeklyMenu: "每周菜单",
-                admin: "管理",
-                profile: "个人资料与过敏源",
-                logout: "登出",
-                login: "登录",
-                signup: "注册",
-                welcomeTitle: "欢迎来到高丽大学校园餐饮指南",
-                welcomeSub: "您寻找校园食堂、每日菜单和每周时间表的最佳指南。",
-                viewTodays: "今日完整菜单",
-                viewCafes: "查看食堂及营业时间",
-                todaysOverview: "今日菜单概览",
-                viewAll: "查看全部 →",
-                location: "位置",
-                hours: "营业时间",
-                phone: "电话",
-                price: "韩元",
-                priceUnknown: "价格未知",
-                details: "详情",
-                warningAllergy: "⚠️ 警告：包含您的过敏原！",
-                safeDish: "✅ 根据您的过敏原档案确认安全。",
-                filters: "筛选",
-                cafeteria: "食堂",
-                dateAndMeal: "日期与餐次",
-                rating: "评分",
-                cafeteriaLabel: "食堂",
-                filtersLabel: "筛选",
-                allergens: "过敏原",
-                ingredients: "配料",
-                description: "描述",
-                reset: "重置",
-                allCafeterias: "所有食堂",
-                allDays: "所有日期",
-                allMeals: "所有餐次",
-                breakfast: "早餐",
-                lunch: "午餐",
-                dinner: "晚餐",
-                close: "关闭",
-                rateThis: "评价此菜品：",
-                noDishes: "今天暂未发布菜单。",
-                selectYourAllergens: "选择您的过敏原",
-                allergyCaution: "注意：这道菜包含您资料中列出的过敏原",
-                backToCafes: "← 返回所有食堂",
-                clickToViewMenu: "点击查看按星期划分的菜单 →",
-                weekLabel: "星期:",
-                itemsLabel: "项",
-                dishCountLabel: "道菜",
-                excludeText: "排除",
-                allAllergensShowAll: "所有过敏原（显示全部）",
-                hideMyAllergens: "✅ 隐藏我的过敏原",
-                hiUser: "你好, ",
-                filterCafeteria: "食堂",
-                filterDayOfWeek: "星期",
-                filterMealType: "餐次",
-                filterAllergens: "过敏原",
-                selectDateLabel: "选择日期:",
-                noMatchingDishes: "所选日期没有匹配的菜单项。",
-                noDishesForDay: "该日期暂无安排菜品:",
-                spiceLevel: "辣度",
-                mild: "微辣 🟢",
-                medium: "中辣 🟡",
-                spicy: "辣 🔴",
-                extraSpicy: "特辣 🔥"
-            }
-        };
+const SHORT_DAY_TRANSLATIONS = {
+    'Mon': { ru: 'Пн', zh: '周一' },
+    'Tue': { ru: 'Вт', zh: '周二' },
+    'Wed': { ru: 'Ср', zh: '周三' },
+    'Thu': { ru: 'Чт', zh: '周四' },
+    'Fri': { ru: 'Пт', zh: '周五' },
+    'Sat': { ru: 'Сб', zh: '周六' },
+    'Sun': { ru: 'Вс', zh: '周日' }
+};
 
-        const DAY_TRANSLATIONS = {
-            'Monday': { ru: 'Понедельник', zh: '星期一' },
-            'Tuesday': { ru: 'Вторник', zh: '星期二' },
-            'Wednesday': { ru: 'Среда', zh: '星期三' },
-            'Thursday': { ru: 'Четверг', zh: '星期四' },
-            'Friday': { ru: 'Пятница', zh: '星期五' },
-            'Saturday': { ru: 'Суббота', zh: '星期六' },
-            'Sunday': { ru: 'Воскресенье', zh: '星期日' }
-        };
+const translateDay = (dayEn, lang) => {
+    if (!dayEn || lang === 'en') return dayEn;
+    return DAY_TRANSLATIONS[dayEn]?.[lang] || dayEn;
+};
 
-        const SHORT_DAY_TRANSLATIONS = {
-            'Mon': { ru: 'Пн', zh: '周一' },
-            'Tue': { ru: 'Вт', zh: '周二' },
-            'Wed': { ru: 'Ср', zh: '周三' },
-            'Thu': { ru: 'Чт', zh: '周四' },
-            'Fri': { ru: 'Пт', zh: '周五' },
-            'Sat': { ru: 'Сб', zh: '周六' },
-            'Sun': { ru: 'Вс', zh: '周日' }
-        };
+const translateShortDay = (dayEn, lang) => {
+    if (!dayEn || lang === 'en') return dayEn;
+    return SHORT_DAY_TRANSLATIONS[dayEn]?.[lang] || dayEn;
+};
 
-        const translateDay = (dayEn, lang) => {
-            if (!dayEn || lang === 'en') return dayEn;
-            return DAY_TRANSLATIONS[dayEn]?.[lang] || dayEn;
-        };
+const ALLERGEN_TRANSLATIONS = {
+    'egg': { ru: 'Яйца', zh: '鸡蛋' },
+    'eggs': { ru: 'Яйца', zh: '鸡蛋' },
+    'milk': { ru: 'Молоко', zh: '牛奶' },
+    'dairy': { ru: 'Молочные продукты', zh: '乳制品' },
+    'peanuts': { ru: 'Арахис', zh: '花生' },
+    'peanut': { ru: 'Арахис', zh: '花生' },
+    'tree nuts': { ru: 'Орехи', zh: '坚果' },
+    'nuts': { ru: 'Орехи', zh: '坚果' },
+    'soy': { ru: 'Соя', zh: '大豆' },
+    'soybean': { ru: 'Соя', zh: '大豆' },
+    'wheat / gluten': { ru: 'Пшеница / Глютен', zh: '小麦 / 面筋' },
+    'wheat': { ru: 'Пшеница', zh: '小麦' },
+    'gluten': { ru: 'Глютен', zh: '面筋' },
+    'fish': { ru: 'Рыба', zh: '鱼类' },
+    'shellfish': { ru: 'Моллюски / Ракообразные', zh: '甲壳类海鲜' },
+    'crustaceans': { ru: 'Ракообразные', zh: '甲壳类' },
+    'crustacean': { ru: 'Ракообразные', zh: '甲壳类' },
+    'mollusc': { ru: 'Моллюски', zh: '软体动物' },
+    'molluscs': { ru: 'Моллюски', zh: '软体动物' },
+    'pork': { ru: 'Свинина', zh: '猪肉' },
+    'beef': { ru: 'Говядина', zh: '牛肉' },
+    'chicken': { ru: 'Курица', zh: '鸡肉' },
+    'poultry': { ru: 'Птица', zh: '家禽' },
+    'duck': { ru: 'Утка', zh: '鸭肉' },
+    'sesame': { ru: 'Кунжут', zh: '芝麻' },
+    'garlic': { ru: 'Чеснок', zh: '大蒜' },
+    'tomato': { ru: 'Томаты', zh: '番茄' },
+    'shrimp': { ru: 'Креветки', zh: '虾' },
+    'crab': { ru: 'Краб', zh: '蟹' },
+    'squid': { ru: 'Кальмар', zh: '鱿鱼' },
+    'mushrooms': { ru: 'Грибы', zh: '蘑菇' },
+    'buckwheat': { ru: 'Гречка', zh: '荞麦' }
+};
 
-        const translateShortDay = (dayEn, lang) => {
-            if (!dayEn || lang === 'en') return dayEn;
-            return SHORT_DAY_TRANSLATIONS[dayEn]?.[lang] || dayEn;
-        };
+const translateAllergen = (item, targetLang) => {
+    if (!item) return '';
+    if (Array.isArray(item)) {
+        return item.map(subItem => translateAllergen(subItem, targetLang)).join(', ');
+    }
+    const clean = String(item).trim().toLowerCase();
+    if (targetLang === 'en') return item.trim();
+    if (ALLERGEN_TRANSLATIONS[clean]) {
+        return ALLERGEN_TRANSLATIONS[clean][targetLang] || item.trim();
+    }
+    for (const [key, translations] of Object.entries(ALLERGEN_TRANSLATIONS)) {
+        if (clean.includes(key)) {
+            return translations[targetLang] || item.trim();
+        }
+    }
+    return item.trim();
+};
 
-        const ALLERGEN_TRANSLATIONS = {
-            'egg': { ru: 'Яйца', zh: '鸡蛋' },
-            'eggs': { ru: 'Яйца', zh: '鸡蛋' },
-            'milk': { ru: 'Молоко', zh: '牛奶' },
-            'dairy': { ru: 'Молочные продукты', zh: '乳制品' },
-            'peanuts': { ru: 'Арахис', zh: '花生' },
-            'peanut': { ru: 'Арахис', zh: '花生' },
-            'tree nuts': { ru: 'Орехи', zh: '坚果' },
-            'nuts': { ru: 'Орехи', zh: '坚果' },
-            'soy': { ru: 'Соя', zh: '大豆' },
-            'soybean': { ru: 'Соя', zh: '大豆' },
-            'wheat / gluten': { ru: 'Пшеница / Глютен', zh: '小麦 / 面筋' },
-            'wheat': { ru: 'Пшеница', zh: '小麦' },
-            'gluten': { ru: 'Глютен', zh: '面筋' },
-            'fish': { ru: 'Рыба', zh: '鱼类' },
-            'shellfish': { ru: 'Моллюски / Ракообразные', zh: '甲壳类海鲜' },
-            'crustaceans': { ru: 'Ракообразные', zh: '甲壳类' },
-            'crustacean': { ru: 'Ракообразные', zh: '甲壳类' },
-            'mollusc': { ru: 'Моллюски', zh: '软体动物' },
-            'molluscs': { ru: 'Моллюски', zh: '软体动物' },
-            'pork': { ru: 'Свинина', zh: '猪肉' },
-            'beef': { ru: 'Говядина', zh: '牛肉' },
-            'chicken': { ru: 'Курица', zh: '鸡肉' },
-            'poultry': { ru: 'Птица', zh: '家禽' },
-            'duck': { ru: 'Утка', zh: '鸭肉' },
-            'sesame': { ru: 'Кунжут', zh: '芝麻' },
-            'garlic': { ru: 'Чеснок', zh: '大蒜' },
-            'tomato': { ru: 'Томаты', zh: '番茄' },
-            'shrimp': { ru: 'Креветки', zh: '虾' },
-            'crab': { ru: 'Краб', zh: '蟹' },
-            'squid': { ru: 'Кальмар', zh: '鱿鱼' },
-            'mushrooms': { ru: 'Грибы', zh: '蘑菇' },
-            'buckwheat': { ru: 'Гречка', zh: '荞麦' }
-        };
+const getLocalizedField = (dish, field, lang) => {
+    if (!dish) return '';
+    if (lang === 'ru' && dish[`ru${field}`]) return dish[`ru${field}`];
+    if (lang === 'zh' && dish[`zh${field}`]) return dish[`zh${field}`];
+    if (lang === 'en' && dish[`en${field}`]) return dish[`en${field}`];
+    return dish[`en${field}`] || dish[`ko${field}`] || '';
+};
 
-        const translateAllergen = (item, targetLang) => {
-            if (!item) return '';
-            if (Array.isArray(item)) {
-                return item.map(subItem => translateAllergen(subItem, targetLang)).join(', ');
-            }
-            
-            const clean = String(item).trim().toLowerCase();
-            if (targetLang === 'en') return item.trim();
-            
-            if (ALLERGEN_TRANSLATIONS[clean]) {
-                return ALLERGEN_TRANSLATIONS[clean][targetLang] || item.trim();
-            }
-            
-            for (const [key, translations] of Object.entries(ALLERGEN_TRANSLATIONS)) {
-                if (clean.includes(key)) {
-                    return translations[targetLang] || item.trim();
-                }
-            }
-            
-            return item.trim();
-        };
-        
-        const getLocalizedField = (dish, field, lang) => {
-            if (!dish) return '';
-            if (lang === 'ru' && dish[`ru${field}`]) return dish[`ru${field}`];
-            if (lang === 'zh' && dish[`zh${field}`]) return dish[`zh${field}`];
-            if (lang === 'en' && dish[`en${field}`]) return dish[`en${field}`];
-            return dish[`en${field}`] || dish[`ko${field}`] || '';
-        };
+const CAFETERIAS_DATA = {
+    c1: {
+        koName: '학생회관 학생식당',
+        en: { name: 'Student Union Cafeteria', location: 'Student Union Building 2F, Humanities & Social Sciences Campus', hours: 'Breakfast: 08:00 - 09:30 | Lunch: 11:20 - 14:00 | Dinner: Closed' },
+        ru: { name: 'Столовая студенческого совета', location: 'Здание студсовета, 2 этаж, Кампус гуманитарных и общественных наук', hours: 'Завтрак: 08:00 - 09:30 | Обед: 11:20 - 14:00 | Ужин: Закрыто' },
+        zh: { name: '学生会馆食堂', location: '学生会馆2楼, 人文社会科学校区', hours: '早餐: 08:00 - 09:30 | 午餐: 11:20 - 14:00 | 晚餐: 关闭' },
+        phone: '070-4242-1815'
+    },
+    c2: {
+        koName: '안암학사 식당',
+        en: { name: 'Anam Dormitory Cafeteria', location: 'Anam Dormitory Administration Building 2F', hours: 'Cheonwon Breakfast: 08:00 - 09:30 | Easy Meal: 08:00 - 19:00 | Lunch: 11:30 - 14:00 | Dinner: 17:00 - 19:00' },
+        ru: { name: 'Столовая общежития Анам', location: 'Административное здание общежития Анам, 2 этаж', hours: 'Завтрак Чхонвон: 08:00 - 09:30 | Перекус: 08:00 - 19:00 | Обед: 11:30 - 14:00 | Ужин: 17:00 - 19:00' },
+        zh: { name: '安岩宿舍食堂', location: '安岩宿舍行政楼2楼', hours: '千元早餐: 08:00 - 09:30 | 简餐: 08:00 - 19:00 | 午餐: 11:30 - 14:00 | 晚餐: 17:00 - 19:00' },
+        phone: '070-4120-3229'
+    },
+    c3: {
+        koName: '산학관 식당',
+        en: { name: 'Sanhakwan Dining Hall', location: 'Sanhakwan 1F, Science & Technology Campus', hours: 'Lunch: 11:20 - 13:50 | Dinner: 17:30 - 18:50 (Last Order 18:30)' },
+        ru: { name: 'Столовая Санакван', location: 'Санакван, 1 этаж, Кампус точных наук и технологий', hours: 'Обед: 11:20 - 13:50 | Ужин: 17:30 - 18:50 (Заказ до 18:30)' },
+        zh: { name: '山学馆食堂', location: '山学馆1楼, 科学技术校区', hours: '午餐: 11:20 - 13:50 | 晚餐: 17:30 - 18:50 (最后点餐 18:30)' },
+        phone: '02-921-5770'
+    },
+    c4: {
+        koName: '자연계 학생식당',
+        en: { name: 'Science Campus Student Cafeteria', location: 'Agineung Living Hall 2F', hours: 'Cafe: 08:00 - 17:00 | Student Cafeteria - Breakfast: 08:00 - 09:30 / Lunch: 11:00 - 13:30 | Staff Cafeteria - Lunch: 11:00 - 14:00 / Dinner: 17:30 - 19:00' },
+        ru: { name: 'Студенческая столовая естественнонаучного кампуса', location: 'Агинынг Ливинг Холл, 2 этаж', hours: 'Кафе: 08:00 - 17:00 | Студенческая столовая Завтрак: 08:00 - 09:30 / Обед: 11:00 - 13:30 | Столовая сотрудников Обед: 11:00 - 14:00 / Ужин: 17:30 - 19:00' },
+        zh: { name: '自然园区学生食堂', location: '峨嵋陵生活馆2楼', hours: '咖啡厅: 08:00 - 17:00 | 学生食堂 - 早餐: 08:00 - 09:30 / 午餐: 11:00 - 13:30 | 教职工食堂 - 午餐: 11:00 - 14:00 / 晚餐: 17:30 - 19:00' },
+        phone: '02-3290-4351'
+    }
+};
 
-        const CAFETERIAS_DATA = {
-            c1: {
-                koName: '학생회관 학생식당',
-                en: { name: 'Student Union Cafeteria', location: 'Student Union Building 2F, Humanities & Social Sciences Campus', hours: 'Breakfast: 08:00 - 09:30 | Lunch: 11:20 - 14:00 | Dinner: Closed' },
-                ru: { name: 'Столовая студенческого совета', location: 'Здание студсовета, 2 этаж, Кампус гуманитарных и общественных наук', hours: 'Завтрак: 08:00 - 09:30 | Обед: 11:20 - 14:00 | Ужин: Закрыто' },
-                zh: { name: '学生会馆食堂', location: '学生会馆2楼，人文社会科学校区', hours: '早餐: 08:00 - 09:30 | 午餐: 11:20 - 14:00 | 晚餐: 关闭' },
-                phone: '070-4242-1815'
-            },
-            c2: {
-                koName: '안암학사 식당',
-                en: { name: 'Anam Dormitory Cafeteria', location: 'Anam Dormitory Administration Building 2F', hours: 'Cheonwon Breakfast: 08:00 - 09:30 | Easy Meal: 08:00 - 19:00 | Lunch: 11:30 - 14:00 | Dinner: 17:00 - 19:00' },
-                ru: { name: 'Столовая общежития Анам', location: 'Административное здание общежития Анам, 2 этаж', hours: 'Завтрак Чхонвон: 08:00 - 09:30 | Перекус: 08:00 - 19:00 | Обед: 11:30 - 14:00 | Ужин: 17:00 - 19:00' },
-                zh: { name: '安岩宿舍食堂', location: '安岩宿舍行政楼2楼', hours: '千元早餐: 08:00 - 09:30 | 简餐: 08:00 - 19:00 | 午餐: 11:30 - 14:00 | 晚餐: 17:00 - 19:00' },
-                phone: '070-4120-3229'
-            },
-            c3: {
-                koName: '산학관 식당',
-                en: { name: 'Sanhakwan Dining Hall', location: 'Sanhakwan 1F, Science & Technology Campus', hours: 'Lunch: 11:20 - 13:50 | Dinner: 17:30 - 18:50 (Last Order 18:30)' },
-                ru: { name: 'Столовая Санакван', location: 'Санакван, 1 этаж, Кампус точных наук и технологий', hours: 'Обед: 11:20 - 13:50 | Ужин: 17:30 - 18:50 (Заказ до 18:30)' },
-                zh: { name: '山学馆食堂', location: '山学馆1楼，科学技术校区', hours: '午餐: 11:20 - 13:50 | 晚餐: 17:30 - 18:50 (最后点餐 18:30)' },
-                phone: '02-921-5770'
-            },
-            c4: {
-                koName: '자연계 학생식당',
-                en: { name: 'Science Campus Student Cafeteria', location: 'Agineung Living Hall 2F', hours: 'Cafe: 08:00 - 17:00 | Student Cafeteria - Breakfast: 08:00 - 09:30 / Lunch: 11:00 - 13:30 | Staff Cafeteria - Lunch: 11:00 - 14:00 / Dinner: 17:30 - 19:00' },
-                ru: { name: 'Студенческая столовая естественнонаучного кампуса', location: 'Агинынг Ливинг Холл, 2 этаж', hours: 'Кафе: 08:00 - 17:00 | Студенческая столовая - Завтрак: 08:00 - 09:30 / Обед: 11:00 - 13:30 | Столовая сотрудников - Обед: 11:00 - 14:00 / Ужин: 17:30 - 19:00' },
-                zh: { name: '自然园区学生食堂', location: '峨嵋陵生活馆2楼', hours: '咖啡厅: 08:00 - 17:00 | 学生食堂 - 早餐: 08:00 - 09:30 / 午餐: 11:00 - 13:30 | 教职工食堂 - 午餐: 11:00 - 14:00 / 晚餐: 17:30 - 19:00' },
-                phone: '02-3290-4351'
-            }
-        };
+const getCafeterias = (lang) => {
+    return Object.keys(CAFETERIAS_DATA).map(id => ({
+        id,
+        name: CAFETERIAS_DATA[id][lang]?.name || CAFETERIAS_DATA[id]['en'].name,
+        koName: CAFETERIAS_DATA[id].koName,
+        location: CAFETERIAS_DATA[id][lang]?.location || CAFETERIAS_DATA[id]['en'].location,
+        hours: CAFETERIAS_DATA[id][lang]?.hours || CAFETERIAS_DATA[id]['en'].hours,
+        phone: CAFETERIAS_DATA[id].phone
+    }));
+};
 
-        const getCafeterias = (lang) => {
-            return Object.keys(CAFETERIAS_DATA).map(id => ({
-                id,
-                name: CAFETERIAS_DATA[id][lang]?.name || CAFETERIAS_DATA[id]['en'].name,
-                koName: CAFETERIAS_DATA[id].koName,
-                location: CAFETERIAS_DATA[id][lang]?.location || CAFETERIAS_DATA[id]['en'].location,
-                hours: CAFETERIAS_DATA[id][lang]?.hours || CAFETERIAS_DATA[id]['en'].hours,
-                phone: CAFETERIAS_DATA[id].phone
-            }));
-        };
+const COMMON_ALLERGENS = [
+    'Eggs', 'Milk', 'Peanuts', 'Tree Nuts', 'Soy', 'Wheat / Gluten',
+    'Fish', 'Shellfish', 'Pork', 'Beef', 'Chicken', 'Sesame'
+];
 
-        const COMMON_ALLERGENS = [
-            'Eggs', 'Milk', 'Peanuts', 'Tree Nuts', 'Soy', 'Wheat / Gluten', 
-            'Fish', 'Shellfish', 'Pork', 'Beef', 'Chicken', 'Sesame'
-        ];
+const DAYS_OF_WEEK = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
 
-        const DAYS_OF_WEEK = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+const getSafeDateString = (dateInput) => {
+    if (!dateInput) return new Date().toISOString().split('T')[0];
+    const clean = String(dateInput).replace(/\./g, '-').trim();
+    const parts = clean.split('-');
+    if (parts.length === 3) {
+        const y = parts[0];
+        const m = parts[1].padStart(2, '0');
+        const d = parts[2].padStart(2, '0');
+        return `${y}-${m}-${d}`;
+    }
+    return clean;
+};
 
-        const getSafeDateString = (dateInput) => {
-            if (!dateInput) return new Date().toISOString().split('T')[0];
-            const clean = String(dateInput).replace(/\./g, '-').trim();
-            const parts = clean.split('-');
-            if (parts.length === 3) {
-                const y = parts[0];
-                const m = parts[1].padStart(2, '0');
-                const d = parts[2].padStart(2, '0');
-                return `${y}-${m}-${d}`;
-            }
-            return clean;
-        };
+const getDayName = (dateStr) => {
+    const safe = getSafeDateString(dateStr);
+    const [y, m, d] = safe.split('-').map(Number);
+    if (!y || !m || !d) return '';
+    const dateObj = new Date(y, m - 1, d);
+    return isNaN(dateObj.getTime()) ? '' : dateObj.toLocaleDateString('en-US', { weekday: 'long' });
+};
 
-        const getDayName = (dateStr) => {
-            const safe = getSafeDateString(dateStr);
-            const [y, m, d] = safe.split('-').map(Number);
-            if (!y || !m || !d) return '';
-            const dateObj = new Date(y, m - 1, d);
-            return isNaN(dateObj.getTime()) ? '' : dateObj.toLocaleDateString('en-US', { weekday: 'long' });
-        };
+const getCurrWeekDates = () => {
+    const now = new Date();
+    const currentDayOfWeek = now.getDay();
+    const monday = new Date(now);
+    monday.setDate(now.getDate() - (currentDayOfWeek === 0 ? 6 : currentDayOfWeek - 1));
+    const week = [];
+    for (let i = 0; i < 7; i++) {
+        const d = new Date(monday);
+        d.setDate(monday.getDate() + i);
+        week.push({
+            dateStr: d.toISOString().split('T')[0],
+            name: d.toLocaleDateString('en-US', { weekday: 'short' }),
+            dayNum: d.getDate()
+        });
+    }
+    return week;
+};
 
-        const getCurrWeekDates = () => {
-            const now = new Date();
-            const currentDayOfWeek = now.getDay();
-            const monday = new Date(now);
-            monday.setDate(now.getDate() - (currentDayOfWeek === 0 ? 6 : currentDayOfWeek - 1));
-            
-            const week = [];
-            for (let i = 0; i < 7; i++) {
-                const d = new Date(monday);
-                d.setDate(monday.getDate() + i);
-                week.push({
-                    dateStr: d.toISOString().split('T')[0],
-                    name: d.toLocaleDateString('en-US', { weekday: 'short' }),
-                    dayNum: d.getDate()
-                });
-            }
-            return week;
-        };
+const SUPABASE_URL = 'https://fzdseiswlhckroaliizn.supabase.co';
+const SUPABASE_ANON_KEY = 'sb_publishable_1ShB7yCEJTtL3uWYzNZEIQ_XSN-EPVO';
+const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-        const SUPABASE_URL = 'https://fzdseiswlhckroaliizn.supabase.co';
-        const SUPABASE_ANON_KEY = 'sb_publishable_1ShB7yCEJTtL3uWYzNZElQ_XSN-EPVO';
-        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+const getSpiceLabel = (spice, t) => {
+    if (!spice) return null;
+    const s = String(spice).toLowerCase();
+    if (s.includes('extra')) return t.extraSpicy;
+    if (s.includes('spicy')) return t.spicy;
+    if (s.includes('medium')) return t.medium;
+    return t.mild;
+};
 
-        const getSpiceLabel = (spice, t) => {
-            if (!spice) return null;
-            const s = String(spice).toLowerCase();
-            if (s.includes('extra')) return t.extraSpicy;
-            if (s.includes('spicy')) return t.spicy;
-            if (s.includes('medium')) return t.medium;
-            return t.mild;
-        };
-        
-        function App() {
-            const [view, setView] = useState('home');
-            const [lang, setLang] = useState('en');
-            const t = TRANSLATIONS[lang];
-            const INITIAL_CAFETERIAS = getCafeterias(lang);
+function App() {
+    const [view, setView] = useState('home');
+    const [lang, setLang] = useState('en');
+    const t = TRANSLATIONS[lang];
+    const INITIAL_CAFETERIAS = getCafeterias(lang);
+    const [user, setUser] = useState(() => JSON.parse(localStorage.getItem('ku_cloud_user') || 'null'));
+    const [dishes, setDishes] = useState([]);
+    const [ratings, setRatings] = useState([]);
+    const [selectedDishModal, setSelectedDishModal] = useState(null);
+    const [selectedCafeteriald, setSelectedCafeteriald] = useState(null);
+    const [selectedQuickDate, setSelectedQuickDate] = useState(new Date().toISOString().split('T')[0]);
+    const [selectedDishIds, setSelectedDishIds] = useState([]);
 
-            const [user, setUser] = useState(() => JSON.parse(localStorage.getItem('ku_cloud_user') || 'null'));
-            const [dishes, setDishes] = useState([]);
-            const [ratings, setRatings] = useState([]);
-            
-            const [selectedDishModal, setSelectedDishModal] = useState(null);
-            const [selectedCafeteriaId, setSelectedCafeteriaId] = useState(null);
-            const [selectedQuickDate, setSelectedQuickDate] = useState(new Date().toISOString().split('T')[0]);
+    useEffect(() => {
+        fetchDishes();
+        fetchRatings();
+    }, []);
 
-            // Состояние для множественного выбора блюд в админке
-            const [selectedDishIds, setSelectedDishIds] = useState([]);
+    const fetchDishes = async () => {
+        const { data, error } = await supabase.from('dishes').select('*');
+        if (error) console.error('Error fetching dishes:', error);
+        else if (data) setDishes(data);
+    };
 
-            useEffect(() => {
-                fetchDishes();
-                fetchRatings();
-            }, []);
+    const fetchRatings = async () => {
+        const { data, error } = await supabase.from('ratings').select('*');
+        if (error) console.error('Error fetching ratings:', error);
+        else if (data) setRatings(data);
+    };
 
-            const fetchDishes = async () => {
-                const { data, error } = await supabase.from('dishes').select('*');
-                if (error) console.error('Error fetching dishes:', error);
-                else if (data) setDishes(data);
-            };
+    const [authForm, setAuthForm] = useState({
+        username: '',
+        password: '',
+        email: '',
+        selectedAllergens: [],
+        otherAllergens: ''
+    });
+    const [authError, setAuthError] = useState('');
+    const [weeklyCafFilter, setWeeklyCafFilter] = useState('all');
+    const [dayFilter, setDayFilter] = useState('all');
+    const [mealFilter, setMealFilter] = useState('all');
+    const [allergenFilter, setAllergenFilter] = useState('all');
 
-            const fetchRatings = async () => {
-                const { data, error } = await supabase.from('ratings').select('*');
-                if (error) console.error('Error fetching ratings:', error);
-                else if (data) setRatings(data);
-            };
+    const [adminForm, setAdminForm] = useState({
+        cafeteriald: 'c1',
+        date: new Date().toISOString().split('T')[0],
+        mealType: 'Lunch',
+        koName: '',
+        enName: '',
+        ruName: '',
+        zhName: '',
+        price: '',
+        enDesc: '',
+        ruDesc: '',
+        zhDesc: '',
+        enIngredients: '',
+        ruIngredients: '',
+        zhIngredients: '',
+        allergens: '',
+        spice: 'Mild'
+    });
 
-            const [authForm, setAuthForm] = useState({ 
-                username: '', 
-                password: '', 
-                email: '', 
-                selectedAllergens: [], 
-                otherAllergens: '' 
-            });
-            const [authError, setAuthError] = useState('');
+    const [bulkText, setBulkText] = useState('');
+    const [studentProfile, setStudentProfile] = useState(() => {
+        return user?.profile || { allergens: [], spicePreference: 'Medium' };
+    });
+    const [profileOtherAllergen, setProfileOtherAllergen] = useState('');
 
-            const [weeklyCafFilter, setWeeklyCafFilter] = useState('all');
-            const [dayFilter, setDayFilter] = useState('all');
-            const [mealFilter, setMealFilter] = useState('all');
-            const [allergenFilter, setAllergenFilter] = useState('all');
-
-            const [adminForm, setAdminForm] = useState({
-                cafeteriaId: 'c1',
-                date: new Date().toISOString().split('T')[0],
-                mealType: 'Lunch',
-                koName: '',
-                enName: '',
-                ruName: '',
-                zhName: '',
-                price: '',
-                enDesc: '',
-                ruDesc: '',
-                zhDesc: '',
-                enIngredients: '',
-                ruIngredients: '',
-                zhIngredients: '',
-                allergens: '',
-                spice: 'Mild'
-            });
-
-            const [bulkText, setBulkText] = useState('');
-
-            const [studentProfile, setStudentProfile] = useState(() => {
-                return user?.profile || { allergens: [], spicePreference: 'Medium' };
-            });
-            const [profileOtherAllergen, setProfileOtherAllergen] = useState('');
-
-            useEffect(() => { 
-                localStorage.setItem('ku_cloud_user', JSON.stringify(user)); 
-                if (user?.profile && user?.role !== 'admin') {
-                    setStudentProfile(user.profile);
-                    const custom = (user.profile.allergens || []).filter(
-                        a => !COMMON_ALLERGENS.some(ca => ca.toLowerCase() === a.toLowerCase())
-                    );
-                    setProfileOtherAllergen(custom.join(', '));
-                }
-            }, [user]);
-
-            const switchView = (v) => { 
-                setAuthError(''); 
-                setView(v); 
-            };
-
-            const toggleSignupAllergen = (item) => {
-                setAuthForm(prev => {
-                    const exists = prev.selectedAllergens.includes(item);
-                    return {
-                        ...prev,
-                        selectedAllergens: exists 
-                            ? prev.selectedAllergens.filter(a => a !== item)
-                            : [...prev.selectedAllergens, item]
-                    };
-                });
-            };
-
-            const handleLogin = async (e) => {
-                e.preventDefault();
-                if (view === 'admin-login') {
-                    if (authForm.username === 'KUmealAdmin' && authForm.password === 'KUAdmin!2026_MealGuide#47') {
-                        setUser({ username: 'KUmealAdmin', role: 'admin' });
-                        switchView('admin-dashboard');
-                    } else {
-                        setAuthError('Invalid admin credentials.');
-                    }
-                    return;
-                }
-
-                const { data, error } = await supabase
-                    .from('users')
-                    .select('*')
-                    .or(`username.eq.${authForm.username},email.eq.${authForm.username}`);
-
-                if (error || !data || data.length === 0) {
-                    setAuthError('User not found. Please sign up first.');
-                    return;
-                }
-
-                const foundUser = data[0];
-                if (foundUser.password !== authForm.password) {
-                    setAuthError('Incorrect password.');
-                    return;
-                }
-
-                setUser({ 
-                    username: foundUser.username, 
-                    email: foundUser.email, 
-                    role: 'user', 
-                    profile: foundUser.profile || { allergens: [] } 
-                });
-                switchView('home');
-            };
-
-            const handleSignup = async (e) => {
-                e.preventDefault();
-                if (!authForm.username || !authForm.email || !authForm.password) {
-                    setAuthError('Fill in all required fields.');
-                    return;
-                }
-
-                const { data: existing } = await supabase
-                    .from('users')
-                    .select('*')
-                    .eq('username', authForm.username);
-
-                if (existing && existing.length > 0) {
-                    setAuthError('Username already taken. Choose another.');
-                    return;
-                }
-
-                const customList = authForm.otherAllergens
-                    ? authForm.otherAllergens.split(',').map(s => s.trim()).filter(Boolean)
-                    : [];
-                const combinedAllergens = Array.from(new Set([...authForm.selectedAllergens, ...customList]));
-
-                const newProfile = { allergens: combinedAllergens, spicePreference: 'Medium' };
-                const newUserRecord = {
-                    username: authForm.username,
-                    email: authForm.email,
-                    password: authForm.password,
-                    profile: newProfile
-                };
-
-                const { error } = await supabase.from('users').insert([newUserRecord]);
-                if (error) {
-                    setAuthError('Registration error: ' + error.message);
-                    return;
-                }
-
-                setUser({ username: authForm.username, email: authForm.email, role: 'user', profile: newProfile });
-                setAuthForm({ username: '', password: '', email: '', selectedAllergens: [], otherAllergens: '' });
-                alert('Account successfully created and saved to cloud!');
-                switchView('home');
-            };
-
-            const toggleProfileCommonAllergen = (item) => {
-                setStudentProfile(prev => {
-                    const current = prev.allergens || [];
-                    const exists = current.some(a => a.toLowerCase() === item.toLowerCase());
-                    return {
-                        ...prev,
-                        allergens: exists
-                            ? current.filter(a => a.toLowerCase() !== item.toLowerCase())
-                            : [...current, item]
-                    };
-                });
-            };
-
-            const handleUpdateProfile = async (e) => {
-                e.preventDefault();
-                const baseCommon = (studentProfile.allergens || []).filter(
-                    a => COMMON_ALLERGENS.some(ca => ca.toLowerCase() === a.toLowerCase())
-                );
-                const customList = profileOtherAllergen
-                    ? profileOtherAllergen.split(',').map(s => s.trim()).filter(Boolean)
-                    : [];
-                const mergedAllergens = Array.from(new Set([...baseCommon, ...customList]));
-
-                const updatedProfile = { ...studentProfile, allergens: mergedAllergens };
-                const updatedUser = { ...user, profile: updatedProfile };
-                
-                const { error } = await supabase
-                    .from('users')
-                    .update({ profile: updatedProfile })
-                    .eq('username', user.username);
-
-                if (error) {
-                    alert('Error updating profile: ' + error.message);
-                } else {
-                    setStudentProfile(updatedProfile);
-                    setUser(updatedUser);
-                    alert('Profile and allergies updated successfully!');
-                }
-            };
-
-            const handleRateDish = async (dishId, stars) => {
-                if (!user || user.role === 'admin') {
-                    alert('Please log in as a student to rate dishes.');
-                    return;
-                }
-                
-                const existingRating = ratings.find(r => r.dish_id === dishId && r.username === user.username);
-                
-                if (existingRating) {
-                    const { error } = await supabase
-                        .from('ratings')
-                        .update({ rating: stars })
-                        .eq('id', existingRating.id);
-
-                    if (error) {
-                        alert('Error updating rating: ' + error.message);
-                    } else {
-                        setRatings(ratings.map(r => r.id === existingRating.id ? { ...r, rating: stars } : r));
-                    }
-                } else {
-                    const newRecord = { dish_id: dishId, username: user.username, rating: stars };
-                    const { data, error } = await supabase.from('ratings').insert([newRecord]).select();
-
-                    if (error) {
-                        alert('Error saving rating: ' + error.message);
-                    } else if (data) {
-                        setRatings([...ratings, data[0]]);
-                    }
-                }
-            };
-
-            const getDishRatingStats = (dishId) => {
-                const dishRatings = ratings.filter(r => r.dish_id === dishId);
-                if (dishRatings.length === 0) return { avg: 0, count: 0 };
-                const sum = dishRatings.reduce((acc, r) => acc + r.rating, 0);
-                return { avg: (sum / dishRatings.length).toFixed(1), count: dishRatings.length };
-            };
-
-            const getUserDishRating = (dishId) => {
-                if (!user) return 0;
-                const found = ratings.find(r => r.dish_id === dishId && r.username === user.username);
-                return found ? found.rating : 0;
-            };
-
-            const handleAddDish = async (e) => {
-                e.preventDefault();
-                if (!adminForm.koName || !adminForm.enName) {
-                    alert('Fill in Korean name and English name.');
-                    return;
-                }
-                const newDish = {
-                    id: 'dish_' + Date.now() + '_' + Math.random().toString(36).substring(2, 5),
-                    cafeteriaId: adminForm.cafeteriaId,
-                    date: adminForm.date,
-                    mealType: adminForm.mealType,
-                    koName: adminForm.koName,
-                    enName: adminForm.enName,
-                    ruName: adminForm.ruName || adminForm.enName,
-                    zhName: adminForm.zhName || adminForm.enName,
-                    price: adminForm.price ? Number(adminForm.price) : 0,
-                    enDesc: adminForm.enDesc,
-                    ruDesc: adminForm.ruDesc || adminForm.enDesc,
-                    zhDesc: adminForm.zhDesc || adminForm.enDesc,
-                    enIngredients: adminForm.enIngredients,
-                    ruIngredients: adminForm.ruIngredients || adminForm.enIngredients,
-                    zhIngredients: adminForm.zhIngredients || adminForm.enIngredients,
-                    allergens: adminForm.allergens ? adminForm.allergens.split(',').map(s => s.trim().toLowerCase()) : [],
-                    published: true
-                };
-
-                const { error } = await supabase.from('dishes').insert([newDish]);
-                if (error) {
-                    alert('Error saving to cloud: ' + error.message);
-                } else {
-                    setDishes([...dishes, newDish]);
-                    alert('Menu item published and saved to cloud!');
-                    setAdminForm({ 
-                        ...adminForm, 
-                        koName: '', enName: '', ruName: '', zhName: '', 
-                        price: '', enDesc: '', ruDesc: '', zhDesc: '', 
-                        enIngredients: '', ruIngredients: '', zhIngredients: '', allergens: '' 
-                    });
-                }
-            };
-
-            const handleBulkImport = async (e) => {
-                e.preventDefault();
-                if (!bulkText.trim()) {
-                    alert('Please enter text to parse.');
-                    return;
-                }
-                const lines = bulkText.split('\n').filter(l => l.trim().length > 0);
-                const newDishes = [];
-                for (let line of lines) {
-                    const parts = line.split('|').map(p => p.trim());
-                    if (parts.length >= 4) {
-                        const rawPrice = parts[7] ? Number(parts[7]) : 0;
-                        newDishes.push({
-                            id: 'dish_' + Date.now() + '_' + Math.random().toString(36).substring(2, 5),
-                            date: parts[0] || adminForm.date,
-                            cafeteriaId: parts[1] || 'c1',
-                            mealType: parts[2] || 'Lunch',
-                            koName: parts[3] || '',
-                            enName: parts[4] || parts[3] || '',
-                            ruName: parts[5] || parts[4] || parts[3] || '',
-                            zhName: parts[6] || parts[4] || parts[3] || '',
-                            price: isNaN(rawPrice) ? 0 : rawPrice,
-                            enDesc: parts[8] || '',
-                            ruDesc: parts[9] || '',
-                            zhDesc: parts[10] || '',
-                            enIngredients: parts[11] || '',
-                            ruIngredients: parts[12] || '',
-                            zhIngredients: parts[13] || '',
-                            allergens: parts[14] ? parts[14].split(',').map(s => s.trim().toLowerCase()) : [],
-                            published: true
-                        });
-                    }
-                }
-                if (newDishes.length === 0) {
-                    alert('Could not parse any dishes. Check format.');
-                    return;
-                }
-                const { error } = await supabase.from('dishes').insert(newDishes);
-                if (error) {
-                    alert('Error bulk importing: ' + error.message);
-                } else {
-                    setDishes([...dishes, ...newDishes]);
-                    setBulkText('');
-                    alert(`Successfully imported ${newDishes.length} dishes!`);
-                }
-            };
-            
-                const { error } = await supabase.from('dishes').insert([newDish]);
-                if (error) {
-                    alert('Error saving to cloud: ' + error.message);
-                } else {
-                    setDishes([...dishes, newDish]);
-                    alert('Menu item published and saved to cloud!');
-                    setAdminForm({ 
-                        ...adminForm, 
-                        koName: '', enName: '', ruName: '', zhName: '', 
-                        price: '', enDesc: '', ruDesc: '', zhDesc: '', 
-                        enIngredients: '', ruIngredients: '', zhIngredients: '', allergens: '' 
-                    });
-                }
-            };
-
-            const handleBulkImport = async (e) => {
-                e.preventDefault();
-                if (!bulkText.trim()) {
-                    alert('Please enter text to parse.');
-                    return;
-                }
-                const lines = bulkText.split('\n').filter(l => l.trim().length > 0);
-                const newDishes = [];
-                for (let line of lines) {
-                    const parts = line.split('|').map(p => p.trim());
-                    if (parts.length >= 4) {
-                        const rawPrice = parts[7] ? Number(parts[7]) : 0;
-                        newDishes.push({
-                            id: 'dish_' + Date.now() + '_' + Math.random().toString(36).substring(2, 5),
-                            date: parts[0] || adminForm.date,
-                            cafeteriaId: parts[1] || 'c1',
-                            mealType: parts[2] || 'Lunch',
-                            koName: parts[3] || '',
-                            enName: parts[4] || parts[3] || '',
-                            ruName: parts[5] || parts[4] || parts[3] || '',
-                            zhName: parts[6] || parts[4] || parts[3] || '',
-                            price: isNaN(rawPrice) ? 0 : rawPrice,
-                            enDesc: parts[8] || '',
-                            ruDesc: parts[9] || '',
-                            zhDesc: parts[10] || '',
-                            enIngredients: parts[11] || '',
-                            ruIngredients: parts[12] || '',
-                            zhIngredients: parts[13] || '',
-                            allergens: parts[14] ? parts[14].split(',').map(s => s.trim().toLowerCase()) : [],
-                            spice: parts[15] || '',
-                            published: true
-                        });
-                    }
-                }
-                if (newDishes.length === 0) {
-                    alert('Could not parse any dishes. Check format.');
-                    return;
-                }
-                const { error } = await supabase.from('dishes').insert(newDishes);
-                if (error) {
-                    alert('Error bulk importing: ' + error.message);
-                } else {
-                    setDishes([...dishes, ...newDishes]);
-                    setBulkText('');
-                    alert(`Successfully imported ${newDishes.length} dishes!`);
-                }
-            };
-
-            const handleDeleteDish = async (dishId) => {
-                if (!confirm('Are you sure you want to delete this dish?')) return;
-                const { error } = await supabase.from('dishes').delete().eq('id', dishId);
-                if (error) {
-                    alert('Error deleting dish: ' + error.message);
-                } else {
-                    setDishes(dishes.filter(d => d.id !== dishId));
-                    setSelectedDishIds(selectedDishIds.filter(id => id !== dishId));
-                }
-            };
-
-            // Новая функция: Удалить все меню одним кликом
-            const handleDeleteAllDishes = async () => {
-                if (!confirm('WARNING: Are you sure you want to delete ALL dishes from the database? This cannot be undone.')) return;
-                // Удаляем все записи из таблицы dishes, где id не равен пустой строке (или просто удаляем всё)
-                const { error } = await supabase.from('dishes').delete().neq('id', '___non_existent___');
-                if (error) {
-                    alert('Error deleting all dishes: ' + error.message);
-                } else {
-                    setDishes([]);
-                    setSelectedDishIds([]);
-                    alert('All menu items have been deleted successfully.');
-                }
-            };
-
-            // Новая функция: Удалить выбранные (несколько) меню
-            const handleBatchDelete = async () => {
-                if (selectedDishIds.length === 0) {
-                    alert('Please select at least one dish to delete.');
-                    return;
-                }
-                if (!confirm(`Are you sure you want to delete ${selectedDishIds.length} selected dish(es)?`)) return;
-
-                const { error } = await supabase.from('dishes').delete().in('id', selectedDishIds);
-                if (error) {
-                    alert('Error deleting selected dishes: ' + error.message);
-                } else {
-                    setDishes(dishes.filter(d => !selectedDishIds.includes(d.id)));
-                    setSelectedDishIds([]);
-                    alert('Selected dishes deleted successfully.');
-                }
-            };
-
-            const toggleSelectAll = (e) => {
-                if (e.target.checked) {
-                    setSelectedDishIds(dishes.map(d => d.id));
-                } else {
-                    setSelectedDishIds([]);
-                }
-            };
-
-            const toggleSelectDish = (id) => {
-                if (selectedDishIds.includes(id)) {
-                    setSelectedDishIds(selectedDishIds.filter(item => item !== id));
-                } else {
-                    setSelectedDishIds([...selectedDishIds, id]);
-                }
-            };
-
-            const renderHeader = () => (
-                <header className="bg-burgundy text-cream shadow-md sticky top-0 z-50">
-                    <div className="max-w-7xl mx-auto px-4 py-3 flex justify-between items-center">
-                        <div className="flex items-center gap-6">
-                            <h1 className="text-xl font-bold tracking-wide cursor-pointer" onClick={() => switchView('home')}>
-                                {t.brand}
-                            </h1>
-                            <nav className="hidden md:flex items-center gap-4 text-sm font-medium">
-                                <button onClick={() => switchView('home')} className={`hover:text-gold transition ${view === 'home' ? 'text-gold underline underline-offset-4' : ''}`}>{t.home}</button>
-                                <button onClick={() => { setSelectedCafeteriaId(null); switchView('cafeterias'); }} className={`hover:text-gold transition ${view === 'cafeterias' ? 'text-gold underline underline-offset-4' : ''}`}>{t.cafeterias}</button>
-                                <button onClick={() => switchView('todays-menu')} className={`hover:text-gold transition ${view === 'todays-menu' ? 'text-gold underline underline-offset-4' : ''}`}>{t.todaysMenu}</button>
-                                <button onClick={() => { setSelectedCafeteriaId(null); switchView('weekly-menu'); }} className={`hover:text-gold transition ${view === 'weekly-menu' ? 'text-gold underline underline-offset-4' : ''}`}>{t.weeklyMenu}</button>
-                                {user?.role === 'admin' && (
-                                    <button onClick={() => switchView('admin-dashboard')} className={`hover:text-gold transition ${view === 'admin-dashboard' ? 'text-gold underline underline-offset-4' : ''}`}>{t.admin}</button>
-                                )}
-                            </nav>
-                        </div>
-                        <div className="flex items-center gap-3">
-                            <div className="flex bg-burgundy-dark rounded p-0.5 border border-gold/40 text-xs">
-                                <button onClick={() => setLang('en')} className={`px-2 py-1 rounded ${lang === 'en' ? 'bg-gold text-darkbrown font-bold' : 'text-cream'}`}>EN</button>
-                                <button onClick={() => setLang('ru')} className={`px-2 py-1 rounded ${lang === 'ru' ? 'bg-gold text-darkbrown font-bold' : 'text-cream'}`}>RU</button>
-                                <button onClick={() => setLang('zh')} className={`px-2 py-1 rounded ${lang === 'zh' ? 'bg-gold text-darkbrown font-bold' : 'text-cream'}`}>中文</button>
-                            </div>
-                            {user ? (
-                                <div className="flex items-center gap-2 text-xs">
-                                    {user.role !== 'admin' && (
-                                        <button onClick={() => switchView('profile')} className="bg-gold/20 hover:bg-gold/30 text-gold px-3 py-1.5 rounded transition font-semibold border border-gold/40">
-                                            {t.hiUser}{user.username}
-                                        </button>
-                                    )}
-                                    {user.role === 'admin' && (
-                                        <span className="bg-gold/20 text-gold px-3 py-1.5 rounded font-semibold border border-gold/40">
-                                            Admin: {user.username}
-                                        </span>
-                                    )}
-                                    <button onClick={() => { setUser(null); localStorage.removeItem('ku_cloud_user'); switchView('home'); }} className="bg-burgundy-dark hover:bg-burgundy-light px-3 py-1.5 rounded transition">
-                                        {t.logout}
-                                    </button>
-                                </div>
-                            ) : (
-                                <div className="flex items-center gap-2 text-xs">
-                                    <button onClick={() => switchView('login')} className="bg-gold text-darkbrown font-bold px-3 py-1.5 rounded hover:bg-gold/90 transition">{t.login}</button>
-                                    <button onClick={() => switchView('signup')} className="bg-burgundy-dark text-cream px-3 py-1.5 rounded border border-gold/40 hover:bg-burgundy-light transition">{t.signup}</button>
-                                </div>
-                            )}
-                        </div>
-                    </div>
-                </header>
+    useEffect(() => {
+        localStorage.setItem('ku_cloud_user', JSON.stringify(user));
+        if (user?.profile && user?.role !== 'admin') {
+            setStudentProfile(user.profile);
+            const custom = (user.profile.allergens || []).filter(
+                a => !COMMON_ALLERGENS.some(ca => ca.toLowerCase() === a.toLowerCase())
             );
+            setProfileOtherAllergen(custom.join(', '));
+        }
+    }, [user]);
 
-            const renderDishCard = (dish) => {
-                const koName = dish.koName || '';
-                const mainName = getLocalizedField(dish, 'Name', lang);
-                const allergens = dish.allergens || [];
-                const userAllergens = user?.profile?.allergens || [];
-                const hasAllergy = user?.role !== 'admin' && allergens.some(al => userAllergens.some(ua => ua.toLowerCase() === al.toLowerCase()));
-                const stats = getDishRatingStats(dish.id);
-                const spiceLabel = getSpiceLabel(dish.spice, t);
-                return (
-                    <div key={dish.id} onClick={() => setSelectedDishModal(dish)} className={`bg-white rounded-lg shadow border p-4 cursor-pointer transition hover:shadow-md flex flex-col justify-between ${hasAllergy ? 'border-red-400 bg-red-50/20' : 'border-beige'}`}>
+    const switchView = (v) => {
+        setAuthError('');
+        setView(v);
+    };
+
+    const toggleSignupAllergen = (item) => {
+        setAuthForm(prev => {
+            const exists = prev.selectedAllergens.includes(item);
+            return {
+                ...prev,
+                selectedAllergens: exists
+                    ? prev.selectedAllergens.filter(a => a !== item)
+                    : [...prev.selectedAllergens, item]
+            };
+        });
+    };
+
+    const handleLogin = async (e) => {
+        e.preventDefault();
+        if (view === 'admin-login') {
+            if (authForm.username === 'KUmealAdmin' && authForm.password === 'KUAdmin!2026_MealGuide#47') {
+                setUser({ username: 'KUmealAdmin', role: 'admin' });
+                switchView('admin-dashboard');
+            } else {
+                setAuthError('Invalid admin credentials.');
+            }
+            return;
+        }
+
+        const { data, error } = await supabase
+            .from('users')
+            .select('*')
+            .or(`username.eq.${authForm.username},email.eq.${authForm.username}`);
+
+        if (error || !data || data.length === 0) {
+            setAuthError('User not found. Please sign up first.');
+            return;
+        }
+        const foundUser = data[0];
+        if (foundUser.password !== authForm.password) {
+            setAuthError('Incorrect password.');
+            return;
+        }
+        setUser({
+            username: foundUser.username,
+            email: foundUser.email,
+            role: 'user',
+            profile: foundUser.profile || { allergens: [] }
+        });
+        switchView('home');
+    };
+
+    const handleSignup = async (e) => {
+        e.preventDefault();
+        if (!authForm.username || !authForm.email || !authForm.password) {
+            setAuthError('Fill in all required fields.');
+            return;
+        }
+        const { data: existing } = await supabase
+            .from('users')
+            .select('*')
+            .eq('username', authForm.username);
+
+        if (existing && existing.length > 0) {
+            setAuthError('Username already taken. Choose another.');
+            return;
+        }
+
+        const customList = authForm.otherAllergens
+            ? authForm.otherAllergens.split(',').map(s => s.trim()).filter(Boolean)
+            : [];
+        const combinedAllergens = Array.from(new Set([...authForm.selectedAllergens, ...customList]));
+        const newProfile = { allergens: combinedAllergens, spicePreference: 'Medium' };
+        const newUserRecord = {
+            username: authForm.username,
+            email: authForm.email,
+            password: authForm.password,
+            profile: newProfile
+        };
+
+        const { error } = await supabase.from('users').insert([newUserRecord]);
+        if (error) {
+            setAuthError('Registration error: ' + error.message);
+            return;
+        }
+        setUser({ username: authForm.username, email: authForm.email, role: 'user', profile: newProfile });
+        setAuthForm({ username: '', password: '', email: '', selectedAllergens: [], otherAllergens: '' });
+        alert('Account successfully created and saved to cloud!');
+        switchView('home');
+    };
+
+    const toggleProfileCommonAllergen = (item) => {
+        setStudentProfile(prev => {
+            const current = prev.allergens || [];
+            const exists = current.some(a => a.toLowerCase() === item.toLowerCase());
+            return {
+                ...prev,
+                allergens: exists
+                    ? current.filter(a => a.toLowerCase() !== item.toLowerCase())
+                    : [...current, item]
+            };
+        });
+    };
+
+    const handleUpdateProfile = async (e) => {
+        e.preventDefault();
+        const baseCommon = (studentProfile.allergens || []).filter(
+            a => COMMON_ALLERGENS.some(ca => ca.toLowerCase() === a.toLowerCase())
+        );
+        const customList = profileOtherAllergen
+            ? profileOtherAllergen.split(',').map(s => s.trim()).filter(Boolean)
+            : [];
+        const mergedAllergens = Array.from(new Set([...baseCommon, ...customList]));
+        const updatedProfile = { ...studentProfile, allergens: mergedAllergens };
+        const updatedUser = { ...user, profile: updatedProfile };
+
+        const { error } = await supabase
+            .from('users')
+            .update({ profile: updatedProfile })
+            .eq('username', user.username);
+
+        if (error) {
+            alert('Error updating profile: ' + error.message);
+        } else {
+            setStudentProfile(updatedProfile);
+            setUser(updatedUser);
+            alert('Profile and allergies updated successfully!');
+        }
+    };
+
+    const handleRateDish = async (dishld, stars) => {
+        if (!user || user.role === 'admin') {
+            alert('Please log in as a student to rate dishes.');
+            return;
+        }
+        const existingRating = ratings.find(r => r.dish_id === dishld && r.username === user.username);
+        if (existingRating) {
+            const { error } = await supabase
+                .from('ratings')
+                .update({ rating: stars })
+                .eq('id', existingRating.id);
+            if (error) {
+                alert('Error updating rating: ' + error.message);
+            } else {
+                setRatings(ratings.map(r => r.id === existingRating.id ? { ...r, rating: stars } : r));
+            }
+        } else {
+            const newRecord = { dish_id: dishld, username: user.username, rating: stars };
+            const { data, error } = await supabase.from('ratings').insert([newRecord]).select();
+            if (error) {
+                alert('Error saving rating: ' + error.message);
+            } else if (data) {
+                setRatings([...ratings, data[0]]);
+            }
+        }
+    };
+
+    const getDishRatingStats = (dishld) => {
+        const dishRatings = ratings.filter(r => r.dish_id === dishld);
+        if (dishRatings.length === 0) return { avg: 0, count: 0 };
+        const sum = dishRatings.reduce((acc, r) => acc + r.rating, 0);
+        return { avg: (sum / dishRatings.length).toFixed(1), count: dishRatings.length };
+    };
+
+    const getUserDishRating = (dishld) => {
+        if (!user) return 0;
+        const found = ratings.find(r => r.dish_id === dishld && r.username === user.username);
+        return found ? found.rating : 0;
+    };
+
+    const handleAddDish = async (e) => {
+        e.preventDefault();
+        if (!adminForm.koName || !adminForm.enName) {
+            alert('Fill in Korean name and English name.');
+            return;
+        }
+        const newDish = {
+            id: 'dish_' + Date.now() + '_' + Math.random().toString(36).substring(2, 5),
+            cafeteriald: adminForm.cafeteriald,
+            date: adminForm.date,
+            mealType: adminForm.mealType,
+            koName: adminForm.koName,
+            enName: adminForm.enName,
+            ruName: adminForm.ruName || adminForm.enName,
+            zhName: adminForm.zhName || adminForm.enName,
+            price: adminForm.price ? Number(adminForm.price) : 0,
+            enDesc: adminForm.enDesc,
+            ruDesc: adminForm.ruDesc || adminForm.enDesc,
+            zhDesc: adminForm.zhDesc || adminForm.enDesc,
+            enIngredients: adminForm.enIngredients,
+            ruIngredients: adminForm.ruIngredients || adminForm.enIngredients,
+            zhIngredients: adminForm.zhIngredients || adminForm.enIngredients,
+            allergens: adminForm.allergens ? adminForm.allergens.split(',').map(s => s.trim().toLowerCase()) : [],
+            spice: adminForm.spice || 'Mild',
+            published: true
+        };
+
+        const { error } = await supabase.from('dishes').insert([newDish]);
+        if (error) {
+            alert('Error saving to cloud: ' + error.message);
+        } else {
+            setDishes([...dishes, newDish]);
+            alert('Menu item published and saved to cloud!');
+            setAdminForm({
+                ...adminForm,
+                koName: '', enName: '', ruName: '', zhName: '',
+                price: '', enDesc: '', ruDesc: '', zhDesc: '',
+                enIngredients: '', ruIngredients: '', zhIngredients: '', allergens: ''
+            });
+        }
+    };
+
+    const handleBulkImport = async (e) => {
+        e.preventDefault();
+        if (!bulkText.trim()) {
+            alert('Please enter text to parse.');
+            return;
+        }
+        const lines = bulkText.split('\n').filter(l => l.trim().length > 0);
+        const newDishes = [];
+        for (let line of lines) {
+            const parts = line.split('|').map(p => p.trim());
+            if (parts.length >= 4) {
+                const rawPrice = parts[7] ? Number(parts[7]) : 0;
+                newDishes.push({
+                    id: 'dish_' + Date.now() + '_' + Math.random().toString(36).substring(2, 5),
+                    date: parts[0] || adminForm.date,
+                    cafeteriald: parts[1] || 'c1',
+                    mealType: parts[2] || 'Lunch',
+                    koName: parts[3] || '',
+                    enName: parts[4] || parts[3] || '',
+                    ruName: parts[5] || parts[4] || parts[3] || '',
+                    zhName: parts[6] || parts[4] || parts[3] || '',
+                    price: isNaN(rawPrice) ? 0 : rawPrice,
+                    enDesc: parts[8] || '',
+                    ruDesc: parts[9] || '',
+                    zhDesc: parts[10] || '',
+                    enIngredients: parts[11] || '',
+                    ruIngredients: parts[12] || '',
+                    zhIngredients: parts[13] || '',
+                    allergens: parts[14] ? parts[14].split(',').map(s => s.trim().toLowerCase()) : [],
+                    spice: parts[15] || 'Mild',
+                    published: true
+                });
+            }
+        }
+        if (newDishes.length === 0) {
+            alert('Could not parse any dishes. Check format.');
+            return;
+        }
+        const { error } = await supabase.from('dishes').insert(newDishes);
+        if (error) {
+            alert('Error bulk importing: ' + error.message);
+        } else {
+            setDishes([...dishes, ...newDishes]);
+            setBulkText('');
+            alert(`Successfully imported ${newDishes.length} dishes!`);
+        }
+    };
+
+    const handleDeleteDish = async (dishld) => {
+        if (!confirm('Are you sure you want to delete this dish?')) return;
+        const { error } = await supabase.from('dishes').delete().eq('id', dishld);
+        if (error) {
+            alert('Error deleting dish: ' + error.message);
+        } else {
+            setDishes(dishes.filter(d => d.id !== dishld));
+            setSelectedDishIds(selectedDishIds.filter(id => id !== dishld));
+        }
+    };
+
+    const handleDeleteAllDishes = async () => {
+        if (!confirm('WARNING: Are you sure you want to delete ALL dishes from the database? This cannot be undone.')) return;
+        const { error } = await supabase.from('dishes').delete().neq('id', '_non_existent_');
+        if (error) {
+            alert('Error deleting all dishes: ' + error.message);
+        } else {
+            setDishes([]);
+            setSelectedDishIds([]);
+            alert('All menu items have been deleted successfully.');
+        }
+    };
+
+    const handleBatchDelete = async () => {
+        if (selectedDishIds.length === 0) {
+            alert('Please select at least one dish to delete.');
+            return;
+        }
+        if (!confirm(`Are you sure you want to delete ${selectedDishIds.length} selected dish(es)?`)) return;
+        const { error } = await supabase.from('dishes').delete().in('id', selectedDishIds);
+        if (error) {
+            alert('Error deleting selected dishes: ' + error.message);
+        } else {
+            setDishes(dishes.filter(d => !selectedDishIds.includes(d.id)));
+            setSelectedDishIds([]);
+            alert('Selected dishes deleted successfully.');
+        }
+    };
+
+    const toggleSelectAll = (e) => {
+        if (e.target.checked) {
+            setSelectedDishIds(dishes.map(d => d.id));
+        } else {
+            setSelectedDishIds([]);
+        }
+    };
+
+    const toggleSelectDish = (id) => {
+        if (selectedDishIds.includes(id)) {
+            setSelectedDishIds(selectedDishIds.filter(item => item !== id));
+        } else {
+            setSelectedDishIds([...selectedDishIds, id]);
+        }
+    };
+
+    const renderHeader = () => (
+        <header className="bg-burgundy text-cream shadow-md sticky top-0 z-50">
+            <div className="max-w-7xl mx-auto px-4 py-3 flex justify-between items-center">
+                <div className="flex items-center gap-6">
+                    <h1 className="text-xl font-bold tracking-wide cursor-pointer" onClick={() => switchView('home')}>
+                        {t.brand}
+                    </h1>
+                    <nav className="hidden md:flex items-center gap-4 text-sm font-medium">
+                        <button onClick={() => switchView('home')} className={`hover:text-gold transition ${view === 'home' ? 'text-gold underline underline-offset-4' : ''}`}>{t.home}</button>
+                        <button onClick={() => { setSelectedCafeteriald(null); switchView('cafeterias'); }} className={`hover:text-gold transition ${view === 'cafeterias' ? 'text-gold underline underline-offset-4' : ''}`}>{t.cafeterias}</button>
+                        <button onClick={() => switchView('todays-menu')} className={`hover:text-gold transition ${view === 'todays-menu' ? 'text-gold underline underline-offset-4' : ''}`}>{t.todaysMenu}</button>
+                        <button onClick={() => { setSelectedCafeteriald(null); switchView('weekly-menu'); }} className={`hover:text-gold transition ${view === 'weekly-menu' ? 'text-gold underline underline-offset-4' : ''}`}>{t.weeklyMenu}</button>
+                        {user?.role === 'admin' && (
+                            <button onClick={() => switchView('admin-dashboard')} className={`hover:text-gold transition ${view === 'admin-dashboard' ? 'text-gold underline underline-offset-4' : ''}`}>{t.admin}</button>
+                        )}
+                    </nav>
+                </div>
+                <div className="flex items-center gap-3">
+                    <div className="flex bg-burgundy-dark rounded p-0.5 border border-gold/40 text-xs">
+                        <button onClick={() => setLang('en')} className={`px-2 py-1 rounded ${lang === 'en' ? 'bg-gold text-darkbrown font-bold' : 'text-cream'}`}>EN</button>
+                        <button onClick={() => setLang('ru')} className={`px-2 py-1 rounded ${lang === 'ru' ? 'bg-gold text-darkbrown font-bold' : 'text-cream'}`}>RU</button>
+                        <button onClick={() => setLang('zh')} className={`px-2 py-1 rounded ${lang === 'zh' ? 'bg-gold text-darkbrown font-bold' : 'text-cream'}`}>中文</button>
+                    </div>
+                    {user ? (
+                        <div className="flex items-center gap-2 text-xs">
+                            {user.role !== 'admin' && (
+                                <button onClick={() => switchView('profile')} className="bg-gold/20 hover:bg-gold/30 text-gold px-3 py-1.5 rounded transition font-semibold border border-gold/40">
+                                    {t.hiUser}{user.username}
+                                </button>
+                            )}
+                            {user.role === 'admin' && (
+                                <span className="bg-gold/20 text-gold px-3 py-1.5 border border-gold/40 rounded font-semibold">
+                                    Admin: {user.username}
+                                </span>
+                            )}
+                            <button onClick={() => { setUser(null); localStorage.removeItem('ku_cloud_user'); switchView('home'); }} className="bg-burgundy-dark hover:bg-burgundy-light px-3 py-1.5 rounded transition">
+                                {t.logout}
+                            </button>
+                        </div>
+                    ) : (
+                        <div className="flex items-center gap-2 text-xs">
+                            <button onClick={() => switchView('login')} className="bg-gold text-darkbrown font-bold px-3 py-1.5 rounded hover:bg-gold/90 transition">{t.login}</button>
+                            <button onClick={() => switchView('signup')} className="bg-burgundy-dark text-cream px-3 py-1.5 rounded border border-gold/40 hover:bg-burgundy-light transition">{t.signup}</button>
+                        </div>
+                    )}
+                </div>
+            </div>
+        </header>
+    );
+
+    const renderDishCard = (dish) => {
+        const koName = dish.koName || '';
+        const mainName = getLocalizedField(dish, 'Name', lang);
+        const allergens = dish.allergens || [];
+        const userAllergens = user?.profile?.allergens || [];
+        const hasAllergy = user?.role !== 'admin' && allergens.some(al => userAllergens.some(ua => ua.toLowerCase() === al.toLowerCase()));
+        const stats = getDishRatingStats(dish.id);
+        const spiceLabel = getSpiceLabel(dish.spice, t);
+
+        return (
+            <div key={dish.id} onClick={() => setSelectedDishModal(dish)} className={`bg-white rounded-lg shadow border p-4 cursor-pointer transition hover:shadow-md flex flex-col justify-between ${hasAllergy ? 'border-red-400 bg-red-50/20' : 'border-beige'}`}>
+                <div>
+                    <div className="flex justify-between items-start gap-2 mb-1">
                         <div>
-                            <div className="flex justify-between items-start gap-2 mb-1">
-                                <div>
-                                    <h4 className="font-bold text-darkbrown text-base">{koName}</h4>
-                                    <p className="text-xs text-gray-600 font-medium">{mainName}</p>
-                                </div>
-                                <div className="flex flex-col items-end gap-1">
-                                    <span className="bg-burgundy/10 text-burgundy text-xs font-semibold px-2 py-0.5 rounded whitespace-nowrap">
-                                        {dish.mealType}
-                                    </span>
-                                    {dish.spice && (
-                                        <span className="text-[10px] bg-orange-100 text-orange-800 px-2 py-0.5 rounded font-medium">
-                                            {getSpiceLabel(dish.spice, t)}
-                                        </span>
+                            <h4 className="font-bold text-darkbrown text-base">{koName}</h4>
+                            <p className="text-xs text-gray-600 font-medium">{mainName}</p>
+                        </div>
+                        <div className="flex flex-col items-end gap-1">
+                            <span className="bg-burgundy/10 text-burgundy text-xs font-semibold px-2 py-0.5 rounded whitespace-nowrap">
+                                {dish.mealType}
+                            </span>
+                            {dish.spice && (
+                                <span className="text-[10px] bg-orange-100 text-orange-800 px-2 py-0.5 rounded font-medium">
+                                    {spiceLabel}
+                                </span>
+                            )}
+                        </div>
+                    </div>
+                    <div className="text-xs text-gray-500 my-2">
+                        <span className="font-medium text-darkbrown">{CAFETERIAS_DATA[dish.cafeteriald]?.[lang]?.name || CAFETERIAS_DATA[dish.cafeteriald]?.en?.name}</span>
+                        <span className="mx-1">•</span>
+                        <span>{dish.date}</span>
+                    </div>
+                    {allergens.length > 0 && (
+                        <div className="text-xs text-gray-600 mt-2">
+                            <span className="font-semibold text-darkbrown">{t.allergens}:</span> {allergens.map(al => translateAllergen(al, lang)).join(', ')}
+                        </div>
+                    )}
+                    {hasAllergy && (
+                        <div className="mt-2 text-xs text-red-600 font-bold flex items-center gap-1">
+                            {t.warningAllergy}
+                        </div>
+                    )}
+                </div>
+                <div className="mt-4 pt-3 border-t border-beige flex justify-between items-center text-xs">
+                    <span className="text-burgundy font-bold">
+                        {(!dish.price || dish.price === 0) ? t.priceUnknown : `${dish.price} ${t.price}`}
+                    </span>
+                    <div className="flex items-center gap-2">
+                        <span className="text-yellow-600 font-bold">★ {stats.avg} ({stats.count})</span>
+                        <span className="text-burgundy font-semibold hover:underline">{t.details} →</span>
+                    </div>
+                </div>
+            </div>
+        );
+    };
+
+    const renderDishModal = () => {
+        if (!selectedDishModal) return null;
+        const dish = selectedDishModal;
+        const koName = dish.koName || '';
+        const mainName = getLocalizedField(dish, 'Name', lang);
+        const desc = getLocalizedField(dish, 'Desc', lang);
+        const ingredients = getLocalizedField(dish, 'Ingredients', lang);
+        const allergens = dish.allergens || [];
+        const userAllergens = user?.profile?.allergens || [];
+        const hasAllergy = user?.role !== 'admin' && allergens.some(al => userAllergens.some(ua => ua.toLowerCase() === al.toLowerCase()));
+        const stats = getDishRatingStats(dish.id);
+        const userRating = getUserDishRating(dish.id);
+
+        return (
+            <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+                <div className="bg-white rounded-xl shadow-2xl max-w-lg w-full p-6 relative max-h-[90vh] overflow-y-auto border border-beige">
+                    <button onClick={() => setSelectedDishModal(null)} className="absolute top-4 right-4 text-gray-400 hover:text-darkbrown font-bold text-lg">×</button>
+                    <h3 className="text-xl font-bold text-darkbrown">{koName}</h3>
+                    <p className="text-sm text-gray-600 font-medium mb-4">{mainName}</p>
+                    <div className="space-y-3 text-xs text-gray-700 bg-cream p-3 rounded-lg border border-beige mb-4">
+                        <div><strong className="text-darkbrown">{t.cafeteria}:</strong> {CAFETERIAS_DATA[dish.cafeteriald]?.[lang]?.name || CAFETERIAS_DATA[dish.cafeteriald]?.en?.name}</div>
+                        <div><strong className="text-darkbrown">{t.dateAndMeal}:</strong> {dish.date} ({translateDay(getDayName(dish.date), lang)}) - {dish.mealType}</div>
+                        <div><strong className="text-darkbrown">{t.price}:</strong> {(!dish.price || dish.price === 0) ? t.priceUnknown : `${dish.price} ${t.price}`}</div>
+                        <div><strong className="text-darkbrown">{t.rating}:</strong> ⭐ {stats.avg} ({stats.count})</div>
+                    </div>
+                    {desc && (
+                        <div className="mb-3">
+                            <h4 className="text-xs font-bold uppercase tracking-wide text-burgundy mb-1">{t.description}</h4>
+                            <p className="text-xs text-gray-700 leading-relaxed">{desc}</p>
+                        </div>
+                    )}
+                    {ingredients && (
+                        <div className="mb-3">
+                            <h4 className="text-xs font-bold uppercase tracking-wide text-burgundy mb-1">{t.ingredients}</h4>
+                            <p className="text-xs text-gray-700 leading-relaxed">{ingredients}</p>
+                        </div>
+                    )}
+                    {allergens.length > 0 && (
+                        <div className="mb-4">
+                            <h4 className="text-xs font-bold uppercase tracking-wide text-burgundy mb-1">{t.allergens}</h4>
+                            <p className="text-xs text-gray-700">{allergens.map(al => translateAllergen(al, lang)).join(', ')}</p>
+                        </div>
+                    )}
+                    {hasAllergy && (
+                        <div className="mb-4 p-3 bg-red-50 border border-red-300 rounded text-xs text-red-700 font-bold flex items-center gap-2">
+                            <span>⚠️</span> {t.allergyCaution}
+                        </div>
+                    )}
+                    {user && user.role !== 'admin' && (
+                        <div className="mt-6 pt-4 border-t border-beige">
+                            <h4 className="text-xs font-bold text-darkbrown mb-2">{t.rateThis}</h4>
+                            <div className="flex gap-1">
+                                {[1, 2, 3, 4, 5].map(star => (
+                                    <button key={star} onClick={() => handleRateDish(dish.id, star)} className={`text-xl ${userRating >= star ? 'text-yellow-500' : 'text-gray-300 hover:text-yellow-400'}`}>★</button>
+                                ))}
+                            </div>
+                        </div>
+                    )}
+                    <div className="mt-6 flex justify-end">
+                        <button onClick={() => setSelectedDishModal(null)} className="bg-burgundy text-cream px-4 py-2 rounded text-xs font-semibold hover:bg-burgundy-dark transition">
+                            {t.close}
+                        </button>
+                    </div>
+                </div>
+            </div>
+        );
+    };
+
+    const renderHome = () => (
+        <div className="max-w-7xl mx-auto px-4 py-8 flex-grow">
+            <div className="bg-burgundy text-cream rounded-2xl p-8 mb-8 shadow-md flex flex-col md:flex-row justify-between items-center gap-6">
+                <div>
+                    <h2 className="text-3xl font-bold mb-2">{t.welcomeTitle}</h2>
+                    <p className="text-sm text-cream/80 max-w-xl">{t.welcomeSub}</p>
+                </div>
+                <div className="flex flex-col sm:flex-row gap-3">
+                    <button onClick={() => switchView('todays-menu')} className="bg-gold text-darkbrown font-bold px-5 py-2.5 rounded-lg text-xs hover:bg-gold/90 transition shadow">
+                        {t.viewTodays}
+                    </button>
+                    <button onClick={() => { setSelectedCafeteriald(null); switchView('cafeterias'); }} className="bg-burgundy-dark text-cream border border-gold/40 px-5 py-2.5 rounded-lg text-xs font-semibold hover:bg-burgundy-light transition">
+                        {t.viewCafes}
+                    </button>
+                </div>
+            </div>
+            <div className="flex justify-between items-center mb-4">
+                <h3 className="text-lg font-bold text-darkbrown">{t.todaysOverview}</h3>
+                <button onClick={() => switchView('todays-menu')} className="text-xs font-bold text-burgundy hover:underline">{t.viewAll}</button>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                {INITIAL_CAFETERIAS.map(caf => {
+                    const cafDishes = dishes.filter(d => d.cafeteriald === caf.id && d.date === selectedQuickDate);
+                    return (
+                        <div key={caf.id} className="bg-white rounded-lg shadow border border-beige p-4 flex flex-col justify-between">
+                            <div>
+                                <h4 className="font-bold text-darkbrown text-sm mb-1">{caf.name}</h4>
+                                <p className="text-xs text-gray-500 mb-3">{caf.hours}</p>
+                                <div className="text-xs text-gray-700 space-y-1 mb-4">
+                                    {cafDishes.length === 0 ? (
+                                        <p className="text-gray-400 italic text-xs">{t.noDishes}</p>
+                                    ) : (
+                                        cafDishes.slice(0, 3).map(d => (
+                                            <div key={d.id} className="truncate font-medium">{d.koName || getLocalizedField(d, 'Name', lang)}</div>
+                                        ))
                                     )}
                                 </div>
                             </div>
-                            <div className="text-xs text-gray-500 my-2">
-                                <span className="font-medium text-darkbrown">{CAFETERIAS_DATA[dish.cafeteriaId]?.[lang]?.name || CAFETERIAS_DATA[dish.cafeteriaId]?.en?.name}</span>
-                                <span className="mx-1">•</span>
-                                <span>{dish.date}</span>
-                            </div>
-                            {allergens.length > 0 && (
-                                <div className="text-xs text-gray-600 mt-2">
-                                    <span className="font-semibold text-darkbrown">{t.allergens}:</span> {allergens.map(al => translateAllergen(al, lang)).join(', ')}
-                                </div>
-                            )}
-                            {hasAllergy && (
-                                <div className="mt-2 text-xs text-red-600 font-bold flex items-center gap-1">
-                                    ⚠️ {t.warningAllergy}
-                                </div>
-                            )}
+                            <button onClick={() => { setSelectedCafeteriald(caf.id); switchView('weekly-menu'); }} className="text-xs text-burgundy font-bold hover:underline text-left pt-2 border-t border-beige">
+                                {t.clickToViewMenu}
+                            </button>
                         </div>
-                        <div className="mt-4 pt-3 border-t border-beige flex justify-between items-center text-xs">
-                            <span className="text-burgundy font-bold">
-                                {(!dish.price || dish.price === 0) ? t.priceUnknown : `${dish.price} ${t.price}`}
-                            </span>
-                            <div className="flex items-center gap-2">
-                                <span className="text-yellow-600 font-bold">★ {stats.avg} ({stats.count})</span>
-                                <span className="text-burgundy font-semibold hover:underline">{t.details} →</span>
-                            </div>
-                        </div>
-                    </div>
-                );
-            };
+                    );
+                })}
+            </div>
+        </div>
+    );
 
-            const renderDishModal = () => {
-                if (!selectedDishModal) return null;
-                const dish = selectedDishModal;
-                const koName = dish.koName || '';
-                const mainName = getLocalizedField(dish, 'Name', lang);
-                const desc = getLocalizedField(dish, 'Desc', lang);
-                const ingredients = getLocalizedField(dish, 'Ingredients', lang);
-                const allergens = dish.allergens || [];
-                const userAllergens = user?.profile?.allergens || [];
-                const hasAllergy = user?.role !== 'admin' && allergens.some(al => userAllergens.some(ua => ua.toLowerCase() === al.toLowerCase()));
-                const stats = getDishRatingStats(dish.id);
-                const userRating = getUserDishRating(dish.id);
-
-                return (
-                    <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-                        <div className="bg-white rounded-xl shadow-2xl max-w-lg w-full p-6 relative max-h-[90vh] overflow-y-auto border border-beige">
-                            <button onClick={() => setSelectedDishModal(null)} className="absolute top-4 right-4 text-gray-400 hover:text-darkbrown font-bold text-lg">✕</button>
-                            
-                            <h3 className="text-xl font-bold text-darkbrown">{koName}</h3>
-                            <p className="text-sm text-gray-600 font-medium mb-4">{mainName}</p>
-
-                            <div className="space-y-3 text-xs text-gray-700 bg-cream p-3 rounded-lg border border-beige mb-4">
-                                <div><strong className="text-darkbrown">{t.cafeteria}:</strong> {CAFETERIAS_DATA[dish.cafeteriaId]?.[lang]?.name || CAFETERIAS_DATA[dish.cafeteriaId]?.en?.name}</div>
-                                <div><strong className="text-darkbrown">{t.dateAndMeal}:</strong> {dish.date} ({translateDay(getDayName(dish.date), lang)}) — {dish.mealType}</div>
-                                <div><strong className="text-darkbrown">{t.price}:</strong> {(!dish.price || dish.price === 0) ? t.priceUnknown : `${dish.price} ${t.price}`}</div>
-                                <div><strong className="text-darkbrown">{t.rating}:</strong> ★ {stats.avg} ({stats.count})</div>
-                            </div>
-
-                            {desc && (
-                                <div className="mb-3">
-                                    <h4 className="text-xs font-bold uppercase tracking-wide text-burgundy mb-1">{t.description}</h4>
-                                    <p className="text-xs text-gray-700 leading-relaxed">{desc}</p>
-                                </div>
-                            )}
-
-                            {ingredients && (
-                                <div className="mb-3">
-                                    <h4 className="text-xs font-bold uppercase tracking-wide text-burgundy mb-1">{t.ingredients}</h4>
-                                    <p className="text-xs text-gray-700 leading-relaxed">{ingredients}</p>
-                                </div>
-                            )}
-
-                            {allergens.length > 0 && (
-                                <div className="mb-4">
-                                    <h4 className="text-xs font-bold uppercase tracking-wide text-burgundy mb-1">{t.allergens}</h4>
-                                    <p className="text-xs text-gray-700">{allergens.map(al => translateAllergen(al, lang)).join(', ')}</p>
-                                </div>
-                            )}
-
-                            {hasAllergy && (
-                                <div className="mb-4 p-3 bg-red-50 border border-red-300 rounded text-xs text-red-700 font-bold flex items-center gap-2">
-                                    <span>⚠️</span> {t.allergyCaution}
-                                </div>
-                            )}
-
-                            {user && user.role !== 'admin' && (
-                                <div className="mt-6 pt-4 border-t border-beige">
-                                    <h4 className="text-xs font-bold text-darkbrown mb-2">{t.rateThis}</h4>
-                                    <div className="flex gap-1">
-                                        {[1, 2, 3, 4, 5].map(star => (
-                                            <button key={star} onClick={() => handleRateDish(dish.id, star)} className={`text-xl ${userRating >= star ? 'text-yellow-500' : 'text-gray-300 hover:text-yellow-400'}`}>★</button>
-                                        ))}
-                                    </div>
-                                </div>
-                            )}
-
-                            <div className="mt-6 flex justify-end">
-                                <button onClick={() => setSelectedDishModal(null)} className="bg-burgundy text-cream px-4 py-2 rounded text-xs font-semibold hover:bg-burgundy-dark transition">
-                                    {t.close}
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                );
-            };
-
-            const renderHome = () => (
-                <div className="max-w-7xl mx-auto px-4 py-8 flex-grow">
-                    <div className="bg-burgundy text-cream rounded-2xl p-8 mb-8 shadow-md flex flex-col md:flex-row justify-between items-center gap-6">
+    const renderCafeteriasView = () => (
+        <div className="max-w-7xl mx-auto px-4 py-8 flex-grow">
+            <h2 className="text-2xl font-bold text-darkbrown mb-6">{t.cafeterias}</h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {INITIAL_CAFETERIAS.map(caf => (
+                    <div key={caf.id} className="bg-white rounded-xl shadow border border-beige p-6 flex flex-col justify-between">
                         <div>
-                            <h2 className="text-3xl font-bold mb-2">{t.welcomeTitle}</h2>
-                            <p className="text-sm text-cream/80 max-w-xl">{t.welcomeSub}</p>
+                            <h3 className="text-lg font-bold text-burgundy mb-2">{caf.name}</h3>
+                            <p className="text-xs text-gray-600 mb-4"><strong className="text-darkbrown">{t.location}:</strong> {caf.location}</p>
+                            <p className="text-xs text-gray-600 mb-4"><strong className="text-darkbrown">{t.hours}:</strong> {caf.hours}</p>
+                            <p className="text-xs text-gray-600 mb-6"><strong className="text-darkbrown">{t.phone}:</strong> {caf.phone}</p>
                         </div>
-                        <div className="flex flex-col sm:flex-row gap-3">
-                            <button onClick={() => switchView('todays-menu')} className="bg-gold text-darkbrown font-bold px-5 py-2.5 rounded-lg text-xs hover:bg-gold/90 transition shadow">
-                                {t.viewTodays}
-                            </button>
-                            <button onClick={() => { setSelectedCafeteriaId(null); switchView('cafeterias'); }} className="bg-burgundy-dark text-cream border border-gold/40 px-5 py-2.5 rounded-lg text-xs font-semibold hover:bg-burgundy-light transition">
-                                {t.viewCafes}
-                            </button>
+                        <button onClick={() => { setSelectedCafeteriald(caf.id); switchView('weekly-menu'); }} className="bg-burgundy text-cream text-xs font-semibold py-2 px-4 rounded hover:bg-burgundy-dark transition self-start">
+                            {t.clickToViewMenu}
+                        </button>
+                    </div>
+                ))}
+            </div>
+        </div>
+    );
+
+    const renderTodaysMenuView = () => {
+        const filteredDishes = dishes.filter(d => d.date === selectedQuickDate);
+        return (
+            <div className="max-w-7xl mx-auto px-4 py-8 flex-grow">
+                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
+                    <h2 className="text-2xl font-bold text-darkbrown">{t.todaysMenu}</h2>
+                    <div className="bg-white p-3 rounded-lg shadow border border-beige flex items-center gap-3">
+                        <span className="text-xs font-bold text-burgundy uppercase whitespace-nowrap">{t.selectDateLabel}</span>
+                        <input
+                            type="date"
+                            value={selectedQuickDate}
+                            onChange={e => setSelectedQuickDate(e.target.value)}
+                            className="border border-beige rounded p-1.5 text-xs bg-cream text-darkbrown font-semibold focus:outline-none focus:border-burgundy cursor-pointer"
+                        />
+                        <button
+                            onClick={() => setSelectedQuickDate(new Date().toISOString().split('T')[0])}
+                            className="text-xs bg-burgundy/10 hover:bg-burgundy text-burgundy hover:text-white px-2.5 py-1 rounded transition font-semibold"
+                        >
+                            {lang === 'ru' ? 'Сегодня' : lang === 'zh' ? '今天' : 'Today'}
+                        </button>
+                    </div>
+                </div>
+                {filteredDishes.length === 0 ? (
+                    <div className="bg-white rounded-lg shadow border border-beige p-8 text-center text-gray-400 italic text-sm">
+                        {t.noMatchingDishes}
+                    </div>
+                ) : (
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                        {filteredDishes.map(d => renderDishCard(d))}
+                    </div>
+                )}
+            </div>
+        );
+    };
+
+    const renderWeeklyMenuView = () => {
+        const cafes = getCafeterias(lang);
+        const weekDates = getCurrWeekDates();
+        const filteredDishes = dishes.filter(d => {
+            if (weeklyCafFilter !== 'all' && d.cafeteriald !== weeklyCafFilter) return false;
+            if (dayFilter !== 'all' && getDayName(d.date) !== dayFilter) return false;
+            if (mealFilter !== 'all' && d.mealType !== mealFilter) return false;
+            if (allergenFilter !== 'all') {
+                const hasThisAllergen = (d.allergens || []).some(a => a.toLowerCase() === allergenFilter.toLowerCase());
+                if (hasThisAllergen) return false;
+            }
+            return true;
+        });
+
+        return (
+            <div className="max-w-7xl mx-auto px-4 py-8 flex-grow">
+                <div className="flex justify-between items-center mb-6">
+                    <h2 className="text-2xl font-bold text-darkbrown">{t.weeklyMenu}</h2>
+                    {selectedCafeteriald && (
+                        <button onClick={() => setSelectedCafeteriald(null)} className="text-xs text-burgundy font-bold hover:underline">
+                            {t.backToCafes}
+                        </button>
+                    )}
+                </div>
+                <div className="bg-white rounded-xl shadow border border-beige p-4 mb-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                    <div>
+                        <label className="block text-xs font-bold text-gray-600 mb-1">{t.filterCafeteria}</label>
+                        <select value={selectedCafeteriald || weeklyCafFilter} onChange={e => { setSelectedCafeteriald(null); setWeeklyCafFilter(e.target.value); }} className="w-full border border-beige rounded p-2 text-xs bg-cream text-darkbrown font-semibold">
+                            <option value="all">{t.allCafeterias}</option>
+                            {cafes.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
+                        </select>
+                    </div>
+                    <div>
+                        <label className="block text-xs font-bold text-gray-600 mb-1">{t.filterDayOfWeek}</label>
+                        <select value={dayFilter} onChange={e => setDayFilter(e.target.value)} className="w-full border border-beige rounded p-2 text-xs bg-cream text-darkbrown font-semibold">
+                            <option value="all">{t.allDays}</option>
+                            {DAYS_OF_WEEK.map(day => <option key={day} value={day}>{translateDay(day, lang)}</option>)}
+                        </select>
+                    </div>
+                    <div>
+                        <label className="block text-xs font-bold text-gray-600 mb-1">{t.filterMealType}</label>
+                        <select value={mealFilter} onChange={e => setMealFilter(e.target.value)} className="w-full border border-beige rounded p-2 text-xs bg-cream text-darkbrown font-semibold">
+                            <option value="all">{t.allMeals}</option>
+                            <option value="Breakfast">{t.breakfast}</option>
+                            <option value="Lunch">{t.lunch}</option>
+                            <option value="Dinner">{t.dinner}</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label className="block text-xs font-bold text-gray-600 mb-1">{t.filterAllergens}</label>
+                        <select value={allergenFilter} onChange={e => setAllergenFilter(e.target.value)} className="w-full border border-beige rounded p-2 text-xs bg-cream text-darkbrown font-semibold">
+                            <option value="all">{t.allAllergensShowAll}</option>
+                            {COMMON_ALLERGENS.map(al => <option key={al} value={al}>{t.excludeText} {translateAllergen(al, lang)}</option>)}
+                        </select>
+                    </div>
+                </div>
+
+                {selectedCafeteriald ? (
+                    <div className="space-y-6">
+                        <div className="bg-burgundy/10 p-4 rounded-xl border border-burgundy/20">
+                            <h3 className="text-lg font-bold text-burgundy">{CAFETERIAS_DATA[selectedCafeteriald]?.[lang]?.name}</h3>
+                            <p className="text-xs text-gray-600 mt-1">{CAFETERIAS_DATA[selectedCafeteriald]?.[lang]?.location}</p>
                         </div>
-                    </div>
-
-                    <div className="flex justify-between items-center mb-4">
-                        <h3 className="text-lg font-bold text-darkbrown">{t.todaysOverview}</h3>
-                        <button onClick={() => switchView('todays-menu')} className="text-xs font-bold text-burgundy hover:underline">{t.viewAll}</button>
-                    </div>
-
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                        {INITIAL_CAFETERIAS.map(caf => {
-                            const cafDishes = dishes.filter(d => d.cafeteriaId === caf.id && d.date === selectedQuickDate);
-                            return (
-                                <div key={caf.id} className="bg-white rounded-lg shadow border border-beige p-4 flex flex-col justify-between">
-                                    <div>
-                                        <h4 className="font-bold text-darkbrown text-sm mb-1">{caf.name}</h4>
-                                        <p className="text-xs text-gray-500 mb-3">{caf.hours}</p>
-                                        <div className="text-xs text-gray-700 space-y-1 mb-4">
-                                            {cafDishes.length === 0 ? (
-                                                <p className="text-gray-400 italic text-xs">{t.noDishes}</p>
+                        <div className="grid grid-cols-1 md:grid-cols-7 gap-4">
+                            {weekDates.map(dayObj => {
+                                const dayEnName = getDayName(dayObj.dateStr);
+                                const dayDishes = filteredDishes.filter(d => d.cafeteriald === selectedCafeteriald && d.date === dayObj.dateStr);
+                                const dayLocalized = translateDay(dayEnName, lang);
+                                return (
+                                    <div key={dayObj.dateStr} className="bg-white rounded-lg shadow border border-beige p-3 flex flex-col">
+                                        <div className="border-b border-beige pb-2 mb-2 text-center">
+                                            <div className="text-xs font-bold text-burgundy">{dayLocalized}</div>
+                                            <div className="text-xs text-gray-500">{dayObj.dateStr}</div>
+                                        </div>
+                                        <div className="space-y-2 flex-grow">
+                                            {dayDishes.length === 0 ? (
+                                                <p className="text-xs text-gray-400 italic text-center py-4">{t.noDishesForDay} {dayLocalized}.</p>
                                             ) : (
-                                                cafDishes.slice(0, 3).map(d => (
-                                                    <div key={d.id} className="truncate font-medium">• {d.koName || getLocalizedField(d, 'Name', lang)}</div>
+                                                dayDishes.map(d => (
+                                                    <div key={d.id} onClick={() => setSelectedDishModal(d)} className="p-2 bg-cream rounded border border-beige/60 cursor-pointer hover:border-burgundy transition">
+                                                        <div className="font-bold text-darkbrown text-xs truncate">{d.koName}</div>
+                                                        <div className="text-[10px] text-gray-600 truncate">{getLocalizedField(d, 'Name', lang)}</div>
+                                                        <div className="text-[10px] text-burgundy font-semibold mt-1 flex justify-between">
+                                                            <span>{d.mealType}</span>
+                                                            <span>{(!d.price || d.price === 0) ? t.priceUnknown : `${d.price} ${t.price}`}</span>
+                                                        </div>
+                                                    </div>
                                                 ))
                                             )}
                                         </div>
                                     </div>
-                                    <button onClick={() => { setSelectedCafeteriaId(caf.id); switchView('weekly-menu'); }} className="text-xs text-burgundy font-bold hover:underline text-left pt-2 border-t border-beige">
-                                        {t.clickToViewMenu}
+                                );
+                            })}
+                        </div>
+                    </div>
+                ) : (
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                        {cafes.map(caf => {
+                            const cafDishes = filteredDishes.filter(d => d.cafeteriald === caf.id);
+                            return (
+                                <div key={caf.id} className="bg-white rounded-xl shadow border border-beige p-4 flex flex-col justify-between">
+                                    <div>
+                                        <h3 className="font-bold text-burgundy text-base mb-1">{caf.name}</h3>
+                                        <p className="text-xs text-gray-500 mb-4">{cafDishes.length} {t.dishCountLabel}</p>
+                                        <div className="space-y-2 max-h-96 overflow-y-auto pr-1">
+                                            {cafDishes.map(d => (
+                                                <div key={d.id} onClick={() => setSelectedDishModal(d)} className="p-2 bg-cream rounded border border-beige cursor-pointer hover:border-burgundy transition">
+                                                    <div className="text-xs font-bold text-darkbrown truncate">{d.koName}</div>
+                                                    <div className="text-[10px] text-gray-600 truncate">{getLocalizedField(d, 'Name', lang)}</div>
+                                                    <div className="text-[10px] text-burgundy font-semibold mt-1 flex justify-between">
+                                                        <span>{d.date} ({d.mealType})</span>
+                                                        <span>{(!d.price || d.price === 0) ? t.priceUnknown : `${d.price} ${t.price}`}</span>
+                                                    </div>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+                                    <button onClick={() => setSelectedCafeteriald(caf.id)} className="mt-4 w-full bg-burgundy/10 text-burgundy text-xs font-bold py-2 rounded hover:bg-burgundy hover:text-cream transition">
+                                        {t.details} →
                                     </button>
                                 </div>
                             );
                         })}
                     </div>
-                </div>
-            );
+                )}
+            </div>
+        );
+    };
 
-            const renderCafeteriasView = () => (
-                <div className="max-w-7xl mx-auto px-4 py-8 flex-grow">
-                    <h2 className="text-2xl font-bold text-darkbrown mb-6">{t.cafeterias}</h2>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        {INITIAL_CAFETERIAS.map(caf => (
-                            <div key={caf.id} className="bg-white rounded-xl shadow border border-beige p-6 flex flex-col justify-between">
-                                <div>
-                                    <h3 className="text-lg font-bold text-burgundy mb-2">{caf.name}</h3>
-                                    <p className="text-xs text-gray-600 mb-4"><strong className="text-darkbrown">{t.location}:</strong> {caf.location}</p>
-                                    <p className="text-xs text-gray-600 mb-4"><strong className="text-darkbrown">{t.hours}:</strong> {caf.hours}</p>
-                                    <p className="text-xs text-gray-600 mb-6"><strong className="text-darkbrown">{t.phone}:</strong> {caf.phone}</p>
-                                </div>
-                                <button onClick={() => { setSelectedCafeteriaId(caf.id); switchView('weekly-menu'); }} className="bg-burgundy text-cream text-xs font-semibold py-2 px-4 rounded hover:bg-burgundy-dark transition self-start">
-                                    {t.clickToViewMenu}
-                                </button>
-                            </div>
-                        ))}
+    const renderProfileView = () => (
+        <div className="max-w-xl mx-auto px-4 py-8 flex-grow">
+            <div className="bg-white rounded-xl shadow border border-beige p-6">
+                <h2 className="text-2xl font-bold text-darkbrown mb-4">{t.profile}</h2>
+                <form onSubmit={handleUpdateProfile} className="space-y-6">
+                    <div>
+                        <label className="block text-xs font-bold text-gray-700 mb-2">{t.selectYourAllergens}</label>
+                        <div className="grid grid-cols-2 gap-2">
+                            {COMMON_ALLERGENS.map(al => {
+                                const isChecked = (studentProfile.allergens || []).some(a => a.toLowerCase() === al.toLowerCase());
+                                return (
+                                    <label key={al} className={`flex items-center gap-2 p-2 rounded border cursor-pointer text-xs ${isChecked ? 'bg-burgundy/10 border-burgundy font-bold text-burgundy' : 'bg-cream border-beige text-darkbrown'}`}>
+                                        <input
+                                            type="checkbox"
+                                            checked={isChecked}
+                                            onChange={() => toggleProfileCommonAllergen(al)}
+                                            className="rounded border-beige text-burgundy focus:ring-burgundy"
+                                        />
+                                        {translateAllergen(al, lang)}
+                                    </label>
+                                );
+                            })}
+                        </div>
                     </div>
-                </div>
-            );
+                    <div>
+                        <label className="block text-xs font-bold text-gray-700 mb-1">Other Allergens (comma separated)</label>
+                        <input
+                            type="text"
+                            value={profileOtherAllergen}
+                            onChange={e => setProfileOtherAllergen(e.target.value)}
+                            placeholder="e.g. kiwi, buckwheat, garlic"
+                            className="w-full border border-beige rounded p-2 text-xs bg-cream text-darkbrown"
+                        />
+                    </div>
+                    <button type="submit" className="w-full bg-burgundy text-cream font-bold py-2.5 rounded text-xs hover:bg-burgundy-dark transition">
+                        Save Profile
+                    </button>
+                </form>
+            </div>
+        </div>
+    );
 
-            const renderTodaysMenuView = () => {
-                const filteredDishes = dishes.filter(d => d.date === selectedQuickDate);
-
-                return (
-                    <div className="max-w-7xl mx-auto px-4 py-8 flex-grow">
-                        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
-                            <h2 className="text-2xl font-bold text-darkbrown">{t.todaysMenu}</h2>
-                            <div className="bg-white p-3 rounded-lg shadow border border-beige flex items-center gap-3">
-                                <span className="text-xs font-bold text-burgundy uppercase whitespace-nowrap">{t.selectDateLabel}</span>
-                                <input 
-                                    type="date" 
-                                    value={selectedQuickDate} 
-                                    onChange={e => setSelectedQuickDate(e.target.value)} 
-                                    className="border border-beige rounded p-1.5 text-xs bg-cream text-darkbrown font-semibold focus:outline-none focus:border-burgundy cursor-pointer"
-                                />
-                                <button 
-                                    onClick={() => setSelectedQuickDate(new Date().toISOString().split('T')[0])}
-                                    className="text-xs bg-burgundy/10 hover:bg-burgundy text-burgundy hover:text-white px-2.5 py-1 rounded transition font-semibold"
-                                >
-                                    {lang === 'ru' ? 'Сегодня' : lang === 'zh' ? '今天' : 'Today'}
-                                </button>
+    const renderAdminDashboard = () => (
+        <div className="max-w-7xl mx-auto px-4 py-8 flex-grow">
+            <h2 className="text-2xl font-bold text-darkbrown mb-6">Admin Dashboard</h2>
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+                <div className="bg-white rounded-xl shadow border border-beige p-6">
+                    <h3 className="text-lg font-bold text-burgundy mb-4">Add Single Dish</h3>
+                    <form onSubmit={handleAddDish} className="space-y-4">
+                        <div className="grid grid-cols-2 gap-3">
+                            <div>
+                                <label className="block text-xs font-bold text-gray-700 mb-1">Cafeteria</label>
+                                <select value={adminForm.cafeteriald} onChange={e => setAdminForm({...adminForm, cafeteriald: e.target.value})} className="w-full border border-beige rounded p-2 text-xs bg-cream text-darkbrown">
+                                    {getCafeterias(lang).map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
+                                </select>
+                            </div>
+                            <div>
+                                <label className="block text-xs font-bold text-gray-700 mb-1">Date</label>
+                                <input type="date" value={adminForm.date} onChange={e => setAdminForm({...adminForm, date: e.target.value})} className="w-full border border-beige rounded p-2 text-xs bg-cream text-darkbrown" />
                             </div>
                         </div>
-
-                        {filteredDishes.length === 0 ? (
-                            <div className="bg-white rounded-lg shadow border border-beige p-8 text-center text-gray-400 italic text-sm">
-                                {t.noMatchingDishes}
+                        <div className="grid grid-cols-2 gap-3">
+                            <div>
+                                <label className="block text-xs font-bold text-gray-700 mb-1">Meal Type</label>
+                                <select value={adminForm.mealType} onChange={e => setAdminForm({...adminForm, mealType: e.target.value})} className="w-full border border-beige rounded p-2 text-xs bg-cream text-darkbrown">
+                                    <option value="Breakfast">Breakfast</option>
+                                    <option value="Lunch">Lunch</option>
+                                    <option value="Dinner">Dinner</option>
+                                </select>
                             </div>
-                        ) : (
-                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                                {filteredDishes.map(d => renderDishCard(d))}
+                            <div>
+                                <label className="block text-xs font-bold text-gray-700 mb-1">Spice Level</label>
+                                <select value={adminForm.spice} onChange={e => setAdminForm({...adminForm, spice: e.target.value})} className="w-full border border-beige rounded p-2 text-xs bg-cream text-darkbrown">
+                                    <option value="Mild">Mild 🟢</option>
+                                    <option value="Medium">Medium 🟡</option>
+                                    <option value="Spicy">Spicy 🔴</option>
+                                    <option value="Extra Spicy">Extra Spicy 🔥</option>
+                                </select>
                             </div>
+                        </div>
+                        <div className="grid grid-cols-2 gap-3">
+                            <div>
+                                <label className="block text-xs font-bold text-gray-700 mb-1">Price (optional)</label>
+                                <input type="number" value={adminForm.price} onChange={e => setAdminForm({...adminForm, price: e.target.value})} placeholder="e.g. 5000" className="w-full border border-beige rounded p-2 text-xs bg-cream text-darkbrown" />
+                            </div>
+                        </div>
+                        <div>
+                            <label className="block text-xs font-bold text-gray-700 mb-1">Korean Name *</label>
+                            <input type="text" value={adminForm.koName} onChange={e => setAdminForm({...adminForm, koName: e.target.value})} className="w-full border border-beige rounded p-2 text-xs bg-cream text-darkbrown" />
+                        </div>
+                        <div>
+                            <label className="block text-xs font-bold text-gray-700 mb-1">English Name *</label>
+                            <input type="text" value={adminForm.enName} onChange={e => setAdminForm({...adminForm, enName: e.target.value})} className="w-full border border-beige rounded p-2 text-xs bg-cream text-darkbrown" />
+                        </div>
+                        <div className="grid grid-cols-2 gap-3">
+                            <div>
+                                <label className="block text-xs font-bold text-gray-700 mb-1">Russian Name</label>
+                                <input type="text" value={adminForm.ruName} onChange={e => setAdminForm({...adminForm, ruName: e.target.value})} className="w-full border border-beige rounded p-2 text-xs bg-cream text-darkbrown" />
+                            </div>
+                            <div>
+                                <label className="block text-xs font-bold text-gray-700 mb-1">Chinese Name</label>
+                                <input type="text" value={adminForm.zhName} onChange={e => setAdminForm({...adminForm, zhName: e.target.value})} className="w-full border border-beige rounded p-2 text-xs bg-cream text-darkbrown" />
+                            </div>
+                        </div>
+                        <div>
+                            <label className="block text-xs font-bold text-gray-700 mb-1">Allergens (comma separated)</label>
+                            <input type="text" value={adminForm.allergens} onChange={e => setAdminForm({...adminForm, allergens: e.target.value})} placeholder="pork, soy, wheat" className="w-full border border-beige rounded p-2 text-xs bg-cream text-darkbrown" />
+                        </div>
+                        <button type="submit" className="w-full bg-burgundy text-cream font-bold py-2 rounded text-xs hover:bg-burgundy-dark transition">
+                            Publish Dish
+                        </button>
+                    </form>
+                </div>
+                <div className="bg-white rounded-xl shadow border border-beige p-6">
+                    <h3 className="text-lg font-bold text-burgundy mb-4">Bulk Import</h3>
+                    <form onSubmit={handleBulkImport} className="space-y-4">
+                        <div>
+                            <label className="block text-xs font-bold text-gray-700 mb-1">Paste Data (Format: Date|CafId|Meal|Ko|En|Ru|Zh|Price|...|Spice)</label>
+                            <textarea rows="10" value={bulkText} onChange={e => setBulkText(e.target.value)} placeholder="2026-11-18 | c1 | Lunch | 김치찌개 | Kimchi Stew | Кимчи чхиге | 泡菜汤 | 5000 | ... | Mild" className="w-full border border-beige rounded p-2 text-xs bg-cream text-darkbrown font-mono"></textarea>
+                        </div>
+                        <button type="submit" className="w-full bg-gold text-darkbrown font-bold py-2 rounded text-xs hover:bg-gold/90 transition">
+                            Import Bulk Data
+                        </button>
+                    </form>
+                </div>
+            </div>
+            <div className="bg-white rounded-xl shadow border border-beige p-6">
+                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-4">
+                    <h3 className="text-lg font-bold text-burgundy">Manage Published Dishes ({dishes.length})</h3>
+                    <div className="flex items-center gap-2">
+                        {selectedDishIds.length > 0 && (
+                            <button onClick={handleBatchDelete} className="bg-red-600 text-white px-3 py-1.5 rounded text-xs font-bold hover:bg-red-700 transition">
+                                Delete Selected ({selectedDishIds.length})
+                            </button>
                         )}
+                        <button onClick={handleDeleteAllDishes} className="bg-red-800 text-white px-3 py-1.5 rounded text-xs font-bold hover:bg-red-900 transition">
+                            Delete All Menus
+                        </button>
                     </div>
-                );
-            };
+                </div>
+                <div className="overflow-x-auto">
+                    <table className="w-full text-xs text-left">
+                        <thead className="bg-cream border-b border-beige text-darkbrown">
+                            <tr>
+                                <th className="p-2 w-8">
+                                    <input
+                                        type="checkbox"
+                                        onChange={toggleSelectAll}
+                                        checked={dishes.length > 0 && selectedDishIds.length === dishes.length}
+                                        className="rounded border-beige text-burgundy focus:ring-burgundy"
+                                    />
+                                </th>
+                                <th className="p-2">Date</th>
+                                <th className="p-2">Cafeteria</th>
+                                <th className="p-2">Meal</th>
+                                <th className="p-2">Korean Name</th>
+                                <th className="p-2">English Name</th>
+                                <th className="p-2">Price</th>
+                                <th className="p-2 text-right">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {dishes.map(d => {
+                                const isSelected = selectedDishIds.includes(d.id);
+                                return (
+                                    <tr key={d.id} className={`border-b border-beige/40 hover:bg-cream/40 ${isSelected ? 'bg-burgundy/5' : ''}`}>
+                                        <td className="p-2">
+                                            <input
+                                                type="checkbox"
+                                                checked={isSelected}
+                                                onChange={() => toggleSelectDish(d.id)}
+                                                className="rounded border-beige text-burgundy focus:ring-burgundy"
+                                            />
+                                        </td>
+                                        <td className="p-2">{d.date}</td>
+                                        <td className="p-2">{CAFETERIAS_DATA[d.cafeteriald]?.en?.name}</td>
+                                        <td className="p-2">{d.mealType}</td>
+                                        <td className="p-2 font-bold">{d.koName}</td>
+                                        <td className="p-2">{d.enName}</td>
+                                        <td className="p-2">{(!d.price || d.price === 0) ? 'Unknown' : `${d.price} KRW`}</td>
+                                        <td className="p-2 text-right">
+                                            <button onClick={() => handleDeleteDish(d.id)} className="bg-red-100 text-red-600 px-2 py-1 rounded font-semibold hover:bg-red-200 transition">Delete</button>
+                                        </td>
+                                    </tr>
+                                );
+                            })}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    );
 
-            const renderWeeklyMenuView = () => {
-                const cafes = getCafeterias(lang);
-                const weekDates = getCurrWeekDates();
-
-                const filteredDishes = dishes.filter(d => {
-                    if (weeklyCafFilter !== 'all' && d.cafeteriaId !== weeklyCafFilter) return false;
-                    if (dayFilter !== 'all' && getDayName(d.date) !== dayFilter) return false;
-                    if (mealFilter !== 'all' && d.mealType !== mealFilter) return false;
-                    if (allergenFilter !== 'all') {
-                        const hasThisAllergen = (d.allergens || []).some(a => a.toLowerCase() === allergenFilter.toLowerCase());
-                        if (hasThisAllergen) return false;
-                    }
-                    return true;
-                });
-
-                return (
-                    <div className="max-w-7xl mx-auto px-4 py-8 flex-grow">
-                        <div className="flex justify-between items-center mb-6">
-                            <h2 className="text-2xl font-bold text-darkbrown">{t.weeklyMenu}</h2>
-                            {selectedCafeteriaId && (
-                                <button onClick={() => setSelectedCafeteriaId(null)} className="text-xs text-burgundy font-bold hover:underline">
-                                    {t.backToCafes}
-                                </button>
-                            )}
+    const renderAuth = () => (
+        <div className="max-w-md mx-auto px-4 py-16 flex-grow">
+            <div className="bg-white rounded-xl shadow border border-beige p-8">
+                <h2 className="text-2xl font-bold text-darkbrown mb-6 text-center">
+                    {view === 'login' ? t.login : view === 'signup' ? t.signup : 'Admin Login'}
+                </h2>
+                {authError && <div className="mb-4 p-3 bg-red-50 border border-red-300 rounded text-xs text-red-600 font-semibold">{authError}</div>}
+                <form onSubmit={view === 'signup' ? handleSignup : handleLogin} className="space-y-4">
+                    <div>
+                        <label className="block text-xs font-bold text-gray-700 mb-1">{view === 'admin-login' ? 'Admin Username' : 'Username or Email'}</label>
+                        <input type="text" value={authForm.username} onChange={e => setAuthForm({...authForm, username: e.target.value})} className="w-full border border-beige rounded p-2 text-xs bg-cream text-darkbrown" required />
+                    </div>
+                    {view === 'signup' && (
+                        <div>
+                            <label className="block text-xs font-bold text-gray-700 mb-1">Email</label>
+                            <input type="email" value={authForm.email} onChange={e => setAuthForm({...authForm, email: e.target.value})} className="w-full border border-beige rounded p-2 text-xs bg-cream text-darkbrown" required />
                         </div>
-
-                        <div className="bg-white rounded-xl shadow border border-beige p-4 mb-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                            <div>
-                                <label className="block text-xs font-bold text-gray-600 mb-1">{t.filterCafeteria}</label>
-                                <select value={selectedCafeteriaId || weeklyCafFilter} onChange={e => { setSelectedCafeteriaId(null); setWeeklyCafFilter(e.target.value); }} className="w-full border border-beige rounded p-2 text-xs bg-cream text-darkbrown font-semibold">
-                                    <option value="all">{t.allCafeterias}</option>
-                                    {cafes.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
-                                </select>
-                            </div>
-                            <div>
-                                <label className="block text-xs font-bold text-gray-600 mb-1">{t.filterDayOfWeek}</label>
-                                <select value={dayFilter} onChange={e => setDayFilter(e.target.value)} className="w-full border border-beige rounded p-2 text-xs bg-cream text-darkbrown font-semibold">
-                                    <option value="all">{t.allDays}</option>
-                                    {DAYS_OF_WEEK.map(day => <option key={day} value={day}>{translateDay(day, lang)}</option>)}
-                                </select>
-                            </div>
-                            <div>
-                                <label className="block text-xs font-bold text-gray-600 mb-1">{t.filterMealType}</label>
-                                <select value={mealFilter} onChange={e => setMealFilter(e.target.value)} className="w-full border border-beige rounded p-2 text-xs bg-cream text-darkbrown font-semibold">
-                                    <option value="all">{t.allMeals}</option>
-                                    <option value="Breakfast">{t.breakfast}</option>
-                                    <option value="Lunch">{t.lunch}</option>
-                                    <option value="Dinner">{t.dinner}</option>
-                                </select>
-                            </div>
-                            <div>
-                                <label className="block text-xs font-bold text-gray-600 mb-1">{t.filterAllergens}</label>
-                                <select value={allergenFilter} onChange={e => setAllergenFilter(e.target.value)} className="w-full border border-beige rounded p-2 text-xs bg-cream text-darkbrown font-semibold">
-                                    <option value="all">{t.allAllergensShowAll}</option>
-                                    {COMMON_ALLERGENS.map(al => <option key={al} value={al}>{t.excludeText} {translateAllergen(al, lang)}</option>)}
-                                </select>
-                            </div>
-                        </div>
-
-                        {selectedCafeteriaId ? (
-                            <div className="space-y-6">
-                                <div className="bg-burgundy/10 p-4 rounded-xl border border-burgundy/20">
-                                    <h3 className="text-lg font-bold text-burgundy">{CAFETERIAS_DATA[selectedCafeteriaId]?.[lang]?.name}</h3>
-                                    <p className="text-xs text-gray-600 mt-1">{CAFETERIAS_DATA[selectedCafeteriaId]?.[lang]?.location}</p>
-                                </div>
-                                <div className="grid grid-cols-1 md:grid-cols-7 gap-4">
-                                    {weekDates.map(dayObj => {
-                                        const dayEnName = getDayName(dayObj.dateStr);
-                                        const dayDishes = filteredDishes.filter(d => d.cafeteriaId === selectedCafeteriaId && d.date === dayObj.dateStr);
-                                        const dayLocalized = translateDay(dayEnName, lang);
-                                        return (
-                                            <div key={dayObj.dateStr} className="bg-white rounded-lg shadow border border-beige p-3 flex flex-col">
-                                                <div className="border-b border-beige pb-2 mb-2 text-center">
-                                                    <div className="text-xs font-bold text-burgundy">{dayLocalized}</div>
-                                                    <div className="text-xs text-gray-500">{dayObj.dateStr}</div>
-                                                </div>
-                                                <div className="space-y-2 flex-grow">
-                                                    {dayDishes.length === 0 ? (
-                                                        <p className="text-xs text-gray-400 italic text-center py-4">{t.noDishesForDay} {dayLocalized}.</p>
-                                                    ) : (
-                                                        dayDishes.map(d => (
-                                                            <div key={d.id} onClick={() => setSelectedDishModal(d)} className="p-2 bg-cream rounded border border-beige/60 cursor-pointer hover:border-burgundy transition">
-                                                                <div className="font-bold text-darkbrown text-xs truncate">{d.koName}</div>
-                                                                <div className="text-[10px] text-gray-600 truncate">{getLocalizedField(d, 'Name', lang)}</div>
-                                                                <div className="text-[10px] text-burgundy font-semibold mt-1 flex justify-between">
-                                                                    <span>{d.mealType}</span>
-                                                                    <span>{(!d.price || d.price === 0) ? t.priceUnknown : `${d.price} ${t.price}`}</span>
-                                                                </div>
-                                                            </div>
-                                                        ))
-                                                    )}
-                                                </div>
-                                            </div>
-                                        );
-                                    })}
-                                </div>
-                            </div>
-                        ) : (
-                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                                {cafes.map(caf => {
-                                    const cafDishes = filteredDishes.filter(d => d.cafeteriaId === caf.id);
+                    )}
+                    <div>
+                        <label className="block text-xs font-bold text-gray-700 mb-1">Password</label>
+                        <input type="password" value={authForm.password} onChange={e => setAuthForm({...authForm, password: e.target.value})} className="w-full border border-beige rounded p-2 text-xs bg-cream text-darkbrown" required />
+                    </div>
+                    {view === 'signup' && (
+                        <div>
+                            <label className="block text-xs font-bold text-gray-700 mb-2">{t.selectYourAllergens}</label>
+                            <div className="grid grid-cols-2 gap-2 max-h-40 overflow-y-auto p-1 border border-beige rounded">
+                                {COMMON_ALLERGENS.map(al => {
+                                    const isChecked = authForm.selectedAllergens.includes(al);
                                     return (
-                                        <div key={caf.id} className="bg-white rounded-xl shadow border border-beige p-4 flex flex-col justify-between">
-                                            <div>
-                                                <h3 className="font-bold text-burgundy text-base mb-1">{caf.name}</h3>
-                                                <p className="text-xs text-gray-500 mb-4">{cafDishes.length} {t.dishCountLabel}</p>
-                                                <div className="space-y-2 max-h-96 overflow-y-auto pr-1">
-                                                    {cafDishes.map(d => (
-                                                        <div key={d.id} onClick={() => setSelectedDishModal(d)} className="p-2 bg-cream rounded border border-beige cursor-pointer hover:border-burgundy transition">
-                                                            <div className="text-xs font-bold text-darkbrown truncate">{d.koName}</div>
-                                                            <div className="text-[10px] text-gray-600 truncate">{getLocalizedField(d, 'Name', lang)}</div>
-                                                            <div className="text-[10px] text-burgundy font-semibold mt-1 flex justify-between">
-                                                                <span>{d.date} ({d.mealType})</span>
-                                                                <span>{(!d.price || d.price === 0) ? t.priceUnknown : `${d.price} ${t.price}`}</span>
-                                                            </div>
-                                                        </div>
-                                                    ))}
-                                                </div>
-                                            </div>
-                                            <button onClick={() => setSelectedCafeteriaId(caf.id)} className="mt-4 w-full bg-burgundy/10 text-burgundy text-xs font-bold py-2 rounded hover:bg-burgundy hover:text-cream transition">
-                                                {t.details} →
-                                            </button>
-                                        </div>
+                                        <label key={al} className={`flex items-center gap-2 p-1.5 rounded cursor-pointer text-xs ${isChecked ? 'bg-burgundy/10 border border-burgundy font-bold text-burgundy' : 'bg-cream text-darkbrown'}`}>
+                                            <input type="checkbox" checked={isChecked} onChange={() => toggleSignupAllergen(al)} />
+                                            {translateAllergen(al, lang)}
+                                        </label>
                                     );
                                 })}
                             </div>
-                        )}
-                    </div>
-                );
-            };
-
-            const renderProfileView = () => (
-                <div className="max-w-xl mx-auto px-4 py-8 flex-grow">
-                    <div className="bg-white rounded-xl shadow border border-beige p-6">
-                        <h2 className="text-2xl font-bold text-darkbrown mb-4">{t.profile}</h2>
-                        <form onSubmit={handleUpdateProfile} className="space-y-6">
-                            <div>
-                                <label className="block text-xs font-bold text-gray-700 mb-2">{t.selectYourAllergens}</label>
-                                <div className="grid grid-cols-2 gap-2">
-                                    {COMMON_ALLERGENS.map(al => {
-                                        const isChecked = (studentProfile.allergens || []).some(a => a.toLowerCase() === al.toLowerCase());
-                                        return (
-                                            <label key={al} className={`flex items-center gap-2 p-2 rounded border cursor-pointer text-xs ${isChecked ? 'bg-burgundy/10 border-burgundy font-bold text-burgundy' : 'bg-cream border-beige text-darkbrown'}`}>
-                                                <input 
-                                                    type="checkbox" 
-                                                    checked={isChecked} 
-                                                    onChange={() => toggleProfileCommonAllergen(al)} 
-                                                    className="rounded border-beige text-burgundy focus:ring-burgundy"
-                                                />
-                                                {translateAllergen(al, lang)}
-                                            </label>
-                                        );
-                                    })}
-                                </div>
-                            </div>
-                            <div>
-                                <label className="block text-xs font-bold text-gray-700 mb-1">Other Allergens (comma separated)</label>
-                                <input 
-                                    type="text" 
-                                    value={profileOtherAllergen} 
-                                    onChange={e => setProfileOtherAllergen(e.target.value)} 
-                                    placeholder="e.g. kiwi, buckwheat, garlic" 
-                                    className="w-full border border-beige rounded p-2 text-xs bg-cream text-darkbrown"
-                                />
-                            </div>
-                            <button type="submit" className="w-full bg-burgundy text-cream font-bold py-2.5 rounded text-xs hover:bg-burgundy-dark transition">
-                                Save Profile
-                            </button>
-                        </form>
-                    </div>
-                </div>
-            );
-
-            const renderAdminDashboard = () => (
-                <div className="max-w-7xl mx-auto px-4 py-8 flex-grow">
-                    <h2 className="text-2xl font-bold text-darkbrown mb-6">Admin Dashboard</h2>
-                    
-                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
-                        <div className="bg-white rounded-xl shadow border border-beige p-6">
-                            <h3 className="text-lg font-bold text-burgundy mb-4">Add Single Dish</h3>
-                            <form onSubmit={handleAddDish} className="space-y-4">
-                                <div className="grid grid-cols-2 gap-3">
-                                    <div>
-                                        <label className="block text-xs font-bold text-gray-700 mb-1">Cafeteria</label>
-                                        <select value={adminForm.cafeteriaId} onChange={e => setAdminForm({...adminForm, cafeteriaId: e.target.value})} className="w-full border border-beige rounded p-2 text-xs bg-cream text-darkbrown">
-                                            {getCafeterias(lang).map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
-                                        </select>
-                                    </div>
-                                    <div>
-                                        <label className="block text-xs font-bold text-gray-700 mb-1">Date</label>
-                                        <input type="date" value={adminForm.date} onChange={e => setAdminForm({...adminForm, date: e.target.value})} className="w-full border border-beige rounded p-2 text-xs bg-cream text-darkbrown" />
-                                    </div>
-                                </div>
-                                <div className="grid grid-cols-2 gap-3">
-                                    <div>
-                                        <label className="block text-xs font-bold text-gray-700 mb-1">Meal Type</label>
-                                        <select value={adminForm.mealType} onChange={e => setAdminForm({...adminForm, mealType: e.target.value})} className="w-full border border-beige rounded p-2 text-xs bg-cream text-darkbrown">
-                                            <option value="Breakfast">Breakfast</option>
-                                            <option value="Lunch">Lunch</option>
-                                            <option value="Dinner">Dinner</option>
-                                        </select>
-                                    </div>
-                                    <div>
-                                        <label className="block text-xs font-bold text-gray-700 mb-1">Price (optional)</label>
-                                        <input type="number" value={adminForm.price} onChange={e => setAdminForm({...adminForm, price: e.target.value})} placeholder="e.g. 5000" className="w-full border border-beige rounded p-2 text-xs bg-cream text-darkbrown" />
-                                    </div>
-                                </div>
-                                <div>
-                                    <label className="block text-xs font-bold text-gray-700 mb-1">Korean Name *</label>
-                                    <input type="text" value={adminForm.koName} onChange={e => setAdminForm({...adminForm, koName: e.target.value})} className="w-full border border-beige rounded p-2 text-xs bg-cream text-darkbrown" />
-                                </div>
-                                <div>
-                                    <label className="block text-xs font-bold text-gray-700 mb-1">English Name *</label>
-                                    <input type="text" value={adminForm.enName} onChange={e => setAdminForm({...adminForm, enName: e.target.value})} className="w-full border border-beige rounded p-2 text-xs bg-cream text-darkbrown" />
-                                </div>
-                                <div className="grid grid-cols-2 gap-3">
-                                    <div>
-                                        <label className="block text-xs font-bold text-gray-700 mb-1">Russian Name</label>
-                                        <input type="text" value={adminForm.ruName} onChange={e => setAdminForm({...adminForm, ruName: e.target.value})} className="w-full border border-beige rounded p-2 text-xs bg-cream text-darkbrown" />
-                                    </div>
-                                    <div>
-                                        <label className="block text-xs font-bold text-gray-700 mb-1">Chinese Name</label>
-                                        <input type="text" value={adminForm.zhName} onChange={e => setAdminForm({...adminForm, zhName: e.target.value})} className="w-full border border-beige rounded p-2 text-xs bg-cream text-darkbrown" />
-                                    </div>
-                                </div>
-                                <div>
-                                    <label className="block text-xs font-bold text-gray-700 mb-1">Allergens (comma separated)</label>
-                                    <input type="text" value={adminForm.allergens} onChange={e => setAdminForm({...adminForm, allergens: e.target.value})} placeholder="pork, soy, wheat" className="w-full border border-beige rounded p-2 text-xs bg-cream text-darkbrown" />
-                                </div>
-                                JavaScript
-                                <div className="grid grid-cols-2 gap-3">
-                                    <div>
-                                        <label className="block text-xs font-bold text-gray-700 mb-1">Meal Type</label>
-                                        <select value={adminForm.mealType} onChange={e => setAdminForm({...adminForm, mealType: e.target.value})} className="w-full border border-beige rounded p-2 text-xs bg-cream text-darkbrown">
-                                            <option value="Breakfast">Breakfast</option>
-                                            <option value="Lunch">Lunch</option>
-                                            <option value="Dinner">Dinner</option>
-                                        </select>
-                                    </div>
-                                    <div>
-                                        <label className="block text-xs font-bold text-gray-700 mb-1">Spice Level</label>
-                                        <select value={adminForm.spice} onChange={e => setAdminForm({...adminForm, spice: e.target.value})} className="w-full border border-beige rounded p-2 text-xs bg-cream text-darkbrown">
-                                            <option value="Mild">Mild 🟢</option>
-                                            <option value="Medium">Medium 🟡</option>
-                                            <option value="Spicy">Spicy 🔴</option>
-                                            <option value="Extra Spicy">Extra Spicy 🔥</option>
-                                        </select>
-                                    </div>
-                                </div>
-                                <button type="submit" className="w-full bg-burgundy text-cream font-bold py-2 rounded text-xs hover:bg-burgundy-dark transition">
-                                    Publish Dish
-                                </button>
-                            </form>
                         </div>
-
-                        <div className="bg-white rounded-xl shadow border border-beige p-6">
-                            <h3 className="text-lg font-bold text-burgundy mb-4">Bulk Import</h3>
-                            <form onSubmit={handleBulkImport} className="space-y-4">
-                                <div>
-                                    <label className="block text-xs font-bold text-gray-700 mb-1">Paste Data (Format: Date|CafId|Meal|Ko|En|Ru|Zh|Price|...)</label>
-                                    <textarea rows="10" value={bulkText} onChange={e => setBulkText(e.target.value)} placeholder="2026-11-18 | c1 | Lunch | 김치찌개 | Kimchi Stew | Кимчи чхиге | 泡菜汤 | 5000 | ..." className="w-full border border-beige rounded p-2 text-xs bg-cream text-darkbrown font-mono"></textarea>
-                                </div>
-                                <button type="submit" className="w-full bg-gold text-darkbrown font-bold py-2 rounded text-xs hover:bg-gold/90 transition">
-                                    Import Bulk Data
-                                </button>
-                            </form>
-                        </div>
+                    )}
+                    <button type="submit" className="w-full bg-burgundy text-cream font-bold py-2.5 rounded text-xs hover:bg-burgundy-dark transition">
+                        {view === 'signup' ? t.signup : t.login}
+                    </button>
+                </form>
+                {view !== 'admin-login' && (
+                    <div className="mt-4 text-center text-xs">
+                        <button onClick={() => switchView('admin-login')} className="text-gray-500 hover:text-burgundy underline">Login as Admin</button>
                     </div>
+                )}
+            </div>
+        </div>
+    );
 
-                    <div className="bg-white rounded-xl shadow border border-beige p-6">
-                        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-4">
-                            <h3 className="text-lg font-bold text-burgundy">Manage Published Dishes ({dishes.length})</h3>
-                            <div className="flex items-center gap-2">
-                                {selectedDishIds.length > 0 && (
-                                    <button onClick={handleBatchDelete} className="bg-red-600 text-white px-3 py-1.5 rounded text-xs font-bold hover:bg-red-700 transition">
-                                        Delete Selected ({selectedDishIds.length})
-                                    </button>
-                                )}
-                                <button onClick={handleDeleteAllDishes} className="bg-red-800 text-white px-3 py-1.5 rounded text-xs font-bold hover:bg-red-900 transition">
-                                     Delete All Menus
-                                </button>
-                            </div>
-                        </div>
+    return (
+        <div className="min-h-screen flex flex-col bg-cream">
+            {renderHeader()}
+            {view === 'home' && renderHome()}
+            {view === 'cafeterias' && renderCafeteriasView()}
+            {view === 'todays-menu' && renderTodaysMenuView()}
+            {view === 'weekly-menu' && renderWeeklyMenuView()}
+            {view === 'profile' && renderProfileView()}
+            {view === 'admin-dashboard' && renderAdminDashboard()}
+            {(view === 'login' || view === 'signup' || view === 'admin-login') && renderAuth()}
+            {renderDishModal()}
+            <footer className="bg-darkbrown text-cream/70 text-center py-4 text-xs mt-auto">
+                <p>© 2026 Korea University Meal Guide. All rights reserved.</p>
+            </footer>
+        </div>
+    );
+}
 
-                        <div className="overflow-x-auto">
-                            <table className="w-full text-xs text-left">
-                                <thead className="bg-cream border-b border-beige text-darkbrown">
-                                    <tr>
-                                        <th className="p-2 w-8">
-                                            <input 
-                                                type="checkbox" 
-                                                onChange={toggleSelectAll} 
-                                                checked={dishes.length > 0 && selectedDishIds.length === dishes.length}
-                                                className="rounded border-beige text-burgundy focus:ring-burgundy"
-                                            />
-                                        </th>
-                                        <th className="p-2">Date</th>
-                                        <th className="p-2">Cafeteria</th>
-                                        <th className="p-2">Meal</th>
-                                        <th className="p-2">Korean Name</th>
-                                        <th className="p-2">English Name</th>
-                                        <th className="p-2">Price</th>
-                                        <th className="p-2 text-right">Action</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {dishes.map(d => {
-                                        const isSelected = selectedDishIds.includes(d.id);
-                                        return (
-                                            <tr key={d.id} className={`border-b border-beige/40 hover:bg-cream/40 ${isSelected ? 'bg-burgundy/5' : ''}`}>
-                                                <td className="p-2">
-                                                    <input 
-                                                        type="checkbox" 
-                                                        checked={isSelected} 
-                                                        onChange={() => toggleSelectDish(d.id)}
-                                                        className="rounded border-beige text-burgundy focus:ring-burgundy"
-                                                    />
-                                                </td>
-                                                <td className="p-2">{d.date}</td>
-                                                <td className="p-2">{CAFETERIAS_DATA[d.cafeteriaId]?.en?.name}</td>
-                                                <td className="p-2">{d.mealType}</td>
-                                                <td className="p-2 font-bold">{d.koName}</td>
-                                                <td className="p-2">{d.enName}</td>
-                                                <td className="p-2">{(!d.price || d.price === 0) ? 'Unknown' : `${d.price} KRW`}</td>
-                                                <td className="p-2 text-right">
-                                                    <button onClick={() => handleDeleteDish(d.id)} className="bg-red-100 text-red-600 px-2 py-1 rounded font-semibold hover:bg-red-200 transition">Delete</button>
-                                                </td>
-                                            </tr>
-                                        );
-                                    })}
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
-            );
-
-            const renderAuth = () => (
-                <div className="max-w-md mx-auto px-4 py-16 flex-grow">
-                    <div className="bg-white rounded-xl shadow border border-beige p-8">
-                        <h2 className="text-2xl font-bold text-darkbrown mb-6 text-center">
-                            {view === 'login' ? t.login : view === 'signup' ? t.signup : 'Admin Login'}
-                        </h2>
-                        {authError && <div className="mb-4 p-3 bg-red-50 border border-red-300 rounded text-xs text-red-600 font-semibold">{authError}</div>}
-                        <form onSubmit={view === 'signup' ? handleSignup : handleLogin} className="space-y-4">
-                            <div>
-                                <label className="block text-xs font-bold text-gray-700 mb-1">{view === 'admin-login' ? 'Admin Username' : 'Username or Email'}</label>
-                                <input type="text" value={authForm.username} onChange={e => setAuthForm({...authForm, username: e.target.value})} className="w-full border border-beige rounded p-2 text-xs bg-cream text-darkbrown" required />
-                            </div>
-                            {view === 'signup' && (
-                                <div>
-                                    <label className="block text-xs font-bold text-gray-700 mb-1">Email</label>
-                                    <input type="email" value={authForm.email} onChange={e => setAuthForm({...authForm, email: e.target.value})} className="w-full border border-beige rounded p-2 text-xs bg-cream text-darkbrown" required />
-                                </div>
-                            )}
-                            <div>
-                                <label className="block text-xs font-bold text-gray-700 mb-1">Password</label>
-                                <input type="password" value={authForm.password} onChange={e => setAuthForm({...authForm, password: e.target.value})} className="w-full border border-beige rounded p-2 text-xs bg-cream text-darkbrown" required />
-                            </div>
-
-                            {view === 'signup' && (
-                                <div>
-                                    <label className="block text-xs font-bold text-gray-700 mb-2">{t.selectYourAllergens}</label>
-                                    <div className="grid grid-cols-2 gap-2 max-h-40 overflow-y-auto p-1 border border-beige rounded">
-                                        {COMMON_ALLERGENS.map(al => {
-                                            const isChecked = authForm.selectedAllergens.includes(al);
-                                            return (
-                                                <label key={al} className={`flex items-center gap-2 p-1.5 rounded cursor-pointer text-xs ${isChecked ? 'bg-burgundy/10 border border-burgundy font-bold text-burgundy' : 'bg-cream text-darkbrown'}`}>
-                                                    <input type="checkbox" checked={isChecked} onChange={() => toggleSignupAllergen(al)} />
-                                                    {translateAllergen(al, lang)}
-                                                </label>
-                                            );
-                                        })}
-                                    </div>
-                                </div>
-                            )}
-
-                            <button type="submit" className="w-full bg-burgundy text-cream font-bold py-2.5 rounded text-xs hover:bg-burgundy-dark transition">
-                                {view === 'signup' ? t.signup : t.login}
-                            </button>
-                        </form>
-                        
-                        {view !== 'admin-login' && (
-                            <div className="mt-4 text-center text-xs">
-                                <button onClick={() => switchView('admin-login')} className="text-gray-500 hover:text-burgundy underline">Login as Admin</button>
-                            </div>
-                        )}
-                    </div>
-                </div>
-            );
-
-            return (
-                <div className="min-h-screen flex flex-col bg-cream">
-                    {renderHeader()}
-                    {view === 'home' && renderHome()}
-                    {view === 'cafeterias' && renderCafeteriasView()}
-                    {view === 'todays-menu' && renderTodaysMenuView()}
-                    {view === 'weekly-menu' && renderWeeklyMenuView()}
-                    {view === 'profile' && renderProfileView()}
-                    {view === 'admin-dashboard' && renderAdminDashboard()}
-                    {(view === 'login' || view === 'signup' || view === 'admin-login') && renderAuth()}
-                    {renderDishModal()}
-                    <footer className="bg-darkbrown text-cream/70 text-center py-4 text-xs mt-auto">
-                        <p>© 2026 Korea University Meal Guide. All rights reserved.</p>
-                    </footer>
-                </div>
-            );
-        }
-
-        ReactDOM.render(<App />, document.getElementById('root'));
-    </script>
+ReactDOM.render(<App />, document.getElementById('root'));
+</script>
 </body>
 </html>
