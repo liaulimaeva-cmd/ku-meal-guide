@@ -93,7 +93,9 @@
                 filterCafeteria: "Cafeteria",
                 filterDayOfWeek: "Day of Week",
                 filterMealType: "Meal Type",
-                filterAllergens: "Allergens"
+                filterAllergens: "Allergens",
+                noMatchingDishes: "No matching menu items for this date.",
+                noDishesForDay: "No dishes scheduled for"
             },
             ru: {
                 brand: "🐯 KU MEAL GUIDE",
@@ -152,7 +154,9 @@
                 filterCafeteria: "Столовая",
                 filterDayOfWeek: "День недели",
                 filterMealType: "Прием пищи",
-                filterAllergens: "Аллергены"
+                filterAllergens: "Аллергены",
+                noMatchingDishes: "На выбранную дату нет подходящих блюд.",
+                noDishesForDay: "На этот день блюда не запланированы:"
             },
             zh: {
                 brand: "🐯 KU MEAL GUIDE",
@@ -211,7 +215,9 @@
                 filterCafeteria: "食堂",
                 filterDayOfWeek: "星期",
                 filterMealType: "餐次",
-                filterAllergens: "过敏原"
+                filterAllergens: "过敏原",
+                noMatchingDishes: "所选日期没有匹配的菜单项。",
+                noDishesForDay: "该日期暂无安排菜品:"
             }
         };
 
@@ -1018,7 +1024,7 @@ const translateAllergen = (item, targetLang) => {
                                                             <span className="text-xs font-normal text-gray-500">{dayDishes.length} {t.dishCountLabel}</span>
                                                         </h3>
                                                         {dayDishes.length === 0 ? (
-                                                            <p className="text-xs text-gray-400 italic">No dishes scheduled for {dayLocalized}.</p>
+                                                            <p className="text-xs text-gray-400 italic">{t.noDishesForDay} {dayLocalized}.</p>
                                                         ) : (
                                                             <div className="space-y-2">
                                                                 {dayDishes.map(dish => {
@@ -1122,7 +1128,7 @@ const translateAllergen = (item, targetLang) => {
                                                 <p className="text-xs text-gray-500 mb-2">{caf.hours}</p>
                                                 <div className="space-y-3 mt-2">
                                                     {cafDishes.length === 0 ? (
-                                                        <p className="text-sm text-gray-400 italic">No matching menu items for this date.</p>
+                                                        <p className="text-sm text-gray-400 italic">{t.noMatchingDishes}</p>
                                                     ) : (
                                                         cafDishes.map(dish => {
                                                             const isAllergic = checkAllergy(dish.allergens);
