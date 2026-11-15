@@ -22,7 +22,7 @@
     </script>
     <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
     <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
-    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script crossorigin src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
@@ -392,6 +392,25 @@
             return isNaN(dateObj.getTime()) ? '' : dateObj.toLocaleDateString('en-US', { weekday: 'long' });
         };
 
+        const getCurrWeekDates = () => {
+            const now = new Date();
+            const currentDayOfWeek = now.getDay();
+            const monday = new Date(now);
+            monday.setDate(now.getDate() - (currentDayOfWeek === 0 ? 6 : currentDayOfWeek - 1));
+            
+            const week = [];
+            for (let i = 0; i < 7; i++) {
+                const d = new Date(monday);
+                d.setDate(monday.getDate() + i);
+                week.push({
+                    dateStr: d.toISOString().split('T')[0],
+                    name: d.toLocaleDateString('en-US', { weekday: 'short' }),
+                    dayNum: d.getDate()
+                });
+            }
+            return week;
+        };
+
         const SUPABASE_URL = 'https://fzdseiswlhckroaliizn.supabase.co';
         const SUPABASE_ANON_KEY = 'sb_publishable_1ShB7yCEJTtL3uWYzNZElQ_XSN-EPVO';
         const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
@@ -409,6 +428,9 @@
             const [selectedDishModal, setSelectedDishModal] = useState(null);
             const [selectedCafeteriaId, setSelectedCafeteriaId] = useState(null);
             const [selectedQuickDate, setSelectedQuickDate] = useState(new Date().toISOString().split('T')[0]);
+
+            // Состояние для множественного выбора блюд в админке
+            const [selectedDishIds, setSelectedDishIds] = useState([]);
 
             useEffect(() => {
                 fetchDishes();
@@ -469,7 +491,7 @@
 
             useEffect(() => { 
                 localStorage.setItem('ku_cloud_user', JSON.stringify(user)); 
-                if (user?.profile) {
+                if (user?.profile && user?.role !== 'admin') {
                     setStudentProfile(user.profile);
                     const custom = (user.profile.allergens || []).filter(
                         a => !COMMON_ALLERGENS.some(ca => ca.toLowerCase() === a.toLowerCase())
@@ -748,6 +770,55 @@
                     alert('Error deleting dish: ' + error.message);
                 } else {
                     setDishes(dishes.filter(d => d.id !== dishId));
+                    setSelectedDishIds(selectedDishIds.filter(id => id !== dishId));
+                }
+            };
+
+            // Новая функция: Удалить все меню одним кликом
+            const handleDeleteAllDishes = async () => {
+                if (!confirm('WARNING: Are you sure you want to delete ALL dishes from the database? This cannot be undone.')) return;
+                // Удаляем все записи из таблицы dishes, где id не равен пустой строке (или просто удаляем всё)
+                const { error } = await supabase.from('dishes').delete().neq('id', '___non_existent___');
+                if (error) {
+                    alert('Error deleting all dishes: ' + error.message);
+                } else {
+                    setDishes([]);
+                    setSelectedDishIds([]);
+                    alert('All menu items have been deleted successfully.');
+                }
+            };
+
+            // Новая функция: Удалить выбранные (несколько) меню
+            const handleBatchDelete = async () => {
+                if (selectedDishIds.length === 0) {
+                    alert('Please select at least one dish to delete.');
+                    return;
+                }
+                if (!confirm(`Are you sure you want to delete ${selectedDishIds.length} selected dish(es)?`)) return;
+
+                const { error } = await supabase.from('dishes').delete().in('id', selectedDishIds);
+                if (error) {
+                    alert('Error deleting selected dishes: ' + error.message);
+                } else {
+                    setDishes(dishes.filter(d => !selectedDishIds.includes(d.id)));
+                    setSelectedDishIds([]);
+                    alert('Selected dishes deleted successfully.');
+                }
+            };
+
+            const toggleSelectAll = (e) => {
+                if (e.target.checked) {
+                    setSelectedDishIds(dishes.map(d => d.id));
+                } else {
+                    setSelectedDishIds([]);
+                }
+            };
+
+            const toggleSelectDish = (id) => {
+                if (selectedDishIds.includes(id)) {
+                    setSelectedDishIds(selectedDishIds.filter(item => item !== id));
+                } else {
+                    setSelectedDishIds([...selectedDishIds, id]);
                 }
             };
 
@@ -760,9 +831,9 @@
                             </h1>
                             <nav className="hidden md:flex items-center gap-4 text-sm font-medium">
                                 <button onClick={() => switchView('home')} className={`hover:text-gold transition ${view === 'home' ? 'text-gold underline underline-offset-4' : ''}`}>{t.home}</button>
-                                <button onClick={() => switchView('cafeterias')} className={`hover:text-gold transition ${view === 'cafeterias' ? 'text-gold underline underline-offset-4' : ''}`}>{t.cafeterias}</button>
+                                <button onClick={() => { setSelectedCafeteriaId(null); switchView('cafeterias'); }} className={`hover:text-gold transition ${view === 'cafeterias' ? 'text-gold underline underline-offset-4' : ''}`}>{t.cafeterias}</button>
                                 <button onClick={() => switchView('todays-menu')} className={`hover:text-gold transition ${view === 'todays-menu' ? 'text-gold underline underline-offset-4' : ''}`}>{t.todaysMenu}</button>
-                                <button onClick={() => switchView('weekly-menu')} className={`hover:text-gold transition ${view === 'weekly-menu' ? 'text-gold underline underline-offset-4' : ''}`}>{t.weeklyMenu}</button>
+                                <button onClick={() => { setSelectedCafeteriaId(null); switchView('weekly-menu'); }} className={`hover:text-gold transition ${view === 'weekly-menu' ? 'text-gold underline underline-offset-4' : ''}`}>{t.weeklyMenu}</button>
                                 {user?.role === 'admin' && (
                                     <button onClick={() => switchView('admin-dashboard')} className={`hover:text-gold transition ${view === 'admin-dashboard' ? 'text-gold underline underline-offset-4' : ''}`}>{t.admin}</button>
                                 )}
@@ -776,9 +847,16 @@
                             </div>
                             {user ? (
                                 <div className="flex items-center gap-2 text-xs">
-                                    <button onClick={() => switchView('profile')} className="bg-gold/20 hover:bg-gold/30 text-gold px-3 py-1.5 rounded transition font-semibold border border-gold/40">
-                                        {t.hiUser}{user.username}
-                                    </button>
+                                    {user.role !== 'admin' && (
+                                        <button onClick={() => switchView('profile')} className="bg-gold/20 hover:bg-gold/30 text-gold px-3 py-1.5 rounded transition font-semibold border border-gold/40">
+                                            {t.hiUser}{user.username}
+                                        </button>
+                                    )}
+                                    {user.role === 'admin' && (
+                                        <span className="bg-gold/20 text-gold px-3 py-1.5 rounded font-semibold border border-gold/40">
+                                            Admin: {user.username}
+                                        </span>
+                                    )}
                                     <button onClick={() => { setUser(null); localStorage.removeItem('ku_cloud_user'); switchView('home'); }} className="bg-burgundy-dark hover:bg-burgundy-light px-3 py-1.5 rounded transition">
                                         {t.logout}
                                     </button>
@@ -799,7 +877,7 @@
                 const mainName = getLocalizedField(dish, 'Name', lang);
                 const allergens = dish.allergens || [];
                 const userAllergens = user?.profile?.allergens || [];
-                const hasAllergy = allergens.some(al => userAllergens.some(ua => ua.toLowerCase() === al.toLowerCase()));
+                const hasAllergy = user?.role !== 'admin' && allergens.some(al => userAllergens.some(ua => ua.toLowerCase() === al.toLowerCase()));
                 const stats = getDishRatingStats(dish.id);
 
                 return (
@@ -852,7 +930,7 @@
                 const ingredients = getLocalizedField(dish, 'Ingredients', lang);
                 const allergens = dish.allergens || [];
                 const userAllergens = user?.profile?.allergens || [];
-                const hasAllergy = allergens.some(al => userAllergens.some(ua => ua.toLowerCase() === al.toLowerCase()));
+                const hasAllergy = user?.role !== 'admin' && allergens.some(al => userAllergens.some(ua => ua.toLowerCase() === al.toLowerCase()));
                 const stats = getDishRatingStats(dish.id);
                 const userRating = getUserDishRating(dish.id);
 
@@ -930,7 +1008,7 @@
                             <button onClick={() => switchView('todays-menu')} className="bg-gold text-darkbrown font-bold px-5 py-2.5 rounded-lg text-xs hover:bg-gold/90 transition shadow">
                                 {t.viewTodays}
                             </button>
-                            <button onClick={() => switchView('cafeterias')} className="bg-burgundy-dark text-cream border border-gold/40 px-5 py-2.5 rounded-lg text-xs font-semibold hover:bg-burgundy-light transition">
+                            <button onClick={() => { setSelectedCafeteriaId(null); switchView('cafeterias'); }} className="bg-burgundy-dark text-cream border border-gold/40 px-5 py-2.5 rounded-lg text-xs font-semibold hover:bg-burgundy-light transition">
                                 {t.viewCafes}
                             </button>
                         </div>
@@ -1277,11 +1355,32 @@
                     </div>
 
                     <div className="bg-white rounded-xl shadow border border-beige p-6">
-                        <h3 className="text-lg font-bold text-burgundy mb-4">Manage Published Dishes ({dishes.length})</h3>
+                        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-4">
+                            <h3 className="text-lg font-bold text-burgundy">Manage Published Dishes ({dishes.length})</h3>
+                            <div className="flex items-center gap-2">
+                                {selectedDishIds.length > 0 && (
+                                    <button onClick={handleBatchDelete} className="bg-red-600 text-white px-3 py-1.5 rounded text-xs font-bold hover:bg-red-700 transition">
+                                        Delete Selected ({selectedDishIds.length})
+                                    </button>
+                                )}
+                                <button onClick={handleDeleteAllDishes} className="bg-red-800 text-white px-3 py-1.5 rounded text-xs font-bold hover:bg-red-900 transition">
+                                    🗑️ Delete All Menus
+                                </button>
+                            </div>
+                        </div>
+
                         <div className="overflow-x-auto">
                             <table className="w-full text-xs text-left">
                                 <thead className="bg-cream border-b border-beige text-darkbrown">
                                     <tr>
+                                        <th className="p-2 w-8">
+                                            <input 
+                                                type="checkbox" 
+                                                onChange={toggleSelectAll} 
+                                                checked={dishes.length > 0 && selectedDishIds.length === dishes.length}
+                                                className="rounded border-beige text-burgundy focus:ring-burgundy"
+                                            />
+                                        </th>
                                         <th className="p-2">Date</th>
                                         <th className="p-2">Cafeteria</th>
                                         <th className="p-2">Meal</th>
@@ -1292,19 +1391,30 @@
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    {dishes.map(d => (
-                                        <tr key={d.id} className="border-b border-beige/40 hover:bg-cream/40">
-                                            <td className="p-2">{d.date}</td>
-                                            <td className="p-2">{CAFETERIAS_DATA[d.cafeteriaId]?.en?.name}</td>
-                                            <td className="p-2">{d.mealType}</td>
-                                            <td className="p-2 font-bold">{d.koName}</td>
-                                            <td className="p-2">{d.enName}</td>
-                                            <td className="p-2">{(!d.price || d.price === 0) ? 'Unknown' : `${d.price} KRW`}</td>
-                                            <td className="p-2 text-right">
-                                                <button onClick={() => handleDeleteDish(d.id)} className="bg-red-100 text-red-600 px-2 py-1 rounded font-semibold hover:bg-red-200 transition">Delete</button>
-                                            </td>
-                                        </tr>
-                                    ))}
+                                    {dishes.map(d => {
+                                        const isSelected = selectedDishIds.includes(d.id);
+                                        return (
+                                            <tr key={d.id} className={`border-b border-beige/40 hover:bg-cream/40 ${isSelected ? 'bg-burgundy/5' : ''}`}>
+                                                <td className="p-2">
+                                                    <input 
+                                                        type="checkbox" 
+                                                        checked={isSelected} 
+                                                        onChange={() => toggleSelectDish(d.id)}
+                                                        className="rounded border-beige text-burgundy focus:ring-burgundy"
+                                                    />
+                                                </td>
+                                                <td className="p-2">{d.date}</td>
+                                                <td className="p-2">{CAFETERIAS_DATA[d.cafeteriaId]?.en?.name}</td>
+                                                <td className="p-2">{d.mealType}</td>
+                                                <td className="p-2 font-bold">{d.koName}</td>
+                                                <td className="p-2">{d.enName}</td>
+                                                <td className="p-2">{(!d.price || d.price === 0) ? 'Unknown' : `${d.price} KRW`}</td>
+                                                <td className="p-2 text-right">
+                                                    <button onClick={() => handleDeleteDish(d.id)} className="bg-red-100 text-red-600 px-2 py-1 rounded font-semibold hover:bg-red-200 transition">Delete</button>
+                                                </td>
+                                            </tr>
+                                        );
+                                    })}
                                 </tbody>
                             </table>
                         </div>
