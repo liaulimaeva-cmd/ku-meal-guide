@@ -94,6 +94,7 @@
                 filterDayOfWeek: "Day of Week",
                 filterMealType: "Meal Type",
                 filterAllergens: "Allergens",
+                selectDateLabel: "Select Date:",
                 noMatchingDishes: "No matching menu items for this date.",
                 noDishesForDay: "No dishes scheduled for"
             },
@@ -155,6 +156,7 @@
                 filterDayOfWeek: "День недели",
                 filterMealType: "Прием пищи",
                 filterAllergens: "Аллергены",
+                selectDateLabel: "Выберите дату:",
                 noMatchingDishes: "На выбранную дату нет подходящих блюд.",
                 noDishesForDay: "На этот день блюда не запланированы:"
             },
@@ -216,6 +218,7 @@
                 filterDayOfWeek: "星期",
                 filterMealType: "餐次",
                 filterAllergens: "过敏原",
+                selectDateLabel: "选择日期:",
                 noMatchingDishes: "所选日期没有匹配的菜单项。",
                 noDishesForDay: "该日期暂无安排菜品:"
             }
@@ -1073,22 +1076,22 @@ const translateAllergen = (item, targetLang) => {
                                     <h1 className="text-2xl font-bold text-burgundy">{t.todaysMenu} ({selectedQuickDate} — {translateDay(getDayName(selectedQuickDate), lang)})</h1>
                                 </div>
 
-                                <div className="bg-white p-3 rounded-lg shadow border border-beige flex items-center gap-2 overflow-x-auto">
-                                    <span className="text-xs font-bold text-burgundy uppercase whitespace-nowrap">{t.weekLabel}</span>
-                                    {weekDates.map(item => {
-                                        const isSelected = item.dateStr === selectedQuickDate;
-                                        return (
-                                            <button
-                                                key={item.dateStr}
-                                                onClick={() => setSelectedQuickDate(item.dateStr)}
-                                                className={`px-3 py-1.5 rounded text-xs font-semibold whitespace-nowrap transition ${isSelected ? 'bg-burgundy text-white' : 'bg-cream hover:bg-beige text-darkbrown'}`}
-                                            >
-                                                {translateShortDay(item.name, lang)} {item.dayNum}
-                                            </button>
-                                        );
-                                    })}
+                                <div className="bg-white p-3 rounded-lg shadow border border-beige flex items-center gap-3">
+                                    <span className="text-xs font-bold text-burgundy uppercase whitespace-nowrap">{t.selectDateLabel || "Select Date:"}</span>
+                                    <input 
+                                        type="date" 
+                                        value={selectedQuickDate} 
+                                        onChange={e => setSelectedQuickDate(e.target.value)} 
+                                        className="border border-beige rounded p-1.5 text-xs bg-cream text-darkbrown font-semibold focus:outline-none focus:border-burgundy cursor-pointer"
+                                    />
+                                    <button 
+                                        onClick={() => setSelectedQuickDate(new Date().toISOString().split('T')[0])}
+                                        className="text-xs bg-burgundy/10 hover:bg-burgundy text-burgundy hover:text-white px-2.5 py-1 rounded transition font-semibold"
+                                    >
+                                        {lang === 'ru' ? 'Сегодня' : lang === 'zh' ? '今天' : 'Today'}
+                                    </button>
                                 </div>
-
+                                
                                 {user && user.profile?.allergens?.length > 0 && (
                                     <div className="bg-amber-50 border border-amber-200 p-3 rounded text-xs text-amber-800">
                                         ⚠️ Your registered allergies: <strong>{user.profile.allergens.map(a => translateAllergen(a, lang)).join(', ')}</strong>. Unsafe dishes will be highlighted.
