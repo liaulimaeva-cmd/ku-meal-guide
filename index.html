@@ -97,7 +97,12 @@
                 filterAllergens: "Allergens",
                 selectDateLabel: "Select Date:",
                 noMatchingDishes: "No matching menu items for this date.",
-                noDishesForDay: "No dishes scheduled for"
+                noDishesForDay: "No dishes scheduled for",
+                spiceLevel: "Spice Level",
+                mild: "Mild 🟢",
+                medium: "Medium 🟡",
+                spicy: "Spicy 🔴",
+                extraSpicy: "Extra Spicy 🔥"
             },
             ru: {
                 brand: "🐯 KU MEAL GUIDE",
@@ -160,7 +165,12 @@
                 filterAllergens: "Аллергены",
                 selectDateLabel: "Выберите дату:",
                 noMatchingDishes: "На выбранную дату нет подходящих блюд.",
-                noDishesForDay: "На этот день блюда не запланированы:"
+                noDishesForDay: "На этот день блюда не запланированы:",
+                spiceLevel: "Острота",
+                mild: "Не острое 🟢",
+                medium: "Умеренное 🟡",
+                spicy: "Острое 🔴",
+                extraSpicy: "Очень острое 🔥"
             },
             zh: {
                 brand: "🐯 KU MEAL GUIDE",
@@ -223,7 +233,12 @@
                 filterAllergens: "过敏原",
                 selectDateLabel: "选择日期:",
                 noMatchingDishes: "所选日期没有匹配的菜单项。",
-                noDishesForDay: "该日期暂无安排菜品:"
+                noDishesForDay: "该日期暂无安排菜品:",
+                spiceLevel: "辣度",
+                mild: "微辣 🟢",
+                medium: "中辣 🟡",
+                spicy: "辣 🔴",
+                extraSpicy: "特辣 🔥"
             }
         };
 
@@ -415,6 +430,15 @@
         const SUPABASE_ANON_KEY = 'sb_publishable_1ShB7yCEJTtL3uWYzNZElQ_XSN-EPVO';
         const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
+        const getSpiceLabel = (spice, t) => {
+            if (!spice) return null;
+            const s = String(spice).toLowerCase();
+            if (s.includes('extra')) return t.extraSpicy;
+            if (s.includes('spicy')) return t.spicy;
+            if (s.includes('medium')) return t.medium;
+            return t.mild;
+        };
+        
         function App() {
             const [view, setView] = useState('home');
             const [lang, setLang] = useState('en');
@@ -688,14 +712,20 @@
                 }
                 const newDish = {
                     id: 'dish_' + Date.now() + '_' + Math.random().toString(36).substring(2, 5),
-                    ...adminForm,
+                    cafeteriaId: adminForm.cafeteriaId,
+                    date: adminForm.date,
+                    mealType: adminForm.mealType,
+                    koName: adminForm.koName,
+                    enName: adminForm.enName,
                     ruName: adminForm.ruName || adminForm.enName,
                     zhName: adminForm.zhName || adminForm.enName,
+                    price: adminForm.price ? Number(adminForm.price) : 0,
+                    enDesc: adminForm.enDesc,
                     ruDesc: adminForm.ruDesc || adminForm.enDesc,
                     zhDesc: adminForm.zhDesc || adminForm.enDesc,
+                    enIngredients: adminForm.enIngredients,
                     ruIngredients: adminForm.ruIngredients || adminForm.enIngredients,
                     zhIngredients: adminForm.zhIngredients || adminForm.enIngredients,
-                    price: adminForm.price ? Number(adminForm.price) : 0,
                     allergens: adminForm.allergens ? adminForm.allergens.split(',').map(s => s.trim().toLowerCase()) : [],
                     published: true
                 };
@@ -744,7 +774,69 @@
                             ruIngredients: parts[12] || '',
                             zhIngredients: parts[13] || '',
                             allergens: parts[14] ? parts[14].split(',').map(s => s.trim().toLowerCase()) : [],
-                            spice: 'Mild',
+                            published: true
+                        });
+                    }
+                }
+                if (newDishes.length === 0) {
+                    alert('Could not parse any dishes. Check format.');
+                    return;
+                }
+                const { error } = await supabase.from('dishes').insert(newDishes);
+                if (error) {
+                    alert('Error bulk importing: ' + error.message);
+                } else {
+                    setDishes([...dishes, ...newDishes]);
+                    setBulkText('');
+                    alert(`Successfully imported ${newDishes.length} dishes!`);
+                }
+            };
+            
+                const { error } = await supabase.from('dishes').insert([newDish]);
+                if (error) {
+                    alert('Error saving to cloud: ' + error.message);
+                } else {
+                    setDishes([...dishes, newDish]);
+                    alert('Menu item published and saved to cloud!');
+                    setAdminForm({ 
+                        ...adminForm, 
+                        koName: '', enName: '', ruName: '', zhName: '', 
+                        price: '', enDesc: '', ruDesc: '', zhDesc: '', 
+                        enIngredients: '', ruIngredients: '', zhIngredients: '', allergens: '' 
+                    });
+                }
+            };
+
+            const handleBulkImport = async (e) => {
+                e.preventDefault();
+                if (!bulkText.trim()) {
+                    alert('Please enter text to parse.');
+                    return;
+                }
+                const lines = bulkText.split('\n').filter(l => l.trim().length > 0);
+                const newDishes = [];
+                for (let line of lines) {
+                    const parts = line.split('|').map(p => p.trim());
+                    if (parts.length >= 4) {
+                        const rawPrice = parts[7] ? Number(parts[7]) : 0;
+                        newDishes.push({
+                            id: 'dish_' + Date.now() + '_' + Math.random().toString(36).substring(2, 5),
+                            date: parts[0] || adminForm.date,
+                            cafeteriaId: parts[1] || 'c1',
+                            mealType: parts[2] || 'Lunch',
+                            koName: parts[3] || '',
+                            enName: parts[4] || parts[3] || '',
+                            ruName: parts[5] || parts[4] || parts[3] || '',
+                            zhName: parts[6] || parts[4] || parts[3] || '',
+                            price: isNaN(rawPrice) ? 0 : rawPrice,
+                            enDesc: parts[8] || '',
+                            ruDesc: parts[9] || '',
+                            zhDesc: parts[10] || '',
+                            enIngredients: parts[11] || '',
+                            ruIngredients: parts[12] || '',
+                            zhIngredients: parts[13] || '',
+                            allergens: parts[14] ? parts[14].split(',').map(s => s.trim().toLowerCase()) : [],
+                            spice: parts[15] || '',
                             published: true
                         });
                     }
@@ -879,7 +971,7 @@
                 const userAllergens = user?.profile?.allergens || [];
                 const hasAllergy = user?.role !== 'admin' && allergens.some(al => userAllergens.some(ua => ua.toLowerCase() === al.toLowerCase()));
                 const stats = getDishRatingStats(dish.id);
-
+                const spiceLabel = getSpiceLabel(dish.spice, t);
                 return (
                     <div key={dish.id} onClick={() => setSelectedDishModal(dish)} className={`bg-white rounded-lg shadow border p-4 cursor-pointer transition hover:shadow-md flex flex-col justify-between ${hasAllergy ? 'border-red-400 bg-red-50/20' : 'border-beige'}`}>
                         <div>
@@ -888,9 +980,16 @@
                                     <h4 className="font-bold text-darkbrown text-base">{koName}</h4>
                                     <p className="text-xs text-gray-600 font-medium">{mainName}</p>
                                 </div>
-                                <span className="bg-burgundy/10 text-burgundy text-xs font-semibold px-2 py-0.5 rounded whitespace-nowrap">
-                                    {dish.mealType}
-                                </span>
+                                <div className="flex flex-col items-end gap-1">
+                                    <span className="bg-burgundy/10 text-burgundy text-xs font-semibold px-2 py-0.5 rounded whitespace-nowrap">
+                                        {dish.mealType}
+                                    </span>
+                                    {dish.spice && (
+                                        <span className="text-[10px] bg-orange-100 text-orange-800 px-2 py-0.5 rounded font-medium">
+                                            {getSpiceLabel(dish.spice, t)}
+                                        </span>
+                                    )}
+                                </div>
                             </div>
                             <div className="text-xs text-gray-500 my-2">
                                 <span className="font-medium text-darkbrown">{CAFETERIAS_DATA[dish.cafeteriaId]?.[lang]?.name || CAFETERIAS_DATA[dish.cafeteriaId]?.en?.name}</span>
@@ -1334,6 +1433,26 @@
                                     <label className="block text-xs font-bold text-gray-700 mb-1">Allergens (comma separated)</label>
                                     <input type="text" value={adminForm.allergens} onChange={e => setAdminForm({...adminForm, allergens: e.target.value})} placeholder="pork, soy, wheat" className="w-full border border-beige rounded p-2 text-xs bg-cream text-darkbrown" />
                                 </div>
+                                JavaScript
+                                <div className="grid grid-cols-2 gap-3">
+                                    <div>
+                                        <label className="block text-xs font-bold text-gray-700 mb-1">Meal Type</label>
+                                        <select value={adminForm.mealType} onChange={e => setAdminForm({...adminForm, mealType: e.target.value})} className="w-full border border-beige rounded p-2 text-xs bg-cream text-darkbrown">
+                                            <option value="Breakfast">Breakfast</option>
+                                            <option value="Lunch">Lunch</option>
+                                            <option value="Dinner">Dinner</option>
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label className="block text-xs font-bold text-gray-700 mb-1">Spice Level</label>
+                                        <select value={adminForm.spice} onChange={e => setAdminForm({...adminForm, spice: e.target.value})} className="w-full border border-beige rounded p-2 text-xs bg-cream text-darkbrown">
+                                            <option value="Mild">Mild 🟢</option>
+                                            <option value="Medium">Medium 🟡</option>
+                                            <option value="Spicy">Spicy 🔴</option>
+                                            <option value="Extra Spicy">Extra Spicy 🔥</option>
+                                        </select>
+                                    </div>
+                                </div>
                                 <button type="submit" className="w-full bg-burgundy text-cream font-bold py-2 rounded text-xs hover:bg-burgundy-dark transition">
                                     Publish Dish
                                 </button>
@@ -1364,7 +1483,7 @@
                                     </button>
                                 )}
                                 <button onClick={handleDeleteAllDishes} className="bg-red-800 text-white px-3 py-1.5 rounded text-xs font-bold hover:bg-red-900 transition">
-                                    🗑️ Delete All Menus
+                                     Delete All Menus
                                 </button>
                             </div>
                         </div>
